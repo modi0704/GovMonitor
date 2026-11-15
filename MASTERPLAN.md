@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 3
-LAST COMPLETED TASK: P2.7
-NEXT TASK          : P3.1
+LAST COMPLETED TASK: P3.1
+NEXT TASK          : P3.2
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -781,7 +781,7 @@ agency with no code changes.
 
 **Verify start state:** Phase 2 ticked.
 
-- [ ] **P3.1** `audit_log` model; revoke `UPDATE`/`DELETE` from `app_user` in a migration; RLS
+- [x] **P3.1** `audit_log` model; revoke `UPDATE`/`DELETE` from `app_user` in a migration; RLS
   allowing an agency to read only its own rows.
 - [ ] **P3.2** `audit.record(action, entity, before, after)` service plus a model mixin / DRF
   mixin that records create, update and delete with field-level before/after (exclude password
@@ -1179,6 +1179,7 @@ changed, why. Start ids at D19.
 | D24 | 2026-11-15 | Extra columns: `user.recovery_codes` (jsonb, hashed TOTP recovery codes), `user.email_opt_out` (P11.4), `platform_admin.failed_attempts`/`locked_until`/`created_at`, `support_grant.revoked_at`/`created_at`. Table count unchanged. (Claude Code) | Needed by P1.5 recovery codes, P11.4 opt-out, platform sign-in lockout, and early revocation of a support grant. |
 | D25 | 2026-11-15 | RLS policy expression is `agency_id = NULLIF(current_setting('app.agency_id', true), '')::uuid` (6.1 wrote it without NULLIF). `platform_admin` has ALL privileges revoked from app_user. (Claude Code) | After a transaction-local SET the setting reads back as '' and a bare cast raises an error; NULLIF keeps 'no agency = zero rows'. Revoking makes 6.2's 'reachable only through app_owner' a database rule. |
 | D23 | 2026-11-15 | Order inside Phase 1: P1.8 is done before P1.6/P1.7, and the bare `org_level` and `office` models (fields, path computed on create, RLS) are created in P1.8 instead of P2.1. `role_assignment.office_id` becomes a foreign key then. P2.1 still adds moves, cycle checks, remaining constraints and groups. (Claude Code) | Permissions (6.6) are defined over office paths, and the platform area (P1.6) must create an agency's root office so its first administrator is an agency administrator (D1). |
+| D26 | 2026-11-15 | `audit_log` gains `office_id` (uuid, the office the entity belongs to) and `actor_label` (the actor's email at the time). (Claude Code) | P3.5 filters by office, and the audit page must name actors even after a user is renamed or a platform admin (invisible to app_user) acted. |
 
 ---
 

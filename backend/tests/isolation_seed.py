@@ -40,6 +40,13 @@ def _group(objs, shared):
         OfficeGroupMember.objects.create(group=group, office=objs["child"])
 
 
+def _audit(objs, shared):
+    from apps.audit.models import AuditLog
+
+    with context.agency_context(objs["agency"].id):
+        AuditLog.objects.create(agency_id=objs["agency"].id, actor_type="system", action="seed")
+
+
 # table name -> builder(objs, shared). Tables filled by _base are listed with None.
 BUILDERS = {
     "agency": None,
@@ -50,6 +57,7 @@ BUILDERS = {
     "support_grant": lambda objs, shared: _support_grant(objs, shared["platform_admin"]),
     "office_group": _group,
     "office_group_member": None,  # filled by _group
+    "audit_log": _audit,
 }
 
 

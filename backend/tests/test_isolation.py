@@ -145,9 +145,9 @@ def test_b_writing_another_agencys_id_fails(two_agencies):
                 connection.cursor() as cur,
             ):
                 cur.execute(sql, [foreign])
-            # (b2) moving an own row to agency B
+            # (b2) moving an own row to agency B (append-only tables refuse any UPDATE outright)
             with (
-                pytest.raises(DatabaseError, match="row-level security"),
+                pytest.raises(DatabaseError, match="row-level security|permission denied"),
                 transaction.atomic(),
                 connection.cursor() as cur,
             ):

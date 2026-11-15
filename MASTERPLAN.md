@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 6
-LAST COMPLETED TASK: P6.6
-NEXT TASK          : P6.7
+LAST COMPLETED TASK: P6.7
+NEXT TASK          : P6.8
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -896,7 +896,7 @@ approves, revises and re-approves a plan; every action appears in the audit log.
   panel (this month, cumulative, variance, status) that updates as numbers are typed; "Submit".
 - [x] **P6.6** If the profile has `mov_required`, block submission while any row with a non-zero
   actual has no attachment, and show which rows.
-- [ ] **P6.7** Optional actual-amount column (D7), hidden by default, switchable per agency.
+- [x] **P6.7** Optional actual-amount column (D7), hidden by default, switchable per agency.
 - [ ] **P6.8** "My implementing activities" view for an office that implements activities owned
   by other offices.
 

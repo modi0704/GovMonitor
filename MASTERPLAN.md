@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 5
-LAST COMPLETED TASK: P5.5
-NEXT TASK          : P5.6
+LAST COMPLETED TASK: P5.6
+NEXT TASK          : P5.7
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -855,7 +855,7 @@ agency with no code changes.
   (computed, read-only unless `manual`), implementing office, twelve monthly cells, row total.
   Paste from Excel into a cell range; keyboard navigation; undo; validation messages on the row;
   live planned curve and weight chart beside the grid (computed by calling the engine endpoint).
-- [ ] **P5.6** Indicators tab on the same page (name, unit, kind, annual target, weight, monthly
+- [x] **P5.6** Indicators tab on the same page (name, unit, kind, annual target, weight, monthly
   targets).
 - [ ] **P5.7** Versioning: "Revise plan" on an approved plan clones it into a new draft version
   with the same `lineage_id` per row; approving the new version marks the old one `superseded`;

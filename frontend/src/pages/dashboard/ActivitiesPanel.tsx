@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useResource } from '../../api/useResource';
+import { errorMessage, useResource } from '../../api/useResource';
 import FormError from '../../components/FormError';
 import Modal from '../../components/Modal';
 import { monthName, percent } from '../../lib/format';
+import { ACCEPT, uploadMov } from '../reporting/movUpload';
 import type { DashActivity } from './types';
 
 const KIND_WORD = {
@@ -20,6 +21,7 @@ interface History {
     annual_target: string;
     owner_office: { code: string };
     implementing_office: { code: string };
+    lineage_id: string;
   };
   months: {
     month_index: number;
@@ -30,6 +32,8 @@ interface History {
     remarks: string;
     delay_reason: string;
     files: { id: string; file_name: string; download_url: string }[];
+    period_id: string;
+    can_attach: boolean;
   }[];
 }
 
@@ -166,6 +170,14 @@ function HistoryDialog({
                       {f.file_name}
                     </a>
                   ))}
+                  {m.can_attach && a && (
+                    <AttachButtons
+                      lineageId={a.lineage_id}
+                      periodId={m.period_id}
+                      month={monthName(m.start_date)}
+                      onDone={h.reload}
+                    />
+                  )}
                 </td>
               </tr>
             ))}
@@ -173,5 +185,68 @@ function HistoryDialog({
         </table>
       )}
     </Modal>
+  );
+}
+
+/** Phone-friendly upload (P12.2): take a photo with the camera or choose a file; same endpoint and
+ * rules as the desktop upload. */
+function AttachButtons({
+  lineageId,
+  periodId,
+  month,
+  onDone,
+}: {
+  lineageId: string;
+  periodId: string;
+  month: string;
+  onDone: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function upload(files: FileList | null) {
+    const file = files?.[0];
+    if (!file) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await uploadMov(
+        { targetType: 'activity_actual', lineageId, periodId, label: month, editable: true },
+        file,
+      );
+      onDone();
+    } catch (err) {
+      setError(errorMessage(err, 'The file could not be attached.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="attach-buttons">
+      <label className="btn btn-small">
+        Take photo
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="sr-only"
+          disabled={busy}
+          aria-label={`Take a photo for ${month}`}
+          onChange={(e) => upload(e.target.files)}
+        />
+      </label>
+      <label className="btn btn-small">
+        Choose file
+        <input
+          type="file"
+          accept={ACCEPT}
+          className="sr-only"
+          disabled={busy}
+          aria-label={`Choose a file for ${month}`}
+          onChange={(e) => upload(e.target.files)}
+        />
+      </label>
+      {busy && <span className="muted small">Uploading…</span>}
+      {error && <span className="form-error small">{error}</span>}
+    </div>
   );
 }

@@ -141,9 +141,14 @@ function setup() {
         ],
       },
     },
+    'POST /api/v1/attachments': {
+      status: 201,
+      body: { id: 'y', file_name: 'IMG_0001.jpg', download_url: '/y' },
+    },
     'GET /api/v1/dashboard/activity': {
       body: {
         activity: {
+          lineage_id: 'l1',
           code: 'AST-1',
           title: 'Fabrication',
           unit: 'unit',
@@ -161,6 +166,8 @@ function setup() {
             remarks: 'ok',
             delay_reason: '',
             files: [{ id: 'x', file_name: 'proof.pdf', download_url: '/d' }],
+            period_id: 'jan',
+            can_attach: true,
           },
         ],
       },
@@ -211,4 +218,22 @@ it('opens the export dialog for the office shown', async () => {
   await user.click(screen.getByRole('button', { name: 'Export' }));
   const dialog = await screen.findByRole('dialog', { name: 'Export' });
   expect(within(dialog).getByLabelText('RDS RDS office only')).toBeChecked();
+});
+
+it('attaches a photo to a month from the activity history (phone upload)', async () => {
+  const calls = setup();
+  const user = userEvent.setup();
+  await screen.findByRole('heading', { name: 'RDS office' });
+  await user.click(screen.getByRole('button', { name: /AST AST office/ }));
+  await screen.findByRole('heading', { name: 'AST office' });
+  await user.click(screen.getByRole('tab', { name: 'Activities' }));
+  await user.click(await screen.findByRole('button', { name: /AST-1 Fabrication/ }));
+  const dialog = await screen.findByRole('dialog');
+  const camera = await within(dialog).findByLabelText('Take a photo for January');
+  expect(camera).toHaveAttribute('capture', 'environment');
+  expect(camera).toHaveAttribute('accept', 'image/*');
+  await user.upload(camera, new File(['jpg'], 'IMG_0001.jpg', { type: 'image/jpeg' }));
+  expect(calls.some((c) => c.method === 'POST' && c.path === '/api/v1/attachments')).toBe(true);
+  // The history is read again so the new file shows.
+  expect(calls.filter((c) => c.path === '/api/v1/dashboard/activity').length).toBeGreaterThan(1);
 });

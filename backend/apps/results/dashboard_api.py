@@ -270,6 +270,17 @@ class ActivityHistoryView(APIView):
                     "download_url": f"/api/v1/attachments/{f.id}/download",
                 }
             )
+
+        def can_attach(pp) -> bool:
+            """Same rules as the desktop upload (P6.4): editable activity, open month, not submitted."""
+            if pp.status != ReportingPeriod.Status.OPEN:
+                return False
+            try:
+                rules.check_can_report_activity(request.user, ref, pp)
+            except rules.ReportingError:
+                return False
+            return True
+
         months = []
         for pp in period.fiscal_year.periods.order_by("month_index"):
             m = pp.month_index
@@ -286,6 +297,7 @@ class ActivityHistoryView(APIView):
                     "remarks": a.remarks if a else "",
                     "delay_reason": a.delay_reason if a else "",
                     "files": files.get(m, []),
+                    "can_attach": can_attach(pp),
                 }
             )
         return Response(

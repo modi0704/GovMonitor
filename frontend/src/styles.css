@@ -1192,3 +1192,19 @@ label.inline {
     font-size: 1.35rem;
   }
 }
+
+/* ---- Phone MOV upload (P12.2) ---- */
+.attach-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  align-items: center;
+}
+.attach-buttons .btn {
+  cursor: pointer;
+}
+.attach-buttons .btn:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

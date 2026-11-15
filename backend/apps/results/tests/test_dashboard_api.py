@@ -155,3 +155,32 @@ def test_rankings_with_change_against_previous_month(w):
         .status_code
         == 404
     )
+
+
+def test_history_says_which_months_take_files_with_the_upload_rules(w):
+    """P12.2: the phone upload offers a month only where the desktop upload would accept a file."""
+    lineage, feb = w["acts"]["A"]["lineage_id"], w["periods"][2]["id"]
+
+    def attachable(who):
+        hist = client(w, who).get("/api/v1/dashboard/activity", lineage=lineage, period=feb).json()
+        return [m["month_index"] for m in hist["months"] if m["can_attach"]]
+
+    assert attachable("div") == list(range(1, 13))  # every month open, nothing submitted
+    assert attachable("unit") == list(range(1, 13))  # the implementing office reports too
+    assert attachable("viewer") == []  # read-only
+    assert w["boss"].post(f"/api/v1/periods/{w['periods'][1]['id']}/lock").status_code == 200
+    assert attachable("div") == list(range(2, 13))  # January is locked
+
+    # A photo taken on a phone goes through the same endpoint and rules.
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from tests.reporting_helpers import PNG
+
+    r = client(w, "unit").c.post(
+        "/api/v1/attachments",
+        {"target_type": "activity_actual", "lineage_id": lineage, "period_id": feb,
+         "file": SimpleUploadedFile("IMG_0001.png", PNG)},
+    )  # fmt: skip
+    assert r.status_code == 201, r.content
+    hist = client(w, "div").get("/api/v1/dashboard/activity", lineage=lineage, period=feb).json()
+    assert [f["file_name"] for f in hist["months"][1]["files"]] == ["IMG_0001.png"]

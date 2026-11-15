@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 2
-LAST COMPLETED TASK: P2.1
-NEXT TASK          : P2.2
+LAST COMPLETED TASK: P2.2
+NEXT TASK          : P2.3
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -756,7 +756,7 @@ of one cannot fetch any object id of the other (API returns 404).
 
 - [x] **P2.1** Models: `org_level`, `office`, `office_group`, `office_group_member`; path
   maintenance; constraints of 6.3; RLS applied.
-- [ ] **P2.2** API: levels CRUD; office tree read (whole tree in one call), create, rename, move,
+- [x] **P2.2** API: levels CRUD; office tree read (whole tree in one call), create, rename, move,
   reorder, deactivate; groups CRUD and membership.
 - [ ] **P2.3** Frontend "Structure" page: tree view with add / rename / move (drag or "move to")
   / deactivate; level names editor; paste-a-list import (one office per line, indentation or a

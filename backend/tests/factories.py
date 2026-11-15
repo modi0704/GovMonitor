@@ -49,3 +49,37 @@ def assign(user: User, office, level: str = "admin"):
 
     with context.agency_context(user.agency_id):
         return RoleAssignment.objects.create(user=user, office=office, level=level)
+
+
+def api_client(email: str, password: str = DEFAULT_PASSWORD):
+    """A Django test client signed in as ``email``."""
+    from django.test import Client
+
+    client = Client()
+    r = client.post(
+        "/api/v1/auth/login", {"email": email, "password": password}, content_type="application/json"
+    )
+    assert r.status_code == 200, r.content
+    return client
+
+
+class Json:
+    """Thin JSON helpers around a test client."""
+
+    def __init__(self, client):
+        self.c = client
+
+    def get(self, url, **params):
+        return self.c.get(url, params)
+
+    def post(self, url, data=None):
+        return self.c.post(url, data or {}, content_type="application/json")
+
+    def put(self, url, data=None):
+        return self.c.put(url, data or {}, content_type="application/json")
+
+    def patch(self, url, data=None):
+        return self.c.patch(url, data or {}, content_type="application/json")
+
+    def delete(self, url):
+        return self.c.delete(url)

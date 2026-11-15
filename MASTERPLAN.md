@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 7
-LAST COMPLETED TASK: P4.2
-NEXT TASK          : P4.6
-BLOCKERS / NOTES   : reference workbooks supplied 2026-11-15 and copied to reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
+LAST COMPLETED TASK: P4.6
+NEXT TASK          : P7.1
+BLOCKERS / NOTES   : Phase 4 complete. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -818,7 +818,7 @@ agency with no code changes.
 - [x] **P4.4** Indicators (7.5), roll-up (7.6) for both rules, implementing view (7.7), ranking
   (7.8) with ties.
 - [x] **P4.5** Presets (7.10) as data, with a test that each preset loads into a valid profile.
-- [ ] **P4.6** Golden tests for 8.2: six sheet results, the RDS roll-up, the ranking vector.
+- [x] **P4.6** Golden tests for 8.2: six sheet results, the RDS roll-up, the ranking vector.
   > BLOCKED: reference files missing (`reference/` is not in this environment, 2026-11-15).
   > IN PROGRESS: `apps/scoring/tests/test_golden_most.py` holds all 8.2 expectations; the six sheet
   > tests and the RDS roll-up skip until the P4.2 fixtures exist. The ranking vector already passes.

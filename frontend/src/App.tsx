@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import RequireAuth from './auth/RequireAuth';
 import AppShell from './layout/AppShell';
+import AuditPage from './pages/AuditPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import GroupsPage from './pages/GroupsPage';
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="groups" element={<GroupsPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="setup" element={<SetupWizardPage />} />
+        <Route path="audit" element={<AuditPage />} />
       </Route>
       <Route path="/platform/sign-in" element={<PlatformSignInPage />} />
       <Route path="/platform" element={<PlatformAgenciesPage />} />

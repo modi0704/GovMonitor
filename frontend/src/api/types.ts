@@ -91,3 +91,28 @@ export interface ScopeOffice {
   depth: number;
   can_edit: boolean;
 }
+
+export interface AuditRow {
+  id: number;
+  at: string;
+  actor_type: string;
+  actor_id: string | null;
+  actor: string;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  office_id: string | null;
+  ip: string | null;
+  changed: string[];
+  before?: Record<string, unknown> | null;
+  after?: Record<string, unknown> | null;
+  user_agent?: string;
+  request_id?: string;
+}
+
+export interface AuditPage {
+  results: AuditRow[];
+  next_before: number | null;
+  actions: string[];
+  entity_types: string[];
+}

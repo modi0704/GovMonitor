@@ -15,4 +15,5 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/structure', label: 'Structure', show: always },
   { to: '/groups', label: 'Groups', show: always },
   { to: '/users', label: 'Users', show: agencyAdmin },
+  { to: '/audit', label: 'Audit log', show: agencyAdmin },
 ];

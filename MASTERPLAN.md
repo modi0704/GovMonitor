@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 3
-LAST COMPLETED TASK: P3.4
-NEXT TASK          : P3.5
+CURRENT PHASE      : 4
+LAST COMPLETED TASK: P3.5
+NEXT TASK          : P4.1
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -154,7 +154,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 0** — Repository, tooling, containers, pinned versions
 - [x] **Phase 1** — Agencies, sign-in, roles, row-level security
 - [x] **Phase 2** — Office structure and user management
-- [ ] **Phase 3** — Audit log
+- [x] **Phase 3** — Audit log
 - [ ] **Phase 4** — Scoring engine (pure module, test vectors)
 - [ ] **Phase 5** — Fiscal years, scoring profiles, plans, activities, indicators
 - [ ] **Phase 6** — Monthly reporting and MOV uploads
@@ -790,7 +790,7 @@ agency with no code changes.
   role changes, structure changes, support grants).
 - [x] **P3.4** A test that walks every registered API route with an unsafe method and fails if a
   successful call writes no audit row (allow-list only for sign-out and notification-read).
-- [ ] **P3.5** Audit page (agency administrator): filter by date range, user, action, office,
+- [x] **P3.5** Audit page (agency administrator): filter by date range, user, action, office,
   entity; row detail with before/after; CSV download (itself audited as `export`).
 
 **Phase exit checks:** P3.4 passes; attempting `UPDATE audit_log` as `app_user` fails in a test.
@@ -1191,3 +1191,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 0 | Complete. make up → /api/v1/health ok (db, storage, worker); make check green. Docker builds behind a TLS proxy need EXTRA_CA_FILE. |
 | 2026-11-15 | Phase 1 | Complete. RLS forced on every tenant table and proven by generic tests; sign-in with lockout, idle timeout, TOTP; platform area with support grants; two-agency demo seed. Task order changed per D23. |
 | 2026-11-15 | Phase 2 | Complete. Any-depth structure with moves, groups, paste import, users and scope; setup wizard; demo seed builds 3- and 5-level agencies through the services. |
+| 2026-11-15 | Phase 3 | Complete. Append-only audit_log (DB-enforced), model-level field diffs, explicit events, route-walking coverage test, audit page with CSV. |

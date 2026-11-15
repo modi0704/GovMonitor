@@ -61,7 +61,7 @@ Pygments (BSD-2-Clause).
 
 TypeScript 6.0.3 (Apache-2.0), Vite 8.3.8 (MIT), @vitejs/plugin-react 6.3.0 (MIT), Vitest 5.1.0
 (MIT), jsdom 31.0.1 (MIT), Testing Library (MIT), ESLint 10.15.0 (MIT), typescript-eslint 8.72.2
-(MIT), Prettier 3.10.1 (MIT), @playwright/test 1.63.0 (Apache-2.0).
+(MIT), Prettier 3.10.1 (MIT), @playwright/test 1.63.0 (Apache-2.0), @types/node 22.20.5 (MIT).
 
 Transitive build-only packages with other licences (never included in the bundle): lightningcss
 (MPL-2.0, Vite's CSS minifier), minimatch / lru-cache (BlueOak-1.0.0, permissive), caniuse-lite

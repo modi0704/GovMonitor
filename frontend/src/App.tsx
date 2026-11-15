@@ -1,0 +1,13 @@
+import { Navigate, Route, Routes } from 'react-router-dom';
+import SignInPage from './pages/SignInPage';
+import NotFoundPage from './pages/NotFoundPage';
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/sign-in" replace />} />
+      <Route path="/sign-in" element={<SignInPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}

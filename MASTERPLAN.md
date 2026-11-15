@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 4
-LAST COMPLETED TASK: P4.3
-NEXT TASK          : P4.4
+LAST COMPLETED TASK: P4.4
+NEXT TASK          : P4.5
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 BLOCKED (marked in place); working from the 8.1 worked example. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -812,7 +812,7 @@ agency with no code changes.
   > BLOCKED: reference files missing (`reference/` is not in this environment, 2026-11-15).
 - [x] **P4.3** Write the tests of 8.1 first; then implement weights (7.2), progress (7.3) for all
   three measure types, office result (7.4) including status rounding and funds.
-- [ ] **P4.4** Indicators (7.5), roll-up (7.6) for both rules, implementing view (7.7), ranking
+- [x] **P4.4** Indicators (7.5), roll-up (7.6) for both rules, implementing view (7.7), ranking
   (7.8) with ties.
 - [ ] **P4.5** Presets (7.10) as data, with a test that each preset loads into a valid profile.
 - [ ] **P4.6** Golden tests for 8.2: six sheet results, the RDS roll-up, the ranking vector.
@@ -1182,6 +1182,7 @@ changed, why. Start ids at D19.
 | D25 | 2026-11-15 | RLS policy expression is `agency_id = NULLIF(current_setting('app.agency_id', true), '')::uuid` (6.1 wrote it without NULLIF). `platform_admin` has ALL privileges revoked from app_user. (Claude Code) | After a transaction-local SET the setting reads back as '' and a bare cast raises an error; NULLIF keeps 'no agency = zero rows'. Revoking makes 6.2's 'reachable only through app_owner' a database rule. |
 | D23 | 2026-11-15 | Order inside Phase 1: P1.8 is done before P1.6/P1.7, and the bare `org_level` and `office` models (fields, path computed on create, RLS) are created in P1.8 instead of P2.1. `role_assignment.office_id` becomes a foreign key then. P2.1 still adds moves, cycle checks, remaining constraints and groups. (Claude Code) | Permissions (6.6) are defined over office paths, and the platform area (P1.6) must create an agency's root office so its first administrator is an agency administrator (D1). |
 | D26 | 2026-11-15 | `audit_log` gains `office_id` (uuid, the office the entity belongs to) and `actor_label` (the actor's email at the time). (Claude Code) | P3.5 filters by office, and the audit page must name actors even after a user is renamed or a platform admin (invisible to app_user) acted. |
+| D27 | 2026-11-15 | Engine details not fixed by section 7: a `budget_weighted` roll-up whose components all have funds_total 0 uses the simple average; a roll-up's funds_used_actual is the sum of its components' actual amounts when any component has one; offices tied in a ranking are listed in the order given (tree order). (Claude Code) | Avoid division by zero and keep results defined; ordering ties by tree order is stable and predictable for exports. |
 
 ---
 

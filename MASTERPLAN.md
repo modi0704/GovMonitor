@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 0
-LAST COMPLETED TASK: P0.2
-NEXT TASK          : P0.3
+LAST COMPLETED TASK: P0.3
+NEXT TASK          : P0.4
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -691,7 +691,7 @@ passes.
   official site; write them into the table in this file and into `backend/requirements.txt`
   (hashes pinned with `pip-compile` or `uv`) and `frontend/package.json` + lockfile. Record every
   dependency's licence in `docs/THIRD_PARTY.md`; replace any that breaks the licence rule.
-- [ ] **P0.3** Create the Django project `config` with settings split `base/dev/prod`, the empty
+- [x] **P0.3** Create the Django project `config` with settings split `base/dev/prod`, the empty
   apps of 5.3, environment-variable configuration (5.4), `ATOMIC_REQUESTS = True`, UTC storage,
   custom user model declared from the first migration.
 - [ ] **P0.4** Create the Vite + React + TypeScript app with routing, an API client using the

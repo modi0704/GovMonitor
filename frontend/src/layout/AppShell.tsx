@@ -32,7 +32,12 @@ export default function AppShell() {
       <nav className="mainnav" aria-label="Main">
         {me &&
           NAV_ITEMS.filter((item) => item.show(me)).map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.to === '/'}>
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={item.desktopOnly ? 'desktop-only' : undefined}
+            >
               {item.label}
             </NavLink>
           ))}

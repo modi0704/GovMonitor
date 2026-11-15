@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 12
-LAST COMPLETED TASK: P12.2
-NEXT TASK          : P12.3
+LAST COMPLETED TASK: P12.3
+NEXT TASK          : P12.4
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1059,7 +1059,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
   dashboard, ranking, notifications, activity detail with MOV list.
 - [x] **P12.2** Phone MOV upload: from an activity's month detail, take or choose a photo and
   attach it (same rules and permissions as desktop).
-- [ ] **P12.3** On small screens the plan editor, monthly grid, structure, users, settings and
+- [x] **P12.3** On small screens the plan editor, monthly grid, structure, users, settings and
   audit pages show a clear "Open on a computer to edit" message instead of a broken grid.
 - [ ] **P12.4** UX pass on desktop: empty states that say what to do next; consistent status
   words; confirmation with consequences for lock, unlock, approve, deactivate; unsaved-changes

@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ReactNode } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import RequireAuth from './auth/RequireAuth';
+import DesktopOnly from './components/DesktopOnly';
 import AppShell from './layout/AppShell';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -73,7 +74,9 @@ export default function App() {
           path="structure"
           element={
             <Page>
-              <StructurePage />
+              <DesktopOnly what="The office structure">
+                <StructurePage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -81,7 +84,9 @@ export default function App() {
           path="groups"
           element={
             <Page>
-              <GroupsPage />
+              <DesktopOnly what="Editing office groups">
+                <GroupsPage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -89,7 +94,9 @@ export default function App() {
           path="users"
           element={
             <Page>
-              <UsersPage />
+              <DesktopOnly what="User management">
+                <UsersPage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -97,7 +104,9 @@ export default function App() {
           path="setup"
           element={
             <Page>
-              <SetupWizardPage />
+              <DesktopOnly what="The setup wizard">
+                <SetupWizardPage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -105,7 +114,9 @@ export default function App() {
           path="audit"
           element={
             <Page>
-              <AuditPage />
+              <DesktopOnly what="The audit log">
+                <AuditPage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -121,7 +132,9 @@ export default function App() {
           path="fiscal-years/:fyId"
           element={
             <Page>
-              <FiscalYearPage />
+              <DesktopOnly what="The fiscal year calendar">
+                <FiscalYearPage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -129,7 +142,9 @@ export default function App() {
           path="fiscal-years/:fyId/scoring"
           element={
             <Page>
-              <ScoringProfilePage />
+              <DesktopOnly what="Scoring settings">
+                <ScoringProfilePage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -145,7 +160,9 @@ export default function App() {
           path="plans/:planId"
           element={
             <Page>
-              <PlanEditorPage />
+              <DesktopOnly what="The plan editor">
+                <PlanEditorPage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -161,7 +178,9 @@ export default function App() {
           path="settings/alerts"
           element={
             <Page>
-              <AlertSettingsPage />
+              <DesktopOnly what="Alert settings">
+                <AlertSettingsPage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -169,7 +188,9 @@ export default function App() {
           path="settings/report-template"
           element={
             <Page>
-              <ReportTemplatePage />
+              <DesktopOnly what="The report template">
+                <ReportTemplatePage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -209,7 +230,9 @@ export default function App() {
           path="reports"
           element={
             <Page>
-              <MonthlyReportPage />
+              <DesktopOnly what="The monthly report grid">
+                <MonthlyReportPage />
+              </DesktopOnly>
             </Page>
           }
         />
@@ -225,7 +248,9 @@ export default function App() {
           path="plans/:planId/versions"
           element={
             <Page>
-              <PlanVersionsPage />
+              <DesktopOnly what="Comparing plan versions">
+                <PlanVersionsPage />
+              </DesktopOnly>
             </Page>
           }
         />

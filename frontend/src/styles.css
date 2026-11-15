@@ -1208,3 +1208,14 @@ label.inline {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+
+/* ---- Editing screens on phones (P12.3) ---- */
+@media (max-width: 600px) {
+  .mainnav .desktop-only {
+    display: none;
+  }
+}
+.desktop-only-notice h1 {
+  font-size: 1.25rem;
+  margin-top: 0;
+}

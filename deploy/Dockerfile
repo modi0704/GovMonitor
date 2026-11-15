@@ -26,6 +26,10 @@ RUN --mount=type=secret,id=extra_ca,required=false \
 
 # ---- Stage 3: runtime ------------------------------------------------------------------------
 FROM python:3.13-slim AS runtime
+ARG VERSION=dev
+LABEL org.opencontainers.image.title="GovMonitor" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.description="Performance monitoring for government agencies"
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH=/opt/venv/bin:$PATH \
@@ -40,6 +44,7 @@ WORKDIR /app/backend
 COPY backend/ /app/backend/
 COPY --from=frontend /src/frontend/dist /app/frontend/dist
 COPY deploy/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY VERSION /app/VERSION
 RUN rm -rf /app/backend/.venv \
  && SECRET_KEY=build-only DATABASE_URL=postgres://x@localhost/x DATABASE_ADMIN_URL=postgres://x@localhost/x \
     python manage.py collectstatic --noinput \

@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 14
-LAST COMPLETED TASK: P14.5
-NEXT TASK          : P14.6
-BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). Release: replace the placeholder licence public key (D41)
+LAST COMPLETED TASK: P14.6
+NEXT TASK          : P14.7
+BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). Owner steps before publishing 1.0.0: replace the placeholder licence public key (D41), then push tag v1.0.0 (docs/RELEASE.md)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -1125,7 +1125,7 @@ wipe → restore reproduces the dashboard numbers; P13.7 passes.
   "Sample Ministry" (the MOST fixtures, three levels plus field units and two groups) and
   "Sample Bureau" (five levels, equal weighting, capped preset) — proving nothing is hard-coded.
 - [x] **P14.5** `docs/USER_GUIDE.md` (per role, with screenshots) and `docs/API.md`.
-- [ ] **P14.6** Release checklist, version number, changelog, tagged build of the images.
+- [x] **P14.6** Release checklist, version number, changelog, tagged build of the images.
 - [ ] **P14.7** Final pass over this file: every box ticked or struck through with a reason;
   section 5.2 versions match the lockfiles; section 14 lists every deviation.
 
@@ -1203,6 +1203,7 @@ changed, why. Start ids at D19.
 | D40 | 2026-11-15 | Browser smoke tests (P12.7): desktop runs the five flows on a brand-new agency created through the platform screens each run; the phone project then uses that agency for phone work (results, photo upload, export) and checks editing screens and horizontal scroll; data-heavy plan entry uses the same API call the grid makes. They need a running server with a worker and a platform owner, so they run as 'make smoke' and a separate CI job, not inside 'make check'. Fixed on the way: page loads and background polls (X-Background: 1, the notification bell) no longer refresh the idle-sign-out timer — before, an open tab never signed out and a page load racing a sign-out returned SessionInterrupted (Claude Code) | Repeatable runs without collisions; the idle timeout (P1.4) must hold even with the bell polling |
 | D41 | 2026-11-15 | Licence (P13.5): JSON {payload, signature}, Ed25519 over the payload with sorted keys; payload agency, expires, seats. Single mode only. Missing, damaged or expired → read-only enforced by middleware for every API write except sign-in/out, own password and two-step settings, notification reads and exports; seat limit blocks only new users. The committed public key is a PLACEHOLDER whose private key was not kept: the vendor generates the real pair with tools/licence.py keygen, keeps the private key offline and replaces backend/apps/tenancy/licence_public_key.txt before a release (release checklist, P14.6) (Claude Code) | Customers can always read and export their data; signing stays offline with the vendor; no real private key may sit in the repository or in a build session |
 | D42 | 2026-11-15 | P13.7 is verified by deploy/test-offline-install.sh instead of a hand-built VM: the offline bundle is installed into an empty folder in single mode, every Docker network is then cut off from the internet with a DOCKER-USER firewall rule (checked from inside the web container), and a browser test opens every page and exports Excel and PowerPoint, failing on any request outside the site. It runs in CI. The test trusts a throwaway licence key; the shipped compose file deliberately does not pass LICENCE_PUBLIC_KEY (Claude Code) | Repeatable on every build rather than once by hand; the firewall gives the same 'no internet after install' condition as disabling the VM's network |
+| D44 | 2026-11-15 | Release (P14.6): version 1.0.0 in VERSION (baked into the image, its label and /api/v1/health); CHANGELOG.md; docs/RELEASE.md; 'make release' and a tag-triggered release workflow build govmonitor:<version> and the offline bundle, and both refuse to run while the placeholder licence key is present. The build agent built and verified govmonitor:1.0.0 locally but did not create or push the git tag: publishing is the owner's step once the vendor licence key is in place (Claude Code) | A tag is an outward-facing release and the licence key must be the vendor's own; the checklist makes those two steps explicit |
 
 ---
 

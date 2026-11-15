@@ -22,6 +22,9 @@ def test_health_degraded_without_worker(client, tmp_storage):
     assert body["status"] == "degraded"
     assert body["database"]["ok"] and body["storage"]["ok"]
     assert body["worker"] == {"ok": False, "heartbeat_age_seconds": None}
+    from pathlib import Path
+
+    assert body["version"] == (Path(__file__).resolve().parents[2] / "VERSION").read_text().strip()
     assert not any(p.name.startswith("health-") for p in (tmp_storage / "_system").glob("*"))
 
 

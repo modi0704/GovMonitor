@@ -5,6 +5,7 @@
 SHELL := /bin/bash
 comma := ,
 COMPOSE ?= docker compose -f deploy/docker-compose.yml
+VERSION := $(shell cat VERSION 2>/dev/null || echo dev)
 IMAGE ?= govmonitor:$(or $(GOVMONITOR_VERSION),dev)
 PY := $(if $(wildcard backend/.venv/bin/python),$(CURDIR)/backend/.venv/bin/python,python3)
 BACKEND_BIN := $(if $(wildcard backend/.venv/bin/python),$(CURDIR)/backend/.venv/bin/,)
@@ -14,14 +15,14 @@ BUILD_FLAGS := $(if $(EXTRA_CA_FILE),--secret id=extra_ca$(comma)src=$(EXTRA_CA_
 WEB_PORT ?= 8000
 
 .PHONY: help up down logs build migrate migrate-local test test-backend test-frontend lint \
-        lint-backend lint-frontend build-frontend check seed-demo seed-demo-local install lock smoke offline-bundle audit
+        lint-backend lint-frontend build-frontend check seed-demo seed-demo-local install lock smoke offline-bundle audit release
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-16s %s\n", $$1, $$2}'
 
 # ---- Containers ------------------------------------------------------------------------------
 build: ## Build the application image (web + worker)
-	docker build $(BUILD_FLAGS) -f deploy/Dockerfile -t $(IMAGE) .
+	docker build $(BUILD_FLAGS) --build-arg VERSION=$(or $(GOVMONITOR_VERSION),$(VERSION)) -f deploy/Dockerfile -t $(IMAGE) .
 
 up: build ## Build and start db, web and worker; wait for /api/v1/health
 	$(COMPOSE) up -d --no-build
@@ -42,6 +43,12 @@ migrate: ## Apply migrations inside the running stack (as app_owner)
 
 seed-demo: ## Load the demo agencies inside the running stack
 	$(COMPOSE) exec web entrypoint.sh manage seed_demo
+
+release: ## Release build (docs/RELEASE.md): image govmonitor:$(VERSION) and its offline bundle
+	@grep -q PLACEHOLDER backend/apps/tenancy/licence_public_key.txt && \
+	  { echo "release: replace the placeholder licence public key first (docs/RELEASE.md)"; exit 1; } || true
+	$(MAKE) build GOVMONITOR_VERSION=$(VERSION) IMAGE=govmonitor:$(VERSION)
+	deploy/make-offline-bundle.sh $(VERSION)
 
 offline-bundle: ## Archive for installs without internet: images + compose + scripts (dist/)
 	deploy/make-offline-bundle.sh $(or $(GOVMONITOR_VERSION),dev)

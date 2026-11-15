@@ -58,5 +58,6 @@ def health(request):
             "heartbeat_age_seconds": None if age is None else round(age, 1),
         },
         "deployment_mode": settings.DEPLOYMENT_MODE,
+        "version": settings.APP_VERSION,
     }
     return JsonResponse(body, status=200 if status != "error" else 503)

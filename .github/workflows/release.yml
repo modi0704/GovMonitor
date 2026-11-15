@@ -1,0 +1,30 @@
+name: Release
+
+# P14.6: a pushed version tag builds the image and the offline install bundle for that version.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag matches VERSION; licence key is not the placeholder
+        run: |
+          test "${GITHUB_REF_NAME#v}" = "$(cat VERSION)" || { echo "tag $GITHUB_REF_NAME != VERSION $(cat VERSION)"; exit 1; }
+          ! grep -q PLACEHOLDER backend/apps/tenancy/licence_public_key.txt || { echo "replace the placeholder licence key (docs/RELEASE.md)"; exit 1; }
+      - name: Build the image and the offline bundle
+        run: make release
+      - name: Checksums
+        run: cd dist && sha256sum govmonitor-offline-*.tar.gz | tee SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: govmonitor-${{ github.ref_name }}
+          path: |
+            dist/govmonitor-offline-*.tar.gz
+            dist/SHA256SUMS

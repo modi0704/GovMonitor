@@ -9,6 +9,8 @@ from config.env import env, env_bool, env_int, env_list, parse_email_url
 BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 REPO_DIR = BACKEND_DIR.parent
 FRONTEND_DIST = Path(env("FRONTEND_DIST", str(REPO_DIR / "frontend" / "dist")))
+_version_file = REPO_DIR / "VERSION"
+APP_VERSION = _version_file.read_text().strip() if _version_file.exists() else "dev"
 
 SECRET_KEY = env("SECRET_KEY", "insecure-dev-key-change-me")
 DEBUG = env_bool("DEBUG", False)

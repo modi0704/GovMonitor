@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 11
-LAST COMPLETED TASK: P11.4
-NEXT TASK          : P11.5
+CURRENT PHASE      : 12
+LAST COMPLETED TASK: P11.5
+NEXT TASK          : P12.1
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -162,7 +162,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 8** — Dashboards and ranking
 - [x] **Phase 9** — Excel export and plan import
 - [x] **Phase 10** — PowerPoint export
-- [ ] **Phase 11** — Alerts and notifications
+- [x] **Phase 11** — Alerts and notifications
 - [ ] **Phase 12** — Phone layouts and UX polish
 - [ ] **Phase 13** — Deployment packaging (office install and cloud)
 - [ ] **Phase 14** — Hardening, performance, documentation, release
@@ -1042,7 +1042,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
   relevant screen).
 - [x] **P11.4** Email delivery when `EMAIL_URL` is set and `email_enabled` is on: plain, short
   messages with a link; per-user opt-out; one digest per user per day at most.
-- [ ] **P11.5** Tests with a frozen clock for each trigger, for deduplication and for the
+- [x] **P11.5** Tests with a frozen clock for each trigger, for deduplication and for the
   no-SMTP case.
 
 **Phase exit checks:** all P11.5 tests pass; a scan run twice creates no duplicates.
@@ -1218,3 +1218,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 8 | Complete. One-call dashboards with drill-down to activity history, rankings with month-on-month change, quarters/YTD from the engine, FINAL/PROVISIONAL. Ceiling agency (501 offices, 5,000 activities) answers in ~1.4 s uncached; results cached by data stamp. MOST Dec 2023 figures shown through the dashboard API. |
 | 2026-11-15 | Phase 9 | Complete. Jobs API and My exports; Excel export (SUMMARY + office sheets exactly per 9.1, layout constants in exports/layout.py, cached values on every formula); export dialog on the dashboard (audited); acceptance (own evaluator and LibreOffice with poisoned caches match the dashboard ±0.005 pts for 8.1 and RDI), cell-by-cell RDI layout test; import template and import_plan job with row-by-row errors (drafts only, all-or-nothing); export→import round trip exact; 500-activity office exports in ~1 s. |
 | 2026-11-15 | Phase 10 | Complete. 16:9 deck (title, overall, one dashboard slide per office with native S-curve, funds doughnut and children bars, ranking tables per set with continuation, indicator tables, notes) from the results read path; export_template with system defaults (global_read RLS), settings page and logo; export dialog offers Excel or PowerPoint with slide groups. Tests: MOST December deck charts equal the dashboard API for every office slide, RDS ranking RDI/ILD/AST, the 8.2 provincial vector ranks 1-7, long names cut with an ellipsis, deck opens in python-pptx and LibreOffice. |
+| 2026-11-15 | Phase 11 | Complete. alert_rule and notification (RLS); settings page; daily alert_scan queued once per local day after 06:00 (reminders N days before cutoff, late reports, missing accomplishments 3 days before, delays after locking) and event alerts (returned, locked, unlocked, plan submitted), all with dedupe keys; bell with unread count, panel and notifications page; daily email digest only with SMTP + agency switch, per-user opt-out, one per day, failures isolated. Frozen-clock tests for every trigger; scan twice/next day/replayed event create no duplicates; no-SMTP case sends nothing and the job succeeds. |

@@ -167,3 +167,32 @@ def test_the_scan_is_queued_once_a_day_after_six_local(w):
         assert schedule_alert_scan(now=at(10, hour=8)) == 0  # already today
         Job.objects.filter(kind="alert_scan").update(created_at=at(10, hour=7))
         assert schedule_alert_scan(now=at(11, hour=7)) == 1  # next day
+
+
+def test_exit_check_a_scan_run_twice_creates_no_duplicates(w):
+    """Every scheduled trigger at once — January locked and behind plan, February late, March due in
+    3 days with accomplishments missing — then the same scan again, the next day, and a replayed
+    event: no notification is created twice."""
+    p = w["periods"]
+    w["boss"].patch("/api/v1/alert-rules", {"remind_days_before": [3]})
+    assert w["boss"].post(f"/api/v1/periods/{p[1]['id']}/lock").status_code == 200
+    now = datetime.datetime.now(tz=MANILA)
+    with context.agency_context(w["agency"].id):
+        ReportingPeriod.objects.filter(pk=p[2]["id"]).update(cutoff_at=now - datetime.timedelta(days=1))
+        ReportingPeriod.objects.filter(pk=p[3]["id"]).update(
+            cutoff_at=datetime.datetime.combine(
+                (now + datetime.timedelta(days=3)).date(), datetime.time(23, 59), tzinfo=MANILA
+            )
+        )
+    first = scan(w, now)
+    assert first["delayed"] > 0 and first["cutoff_passed"] > 0
+    assert first["cutoff_reminder"] > 0 and first["missing_actuals"] > 0
+    before = total(w)
+    second = scan(w, now)
+    assert all(v == 0 for v in second.values()), second
+    scan(w, now + datetime.timedelta(hours=6))
+    assert total(w) == before
+    with context.agency_context(w["agency"].id):
+        period = ReportingPeriod.objects.get(pk=p[1]["id"])
+        assert services.period_locked(period) == 0  # the lock event replayed
+    assert total(w) == before

@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 14
-LAST COMPLETED TASK: P14.2
-NEXT TASK          : P14.3
+LAST COMPLETED TASK: P14.3
+NEXT TASK          : P14.4
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). Release: replace the placeholder licence public key (D41)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1119,7 +1119,7 @@ wipe → restore reproduces the dashboard numbers; P13.7 passes.
   > DONE in P14.1: 39 composite same-agency constraints, added after every migrate (apps/tenancy/db.py).
 - [x] **P14.2** Automated cross-tenant test: for every API route, call it as agency A with ids
   belonging to agency B; every response must be 404 or 403.
-- [ ] **P14.3** Load test at the D13 sizing ceiling: dashboard, monthly grid save, lock of a
+- [x] **P14.3** Load test at the D13 sizing ceiling: dashboard, monthly grid save, lock of a
   period (target: lock completes in under 60 seconds for one agency).
 - [ ] **P14.4** Demo data: `make seed-demo` builds two sample agencies with different shapes —
   "Sample Ministry" (the MOST fixtures, three levels plus field units and two groups) and

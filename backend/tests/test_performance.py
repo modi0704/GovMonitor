@@ -62,3 +62,50 @@ def test_live_results_are_cached_until_data_changes():
     )
     changed, _, _ = dashboard(boss, w["root"], feb)
     assert changed["headline"]["cum_actual"] != first["headline"]["cum_actual"]
+
+
+def test_load_at_the_ceiling_monthly_grid_and_lock():
+    """P14.3: at the D13 ceiling — open and save a division's monthly grid (70 activities) in under
+    2 seconds each, and lock a month for the whole agency in under 60 seconds."""
+    from apps.planning.models import Activity, Plan
+    from apps.results.models import PeriodResult
+    from apps.structure.models import Office
+    from apps.tenancy import context
+
+    read.clear_live_cache()
+    w = build("load")
+    c = Json(api_client("boss@load.gov"))
+    with context.agency_context(w["agency"].id):
+        division = Office.objects.filter(code="D3-4").get()
+        plan = Plan.objects.get(office=division)
+        lineages = list(
+            Activity.objects.filter(plan=plan, row_kind="activity").values_list("lineage_id", flat=True)
+        )
+    assert len(lineages) == 70
+    month = {"office": str(division.id), "period": str(w["periods"][7].id)}
+
+    start = time.perf_counter()
+    r = c.get("/api/v1/reports", **month)
+    opened = time.perf_counter() - start
+    assert r.status_code == 200, r.content[:200]
+
+    rows = [{"lineage_id": str(lin), "actual": "1", "remarks": "Done"} for lin in lineages]
+    start = time.perf_counter()
+    r = c.post("/api/v1/reports/save", {**month, "activities": rows})
+    saved = time.perf_counter() - start
+    assert r.status_code == 200, r.content[:200]
+
+    start = time.perf_counter()
+    r = c.post(f"/api/v1/periods/{w['periods'][1].id}/lock")
+    locked = time.perf_counter() - start
+    assert r.status_code == 200, r.content[:200]
+    with context.agency_context(w["agency"].id):
+        frozen = PeriodResult.objects.filter(period=w["periods"][1]).count()
+    print(
+        f"\nceiling: grid opened {opened:.2f}s, 70 rows saved {saved:.2f}s, "
+        f"month locked {locked:.1f}s ({frozen} results)"
+    )
+    assert opened < BUDGET, f"monthly grid took {opened:.2f}s to open"
+    assert saved < BUDGET, f"saving 70 rows took {saved:.2f}s"
+    assert locked < 60 * float(os.environ.get("PERF_FACTOR", "1")), f"lock took {locked:.1f}s"
+    assert frozen > 500

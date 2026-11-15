@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 4
-LAST COMPLETED TASK: P3.5
-NEXT TASK          : P4.1
-BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. See the P14.1 note on cross-agency foreign keys
+LAST COMPLETED TASK: P4.1
+NEXT TASK          : P4.3 (P4.2 blocked)
+BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 BLOCKED (marked in place); working from the 8.1 worked example. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -803,18 +803,20 @@ agency with no code changes.
 
 **Verify start state:** Phase 0 ticked (this phase does not need Phases 1–3).
 
-- [ ] **P4.1** Data classes for engine input and output (activity, indicator, profile, office
+- [x] **P4.1** Data classes for engine input and output (activity, indicator, profile, office
   result, ranking row). No ORM imports in `engine.py` (enforce with a test that inspects imports).
 - [ ] **P4.2** `tools/extract_fixtures.py`: read `reference/MOST MONITORING TOOL 2024.xlsx` with
   openpyxl (formulas ignored, values from typed cells only) and write
   `backend/fixtures/most_fy2023_<sheet>.json` for PME, HRM, RDI, AST, ILD and GAS following the
   notes in 8.2. Commit the JSON (it is sample data), not the workbook.
+  > BLOCKED: reference files missing (`reference/` is not in this environment, 2026-11-15).
 - [ ] **P4.3** Write the tests of 8.1 first; then implement weights (7.2), progress (7.3) for all
   three measure types, office result (7.4) including status rounding and funds.
 - [ ] **P4.4** Indicators (7.5), roll-up (7.6) for both rules, implementing view (7.7), ranking
   (7.8) with ties.
 - [ ] **P4.5** Presets (7.10) as data, with a test that each preset loads into a valid profile.
 - [ ] **P4.6** Golden tests for 8.2: six sheet results, the RDS roll-up, the ranking vector.
+  > BLOCKED: reference files missing (`reference/` is not in this environment, 2026-11-15).
 - [ ] **P4.7** Property tests: weights sum to 1; cumulative values are non-decreasing when
   actuals are non-negative; with `cap_at_100` no office exceeds 1; `budget_weighted` roll-up of
   identical children equals the child value.

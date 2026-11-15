@@ -227,10 +227,11 @@ class RoleAssignmentDetailView(APIView):
         return ra
 
     def patch(self, request, assignment_id):
+        ra = self._get(assignment_id)  # look up first: a foreign id is 404 whatever the body (P14.2)
         level = request.data.get("level")
         if level not in RoleAssignment.Level.values:
             return Response({"level": ["Choose admin or read_only."]}, status=400)
-        return _change_level(request, self._get(assignment_id), level)
+        return _change_level(request, ra, level)
 
     def delete(self, request, assignment_id):
         ra = self._get(assignment_id)

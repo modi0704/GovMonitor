@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 14
-LAST COMPLETED TASK: P14.1
-NEXT TASK          : P14.2
+LAST COMPLETED TASK: P14.2
+NEXT TASK          : P14.3
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). Release: replace the placeholder licence public key (D41)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1117,7 +1117,7 @@ wipe → restore reproduces the dashboard numbers; P13.7 passes.
   > referenced ids through RLS-scoped querysets (foreign ids 404); P14.1 should add composite
   > `(agency_id, id)` foreign keys between tenant tables so the database itself forbids it.
   > DONE in P14.1: 39 composite same-agency constraints, added after every migrate (apps/tenancy/db.py).
-- [ ] **P14.2** Automated cross-tenant test: for every API route, call it as agency A with ids
+- [x] **P14.2** Automated cross-tenant test: for every API route, call it as agency A with ids
   belonging to agency B; every response must be 404 or 403.
 - [ ] **P14.3** Load test at the D13 sizing ceiling: dashboard, monthly grid save, lock of a
   period (target: lock completes in under 60 seconds for one agency).

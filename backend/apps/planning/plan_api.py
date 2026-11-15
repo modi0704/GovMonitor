@@ -145,13 +145,12 @@ class PlanListView(APIView):
 
     def post(self, request):
         office = perm.get_office_or_404(request.user, request.data.get("office_id"), edit=True)
-        fy = (
-            FiscalYear.objects.filter(pk=request.data.get("fiscal_year_id")).first()
-            if request.data.get("fiscal_year_id")
-            else None
-        )
-        if fy is None:
+        fy_id = request.data.get("fiscal_year_id")
+        if not fy_id:
             return Response({"fiscal_year_id": ["Choose a fiscal year."]}, status=400)
+        fy = FiscalYear.objects.filter(pk=fy_id).first()
+        if fy is None:  # unknown, or another agency's (P14.2): never say which
+            raise Http404("No such fiscal year.")
         try:
             plan = svc.create_draft(office, fy)
         except PlanningError as err:

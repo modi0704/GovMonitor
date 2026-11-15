@@ -47,7 +47,8 @@ def test_deck_sequence_and_the_office_slide():
     assert "Performance Monitoring Report" in texts
 
     div = shapes(prs.slides[2])
-    assert div["header-title"].text_frame.text == "DIV (ACCOMPLISHMENT REPORT)"
+    assert div["header-title"].text_frame.text == "DIV"
+    assert shapes(prs.slides[1])["header-title"].text_frame.text.endswith("· OVERALL")
     assert div["header-label"].text_frame.text == "PROVISIONAL"
     assert div["tile-actual"].text_frame.text == "ACTUAL\n78.00%"
     assert div["tile-variance"].text_frame.text == "VARIANCE\n-22.00%"

@@ -36,3 +36,11 @@ export const SCOPE_LABEL: Record<string, string> = {
 export function isPending(job: Job): boolean {
   return job.status === 'queued' || job.status === 'running';
 }
+
+export const SLIDE_GROUPS = [
+  { key: 'overall', label: 'Overall performance' },
+  { key: 'offices', label: 'One slide per office' },
+  { key: 'rankings', label: 'Rankings' },
+  { key: 'indicators', label: 'Indicator tables' },
+] as const;
+export type SlideGroup = (typeof SLIDE_GROUPS)[number]['key'];

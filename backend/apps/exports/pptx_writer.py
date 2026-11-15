@@ -30,7 +30,7 @@ from apps.exports.pptx_layout import (
     SLIDE_H,
     SLIDE_W,
 )
-from apps.exports.text_fit import fit
+from apps.exports.text_fit import fit, text_width
 from apps.planning.models import ReportingPeriod
 from apps.results import read
 from apps.results.agency import IMPLEMENTING, OWNER
@@ -134,12 +134,17 @@ class Deck:
             run.font.color.rgb = rgb(color)
         return shape
 
-    def header(self, slide, title: str):
+    def header(self, slide, title: str, suffix: str = ""):
+        """Title bar; ``suffix`` (e.g. "(continued)") always stays visible: the title is cut instead."""
         L = self.L
         bar = L.header
         chip_w = L.header_chip_w
         title_box = (Inches(bar.x), Inches(bar.y), Inches(bar.w - 2 * chip_w - 0.1), Inches(bar.h))
-        self.text(slide, title_box, title.upper(), L.header_title_size, bold=True, color="FFFFFF",
+        size = L.header_title_size.pt
+        tail = f" {suffix}".upper() if suffix else ""
+        room = title_box[2] / 12700 - 12 - text_width(tail, size, bold=True)
+        text = fit(title.upper(), room, size, bold=True) + tail
+        self.text(slide, title_box, text, L.header_title_size, bold=True, color="FFFFFF",
                   fill=self.s["primary_color"], name="header-title")  # fmt: skip
         month = self.data.period.start_date.strftime("%B %Y").upper()
         x = bar.x + bar.w - 2 * chip_w
@@ -176,9 +181,7 @@ class Deck:
         data, L = self.data, self.L
         rv = data.rv(office)
         slide = self.new_slide(kind, str(office.id))
-        self.header(
-            slide, f"{office.name} ({'accomplishment report' if kind == 'office' else 'overall performance'})"
-        )
+        self.header(slide, office.name, "· overall" if kind == "overall" else "")
         # Tiles: plan, actual, variance, status
         tiles = [
             ("PLAN", pct(rv.cum_plan), *L.tile_colors["plan"]),
@@ -196,7 +199,7 @@ class Deck:
         ancestors = [a for a in office.ancestor_ids if a != str(office.id)]
         by_id = {str(o.id): o for o in data.offices} | {str(data.root.id): data.root}
         path = " › ".join(by_id[a].code for a in ancestors if a in by_id)
-        lines = [f"{office.code} · {office.name}"] + ([path] if path else [])
+        lines = [f"{office.code} · {office.name}"] + ([f"Under {path}"] if path else [])
         self.text(slide, L.office_path, lines, Pt(11), color="5B6878", anchor=MSO_ANCHOR.TOP, fit_width=False)
 
         kids = data.children.get(office.id, [])
@@ -308,7 +311,7 @@ class Deck:
         chunks = [rows[i : i + MAX_TABLE_ROWS] for i in range(0, len(rows), MAX_TABLE_ROWS)] or [[]]
         for n, chunk in enumerate(chunks):
             slide = self.new_slide(kind, key)
-            self.header(slide, title + (" (continued)" if n else ""))
+            self.header(slide, title, "(continued)" if n else "")
             x, y, w, _ = L.table.emu()
             row_h = Inches(0.4)
             shape = slide.shapes.add_table(len(chunk) + 1, len(headers), x, y, w, row_h * (len(chunk) + 1))

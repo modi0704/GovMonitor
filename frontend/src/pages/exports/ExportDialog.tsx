@@ -6,20 +6,12 @@ import { errorMessage } from '../../api/useResource';
 import FormError from '../../components/FormError';
 import Modal from '../../components/Modal';
 import { monthYear } from '../../lib/format';
-import { isPending, STATUS_LABEL, type Job } from './types';
+import { isPending, SLIDE_GROUPS, STATUS_LABEL, type Job, type SlideGroup } from './types';
 
 export const JOB_POLL_MS = 2000;
 
 type Scope = 'office' | 'subtree' | 'agency';
 type Format = 'xlsx' | 'pptx';
-
-export const SLIDE_GROUPS = [
-  { key: 'overall', label: 'Overall performance' },
-  { key: 'offices', label: 'One slide per office' },
-  { key: 'rankings', label: 'Rankings' },
-  { key: 'indicators', label: 'Indicator tables' },
-] as const;
-type SlideGroup = (typeof SLIDE_GROUPS)[number]['key'];
 
 /** Export dialog (P9.4, P10.3): format, scope, month, view (and slide groups for a deck); queues
  * the export and follows the job. */

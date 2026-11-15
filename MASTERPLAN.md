@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 10
-LAST COMPLETED TASK: P10.3
-NEXT TASK          : P10.4
+CURRENT PHASE      : 11
+LAST COMPLETED TASK: P10.4
+NEXT TASK          : P11.1
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -161,7 +161,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 7** — Cutoff, locking, frozen results
 - [x] **Phase 8** — Dashboards and ranking
 - [x] **Phase 9** — Excel export and plan import
-- [ ] **Phase 10** — PowerPoint export
+- [x] **Phase 10** — PowerPoint export
 - [ ] **Phase 11** — Alerts and notifications
 - [ ] **Phase 12** — Phone layouts and UX polish
 - [ ] **Phase 13** — Deployment packaging (office install and cloud)
@@ -1010,7 +1010,7 @@ read-only user scoped to one division sees only that division.
 - [x] **P10.2** `export_template` model and settings page: logo upload, primary colour, report
   title, footer text; system default template.
 - [x] **P10.3** Export dialog (scope, month, which slide groups to include) using the job queue.
-- [ ] **P10.4** Tests: slide count and order for a known tree; every chart's data equals the
+- [x] **P10.4** Tests: slide count and order for a known tree; every chart's data equals the
   dashboard API values; the deck opens with python-pptx without repair; long office names do not
   overflow (truncate with an ellipsis after measuring).
 
@@ -1195,6 +1195,7 @@ changed, why. Start ids at D19.
 | D34 | 2026-11-15 | Excel export: office sheets always show each office's own plan (the version scored for the month); the view choice (owner/implementing) applies to the SUMMARY figures. Every formula is written with its computed value cached. Formulas reproduce the engine only under workbook_compatible with cost-share weights and no cap; otherwise M and the total rows hold engine values (with a comment). Activities without a target get value 0 cells instead of a #DIV/0! formula (Claude Code) | 9.1 lays out a plan, which only the owner view has; cached values make the file correct in viewers that never recalculate (phone previews), and LibreOffice/Excel recalculation gives the same numbers (P9.5) |
 | D35 | 2026-11-15 | Plan import: a leading token is read as the row code only if it contains a digit or a dot; measure type is quantity unless the PLAN row carries the export's 'Recurring measure' comment; indicators below an OUTPUT INDICATORS header are imported too (annual target = sum of the monthly targets); import is refused (409) when the office already has a plan for that year. A rejected import fails at once without retries (worker JobRejected) and its whole transaction is rolled back (Claude Code) | The sheet has no code or measure columns, so these keep a round trip of an exported plan faithful without adding columns to the fixed 9.1 layout; refusing over an existing plan avoids overwriting work (use revise instead) |
 | D36 | 2026-11-15 | export_template rows with agency_id NULL are the system defaults (created by migration; readable by every agency through the global_read policy, writable by none). Effective settings = built-in values < system row < the agency's own row, which is created on the first change. The isolation test 'no agency sees nothing' now counts only rows that belong to an agency, and a new test proves system rows cannot be changed or inserted by app_user (Claude Code) | 6.4 asks for system-wide rows; built-in values keep exports working even if a test flush or an operator removes the system rows |
+| D37 | 2026-11-15 | PowerPoint deck: offices in scope with no result for the month (no approved plan beneath them) get no dashboard slide; the notes slide lists them. The scope's root is the overall slide and is not repeated as an office slide. Office slide titles are the office name alone; a suffix such as '(continued)' is kept and the name cut instead. Text is fitted with Arial advance widths (no font file needed) (Claude Code) | A slide of empty charts says nothing; listing them keeps the deck honest about coverage. 'One slide per office' (Phase 10 exit) then means one per office that has figures |
 
 ---
 
@@ -1214,3 +1215,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 7 | Complete. Frozen period_result per office and view, ordered lock/unlock with audited copies, DB trigger on locked months, job queue and worker with auto-lock, submission board, single read path (FINAL/PROVISIONAL). |
 | 2026-11-15 | Phase 8 | Complete. One-call dashboards with drill-down to activity history, rankings with month-on-month change, quarters/YTD from the engine, FINAL/PROVISIONAL. Ceiling agency (501 offices, 5,000 activities) answers in ~1.4 s uncached; results cached by data stamp. MOST Dec 2023 figures shown through the dashboard API. |
 | 2026-11-15 | Phase 9 | Complete. Jobs API and My exports; Excel export (SUMMARY + office sheets exactly per 9.1, layout constants in exports/layout.py, cached values on every formula); export dialog on the dashboard (audited); acceptance (own evaluator and LibreOffice with poisoned caches match the dashboard ±0.005 pts for 8.1 and RDI), cell-by-cell RDI layout test; import template and import_plan job with row-by-row errors (drafts only, all-or-nothing); export→import round trip exact; 500-activity office exports in ~1 s. |
+| 2026-11-15 | Phase 10 | Complete. 16:9 deck (title, overall, one dashboard slide per office with native S-curve, funds doughnut and children bars, ranking tables per set with continuation, indicator tables, notes) from the results read path; export_template with system defaults (global_read RLS), settings page and logo; export dialog offers Excel or PowerPoint with slide groups. Tests: MOST December deck charts equal the dashboard API for every office slide, RDS ranking RDI/ILD/AST, the 8.2 provincial vector ranks 1-7, long names cut with an ellipsis, deck opens in python-pptx and LibreOffice. |

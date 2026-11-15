@@ -26,6 +26,19 @@ def test_seed_demo_is_idempotent_and_builds_three_and_five_level_agencies():
     assert depth("sample-bureau") == (5, 5)
     groups = OfficeGroup.objects.using("owner").filter(agency=agencies["sample-ministry"])
     assert {g.name: g.members.count() for g in groups} == {"Mainland centers": 4, "Island centers": 3}
+    # Phase 5 exit: the worked example is an approved plan, loaded through the API (so audited)
+    from apps.audit.models import AuditLog
+    from apps.planning.models import Plan
+
+    plans = Plan.objects.using("owner").filter(agency=agencies["sample-ministry"])
+    assert [(p.office.code, p.status) for p in plans] == [("PME", "approved")]
+    assert plans[0].rows.filter(row_kind="activity").count() == 3
+    actions = set(
+        AuditLog.objects.using("owner")
+        .filter(agency=agencies["sample-ministry"])
+        .values_list("action", flat=True)
+    )
+    assert {"submit", "approve"} <= actions
     # every path is consistent with its parent chain
     for office in Office.objects.using("owner").select_related("parent"):
         expected = f"/{office.pk}/" if office.parent_id is None else f"{office.parent.path}{office.pk}/"

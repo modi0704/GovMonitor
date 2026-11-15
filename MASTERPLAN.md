@@ -10,10 +10,10 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 5
-LAST COMPLETED TASK: P5.9
-NEXT TASK          : Phase 5 exit checks
-BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
+CURRENT PHASE      : 6
+LAST COMPLETED TASK: Phase 5 exit checks
+NEXT TASK          : P6.1
+BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing; extractor and golden tests ready). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -156,7 +156,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 2** — Office structure and user management
 - [x] **Phase 3** — Audit log
 - [ ] **Phase 4** — Scoring engine (pure module, test vectors)
-- [ ] **Phase 5** — Fiscal years, scoring profiles, plans, activities, indicators
+- [x] **Phase 5** — Fiscal years, scoring profiles, plans, activities, indicators
 - [ ] **Phase 6** — Monthly reporting and MOV uploads
 - [ ] **Phase 7** — Cutoff, locking, frozen results
 - [ ] **Phase 8** — Dashboards and ranking
@@ -1203,3 +1203,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 2 | Complete. Any-depth structure with moves, groups, paste import, users and scope; setup wizard; demo seed builds 3- and 5-level agencies through the services. |
 | 2026-11-15 | Phase 3 | Complete. Append-only audit_log (DB-enforced), model-level field diffs, explicit events, route-walking coverage test, audit page with CSV. |
 | 2026-11-15 | Phase 4 (not ticked) | Engine complete: 8.1 vectors, all of section 7, presets, property tests, 100% coverage. P4.2/P4.6 BLOCKED on the missing reference workbook; extractor and golden tests ready. |
+| 2026-11-15 | Phase 5 | Complete. Fiscal years and profiles, plan API with validation, spreadsheet plan editor with engine preview, versions/compare, approvals, copy-forward. Demo plan (8.1 worked example, P4.2 blocked) loaded through the API. |

@@ -14,7 +14,9 @@ from apps.structure import services as structure
 from apps.structure.models import Office, OfficeGroup
 from apps.tenancy import context, services
 from apps.tenancy.models import Agency
+from seed import plans as demo_plans
 from seed import structures
+from seed.api_client import ApiSession
 
 DEMO_AGENCIES = [
     {
@@ -80,4 +82,30 @@ class Command(BaseCommand):
                 Agency.objects.filter(pk=agency.pk).update(settings=agency.settings)
             if created:
                 self.stdout.write(f"{agency.code}: {created} offices created")
+            if spec["code"] == "sample-ministry":
+                self._ministry_plans(email, password)
         self.stdout.write(f"seed_demo: done (demo administrators use DEMO_PASSWORD, default {password!r})")
+
+    def _ministry_plans(self, email: str, password: str) -> None:
+        """Fiscal year 2026 and approved plans, created through the public API (Phase 5 exit)."""
+        api = ApiSession(email, password)
+        years = {y["label"]: y for y in api.get("/api/v1/fiscal-years")}
+        fy = (
+            years.get("2026")
+            or api.post("/api/v1/fiscal-years", {"label": "2026", "start_year": 2026}).json()
+        )
+        if fy["status"] == "draft":
+            api.patch(f"/api/v1/fiscal-years/{fy['id']}", {"status": "open"})
+        offices = {o["code"]: o for o in api.get("/api/v1/offices")}
+        existing = {p["office"]["code"] for p in api.get("/api/v1/plans", fiscal_year=fy["id"])}
+        rows_by_office = demo_plans.fixture_plans() or {"PME": demo_plans.worked_example_rows()}
+        for code, rows in rows_by_office.items():
+            if code in existing or code not in offices:
+                continue
+            plan = api.post(
+                "/api/v1/plans", {"office_id": offices[code]["id"], "fiscal_year_id": fy["id"]}
+            ).json()
+            api.post(f"/api/v1/plans/{plan['id']}/save", {"rows": rows})
+            api.post(f"/api/v1/plans/{plan['id']}/submit")
+            api.post(f"/api/v1/plans/{plan['id']}/approve")
+            self.stdout.write(f"sample-ministry: plan for {code} approved ({len(rows)} rows)")

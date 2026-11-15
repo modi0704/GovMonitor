@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 6
-LAST COMPLETED TASK: P6.7
-NEXT TASK          : P6.8
+CURRENT PHASE      : 7
+LAST COMPLETED TASK: P6.8
+NEXT TASK          : P7.1
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -157,7 +157,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 3** — Audit log
 - [ ] **Phase 4** — Scoring engine (pure module, test vectors)
 - [x] **Phase 5** — Fiscal years, scoring profiles, plans, activities, indicators
-- [ ] **Phase 6** — Monthly reporting and MOV uploads
+- [x] **Phase 6** — Monthly reporting and MOV uploads
 - [ ] **Phase 7** — Cutoff, locking, frozen results
 - [ ] **Phase 8** — Dashboards and ranking
 - [ ] **Phase 9** — Excel export and plan import
@@ -897,7 +897,7 @@ approves, revises and re-approves a plan; every action appears in the audit log.
 - [x] **P6.6** If the profile has `mov_required`, block submission while any row with a non-zero
   actual has no attachment, and show which rows.
 - [x] **P6.7** Optional actual-amount column (D7), hidden by default, switchable per agency.
-- [ ] **P6.8** "My implementing activities" view for an office that implements activities owned
+- [x] **P6.8** "My implementing activities" view for an office that implements activities owned
   by other offices.
 
 **Phase exit checks:** end-to-end test: a field-unit admin reports on an activity owned by a
@@ -1205,3 +1205,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 3 | Complete. Append-only audit_log (DB-enforced), model-level field diffs, explicit events, route-walking coverage test, audit page with CSV. |
 | 2026-11-15 | Phase 4 (not ticked) | Engine complete: 8.1 vectors, all of section 7, presets, property tests, 100% coverage. P4.2/P4.6 BLOCKED on the missing reference workbook; extractor and golden tests ready. |
 | 2026-11-15 | Phase 5 | Complete. Fiscal years and profiles, plan API with validation, spreadsheet plan editor with engine preview, versions/compare, approvals, copy-forward. Demo plan (8.1 worked example, P4.2 blocked) loaded through the API. |
+| 2026-11-15 | Phase 6 | Complete. Monthly entry with live engine results, MOV uploads (sniffed types, agency folders, authorised download), submit/return, implementing view. Exit e2e passes. |

@@ -211,16 +211,28 @@ token_generator = PasswordResetTokenGenerator()
 
 
 def request_password_reset_email(email: str, base_url: str) -> None:
-    """Self-service reset by email. Silent on unknown emails; does nothing without SMTP."""
-    if not settings.EMAIL_ENABLED:
-        return
+    """Self-service reset by email. Silent on unknown emails; sends nothing without SMTP."""
     found = lookup_user_by_email(email)
     if found is None:
+        audit.record(
+            "password_reset_requested",
+            entity_type="user",
+            after={"email": (email or "")[:254], "result": "unknown_email"},
+            using="owner",
+        )
         return
     context.set_agency(found.agency_id)
     user = User.objects.filter(pk=found.id, is_active=True).first()
-    if user is None:
+    if user is None or not settings.EMAIL_ENABLED:
+        audit.record(
+            "password_reset_requested",
+            entity_type="user",
+            entity_id=found.id,
+            agency_id=found.agency_id,
+            after={"result": "inactive_user" if user is None else "email_disabled"},
+        )
         return
+    audit.record("password_reset_requested", user, after={"result": "email_sent"})
     token = token_generator.make_token(user)
     link = f"{base_url.rstrip('/')}/reset-password?a={user.agency_id}&u={user.id}&t={token}"
     send_mail(

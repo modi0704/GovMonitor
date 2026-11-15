@@ -58,6 +58,7 @@ class TwoFactorSetupView(APIView):
             return _error("already_enabled", "Two-factor sign-in is already on.")
         secret = twofactor.new_secret()
         request.session[twofactor.SESSION_SETUP_KEY] = secret
+        audit.record("2fa_setup_started", request.user)
         uri = twofactor.provisioning_uri(secret, request.user.email)
         return Response({"secret": secret, "otpauth_uri": uri, "qr_svg": twofactor.qr_svg(uri)})
 

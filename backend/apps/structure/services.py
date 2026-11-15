@@ -216,11 +216,18 @@ def set_group_members(group: OfficeGroup, office_ids: list) -> None:
     if len(offices) != len(set(map(str, office_ids))):
         raise StructureError("unknown_office", "One or more offices do not exist.")
     with transaction.atomic():
-        OfficeGroupMember.objects.filter(group=group).exclude(office__in=offices).delete()
-        existing = set(OfficeGroupMember.objects.filter(group=group).values_list("office_id", flat=True))
-        OfficeGroupMember.objects.bulk_create(
-            [OfficeGroupMember(group=group, office=o) for o in offices if o.pk not in existing]
+        before = sorted(
+            str(i) for i in OfficeGroupMember.objects.filter(group=group).values_list("office_id", flat=True)
         )
+        with audit.suppressed():  # one "group_members" event instead of one row per member
+            OfficeGroupMember.objects.filter(group=group).exclude(office__in=offices).delete()
+            existing = set(OfficeGroupMember.objects.filter(group=group).values_list("office_id", flat=True))
+            OfficeGroupMember.objects.bulk_create(
+                [OfficeGroupMember(group=group, office=o) for o in offices if o.pk not in existing]
+            )
+        after = sorted(str(o.pk) for o in offices)
+        if before != after:
+            audit.record("group_members", group, before={"offices": before}, after={"offices": after})
 
 
 # ---- Paste-a-list import (P2.3) ----------------------------------------------------------------

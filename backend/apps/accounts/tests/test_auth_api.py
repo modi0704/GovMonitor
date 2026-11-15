@@ -138,6 +138,7 @@ def test_admin_reset_password(client, user, settings):
     assert len(mail.outbox) == 1 and temporary not in mail.outbox[0].body
 
 
+@pytest.mark.django_db(databases=["default", "owner"])
 def test_password_reset_by_email(client, user, settings):
     settings.EMAIL_ENABLED = False
     assert client.post("/api/v1/auth/password-reset", {"email": "ana@alpha.gov"}).json() == {"status": "ok"}

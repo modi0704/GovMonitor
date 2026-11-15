@@ -3,6 +3,8 @@
 import re
 import uuid
 
+from django.conf import settings
+
 from apps.audit import services
 
 _SAFE_ID = re.compile(r"^[A-Za-z0-9._-]{8,64}$")
@@ -22,4 +24,6 @@ class AuditContextMiddleware:
         finally:
             services.reset_request(token)
         response["X-Request-ID"] = request.request_id
+        if getattr(settings, "AUDIT_ROWS_HEADER", False):  # tests only (P3.4)
+            response["X-Audit-Rows"] = str(request.audit_rows)
         return response

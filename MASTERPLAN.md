@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 3
-LAST COMPLETED TASK: P3.3
-NEXT TASK          : P3.4
+LAST COMPLETED TASK: P3.4
+NEXT TASK          : P3.5
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -788,7 +788,7 @@ agency with no code changes.
   and secret fields). Request id, IP and user agent captured by middleware.
 - [x] **P3.3** Wire auditing into everything built in Phases 1–2 (sign-in success and failure,
   role changes, structure changes, support grants).
-- [ ] **P3.4** A test that walks every registered API route with an unsafe method and fails if a
+- [x] **P3.4** A test that walks every registered API route with an unsafe method and fails if a
   successful call writes no audit row (allow-list only for sign-out and notification-read).
 - [ ] **P3.5** Audit page (agency administrator): filter by date range, user, action, office,
   entity; row detail with before/after; CSV download (itself audited as `export`).

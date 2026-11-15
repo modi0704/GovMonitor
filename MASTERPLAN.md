@@ -155,7 +155,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 1** — Agencies, sign-in, roles, row-level security
 - [x] **Phase 2** — Office structure and user management
 - [x] **Phase 3** — Audit log
-- [ ] **Phase 4** — Scoring engine (pure module, test vectors)
+- [x] **Phase 4** — Scoring engine (pure module, test vectors)
 - [x] **Phase 5** — Fiscal years, scoring profiles, plans, activities, indicators
 - [x] **Phase 6** — Monthly reporting and MOV uploads
 - [ ] **Phase 7** — Cutoff, locking, frozen results
@@ -1207,3 +1207,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 4 (not ticked) | Engine complete: 8.1 vectors, all of section 7, presets, property tests, 100% coverage. P4.2/P4.6 BLOCKED on the missing reference workbook; extractor and golden tests ready. |
 | 2026-11-15 | Phase 5 | Complete. Fiscal years and profiles, plan API with validation, spreadsheet plan editor with engine preview, versions/compare, approvals, copy-forward. Demo plan (8.1 worked example, P4.2 blocked) loaded through the API. |
 | 2026-11-15 | Phase 6 | Complete. Monthly entry with live engine results, MOV uploads (sniffed types, agency folders, authorised download), submit/return, implementing view. Exit e2e passes. |
+| 2026-11-15 | Phase 4 | Complete. Golden 8.2 vectors pass from the real workbook (PME 95.83, HRM 83.68, RDI 99.07, AST 58.76, ILD 90.23, GAS 80.16, RDS 86.19, ranking); also reproduced through the API. |

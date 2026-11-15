@@ -329,6 +329,10 @@ SCENARIOS = {
     ("period-unlock", "POST"): lambda w: w.admin.post(
         f"/api/v1/periods/{w.locked_period()}/unlock", {"reason": "Late correction"}
     ),
+    ("export-pptx", "POST"): lambda w: w.admin.post(
+        "/api/v1/exports/pptx",
+        {"scope": "agency", "period_id": w.fiscal_year()["periods"][0]["id"], "groups": ["overall"]},
+    ),
     ("export-xlsx", "POST"): lambda w: w.admin.post(
         "/api/v1/exports/xlsx",
         {"scope": "agency", "period_id": w.fiscal_year()["periods"][0]["id"]},

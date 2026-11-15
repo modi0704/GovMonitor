@@ -209,6 +209,6 @@ it('opens the export dialog for the office shown', async () => {
   const user = userEvent.setup();
   await screen.findByRole('heading', { name: 'RDS office' });
   await user.click(screen.getByRole('button', { name: 'Export' }));
-  const dialog = await screen.findByRole('dialog', { name: 'Export to Excel' });
+  const dialog = await screen.findByRole('dialog', { name: 'Export' });
   expect(within(dialog).getByLabelText('RDS RDS office only')).toBeChecked();
 });

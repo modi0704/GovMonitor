@@ -11,8 +11,18 @@ import { isPending, STATUS_LABEL, type Job } from './types';
 export const JOB_POLL_MS = 2000;
 
 type Scope = 'office' | 'subtree' | 'agency';
+type Format = 'xlsx' | 'pptx';
 
-/** Export dialog (P9.4): scope, month and view; queues the workbook and follows the job. */
+export const SLIDE_GROUPS = [
+  { key: 'overall', label: 'Overall performance' },
+  { key: 'offices', label: 'One slide per office' },
+  { key: 'rankings', label: 'Rankings' },
+  { key: 'indicators', label: 'Indicator tables' },
+] as const;
+type SlideGroup = (typeof SLIDE_GROUPS)[number]['key'];
+
+/** Export dialog (P9.4, P10.3): format, scope, month, view (and slide groups for a deck); queues
+ * the export and follows the job. */
 export default function ExportDialog({
   officeId,
   officeLabel,
@@ -30,6 +40,8 @@ export default function ExportDialog({
   canExportAgency: boolean;
   onClose: () => void;
 }) {
+  const [format, setFormat] = useState<Format>('xlsx');
+  const [groups, setGroups] = useState<SlideGroup[]>(SLIDE_GROUPS.map((g) => g.key));
   const [scope, setScope] = useState<Scope>('office');
   const [month, setMonth] = useState(periodId);
   const [chosenView, setChosenView] = useState(view);
@@ -55,13 +67,14 @@ export default function ExportDialog({
     setBusy(true);
     setError(null);
     try {
+      const body = { scope, office_id: officeId, period_id: month, view: chosenView };
       setJob(
-        await api.post<Job>('exports/xlsx', {
-          scope,
-          office_id: officeId,
-          period_id: month,
-          view: chosenView,
-        }),
+        await api.post<Job>(
+          `exports/${format}`,
+          format === 'pptx'
+            ? { ...body, groups: SLIDE_GROUPS.map((g) => g.key).filter((k) => groups.includes(k)) }
+            : body,
+        ),
       );
     } catch (err) {
       setError(errorMessage(err));
@@ -71,12 +84,12 @@ export default function ExportDialog({
   }
 
   return (
-    <Modal title="Export to Excel" onClose={onClose}>
+    <Modal title="Export" onClose={onClose}>
       {job ? (
         <div className="stack" aria-live="polite">
           <p>
             <span className={`job-status job-${job.status}`}>{STATUS_LABEL[job.status]}</span>
-            {pending && ' The workbook is being prepared. You can close this window.'}
+            {pending && ' The file is being prepared. You can close this window.'}
           </p>
           {job.status === 'failed' && <p className="form-error">{job.error}</p>}
           {job.download_url && (
@@ -93,6 +106,27 @@ export default function ExportDialog({
         </div>
       ) : (
         <form onSubmit={submit} className="stack">
+          <fieldset className="stack">
+            <legend>Format</legend>
+            <label className="check">
+              <input
+                type="radio"
+                name="format"
+                checked={format === 'xlsx'}
+                onChange={() => setFormat('xlsx')}
+              />
+              Excel workbook (one sheet per office, live formulas)
+            </label>
+            <label className="check">
+              <input
+                type="radio"
+                name="format"
+                checked={format === 'pptx'}
+                onChange={() => setFormat('pptx')}
+              />
+              PowerPoint deck (ready to present)
+            </label>
+          </fieldset>
           <fieldset className="stack">
             <legend>What to include</legend>
             <label className="check">
@@ -146,13 +180,37 @@ export default function ExportDialog({
               <option value="implementing">Activities each office carries out</option>
             </select>
           </label>
+          {format === 'pptx' && (
+            <fieldset className="stack">
+              <legend>Slides</legend>
+              {SLIDE_GROUPS.map((g) => (
+                <label key={g.key} className="check">
+                  <input
+                    type="checkbox"
+                    checked={groups.includes(g.key)}
+                    onChange={(e) =>
+                      setGroups((cur) =>
+                        e.target.checked ? [...cur, g.key] : cur.filter((k) => k !== g.key),
+                      )
+                    }
+                  />
+                  {g.label}
+                </label>
+              ))}
+              <p className="muted small">The title and notes slides are always included.</p>
+            </fieldset>
+          )}
           <FormError message={error} />
           <div className="row">
             <button type="button" className="btn" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={busy}>
-              Prepare workbook
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={busy || (format === 'pptx' && groups.length === 0)}
+            >
+              {format === 'pptx' ? 'Prepare deck' : 'Prepare workbook'}
             </button>
           </div>
         </form>

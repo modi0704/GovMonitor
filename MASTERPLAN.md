@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 10
-LAST COMPLETED TASK: P10.2
-NEXT TASK          : P10.3
+LAST COMPLETED TASK: P10.3
+NEXT TASK          : P10.4
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1009,7 +1009,7 @@ read-only user scoped to one division sees only that division.
   charts and tables; layout constants in one module.
 - [x] **P10.2** `export_template` model and settings page: logo upload, primary colour, report
   title, footer text; system default template.
-- [ ] **P10.3** Export dialog (scope, month, which slide groups to include) using the job queue.
+- [x] **P10.3** Export dialog (scope, month, which slide groups to include) using the job queue.
 - [ ] **P10.4** Tests: slide count and order for a known tree; every chart's data equals the
   dashboard API values; the deck opens with python-pptx without repair; long office names do not
   overflow (truncate with an ellipsis after measuring).

@@ -29,6 +29,25 @@ def export_xlsx(job: Job) -> dict:
     return {"file_name": name, **summary}
 
 
+@handler(Job.Kind.EXPORT_PPTX)
+def export_pptx(job: Job) -> dict:
+    from apps.exports import pptx_writer, templates
+    from apps.exports.pptx_layout import SLIDE_GROUPS
+
+    sc = export_scope.resolve(job.params)
+    settings = templates.effective("pptx")
+    data, summary = pptx_writer.build(
+        sc,
+        groups=tuple(job.params.get("groups") or SLIDE_GROUPS),
+        settings=settings,
+        logo=templates.logo_bytes(settings),
+        user=job.requested_by,
+    )
+    name = file_name(sc, "pptx")
+    storage.store_result(job, name, data)
+    return {"file_name": name, "slides": summary["slides"], "offices": summary["offices"]}
+
+
 @handler(Job.Kind.IMPORT_PLAN)
 def import_plan(job: Job) -> dict:
     from apps.exports.plan_import import ImportFailed

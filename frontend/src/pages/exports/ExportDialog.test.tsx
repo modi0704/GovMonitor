@@ -80,3 +80,38 @@ it('queues an export with the chosen scope, month and view, then offers the file
     vi.useRealTimers();
   }
 });
+
+it('asks for slide groups when exporting a PowerPoint deck', async () => {
+  const calls = mockApi({
+    'POST /api/v1/exports/pptx': { status: 202, body: job('queued') },
+  });
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <ExportDialog
+        officeId="rds"
+        officeLabel="RDS Research"
+        periods={PERIODS}
+        periodId="dec"
+        view="owner"
+        canExportAgency
+        onClose={() => {}}
+      />
+    </MemoryRouter>,
+  );
+  expect(screen.queryByLabelText('Rankings')).not.toBeInTheDocument();
+  await user.click(screen.getByLabelText(/PowerPoint deck/));
+  await user.click(screen.getByLabelText('The whole agency'));
+  await user.click(screen.getByLabelText('Indicator tables'));
+  await user.click(screen.getByRole('button', { name: 'Prepare deck' }));
+  expect(calls.find((c) => c.method === 'POST')).toMatchObject({
+    path: '/api/v1/exports/pptx',
+    body: {
+      scope: 'agency',
+      office_id: 'rds',
+      period_id: 'dec',
+      view: 'owner',
+      groups: ['overall', 'offices', 'rankings'],
+    },
+  });
+});

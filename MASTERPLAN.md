@@ -10,10 +10,10 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 13
-LAST COMPLETED TASK: P13.6
-NEXT TASK          : P13.7
-BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys. Release: replace the placeholder licence public key (D41)
+CURRENT PHASE      : 14
+LAST COMPLETED TASK: P13.7
+NEXT TASK          : P14.1
+BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). P14.1: add composite (agency_id, id) foreign keys. Release: replace the placeholder licence public key (D41)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -164,7 +164,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 10** — PowerPoint export
 - [x] **Phase 11** — Alerts and notifications
 - [x] **Phase 12** — Phone layouts and UX polish
-- [ ] **Phase 13** — Deployment packaging (office install and cloud)
+- [x] **Phase 13** — Deployment packaging (office install and cloud)
 - [ ] **Phase 14** — Hardening, performance, documentation, release
 
 Dependency order is linear (each phase needs the ones before it), except that Phase 4 depends only
@@ -1095,7 +1095,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
   system becomes read-only (never locks customers out of their data). Disabled in `multi` mode.
 - [x] **P13.6** `docs/ADMIN_GUIDE.md`: hardware sizing, install on Windows Server and Linux with
   Docker, network and VPN notes for field offices, backups, updates, SMTP, troubleshooting.
-- [ ] **P13.7** Verify the single-mode install end to end on a clean VM with networking disabled
+- [x] **P13.7** Verify the single-mode install end to end on a clean VM with networking disabled
   after install: all pages load, exports work, no external requests in the browser's network log.
 
 **Phase exit checks:** both compose files start from scratch with one command each; backup →
@@ -1201,6 +1201,7 @@ changed, why. Start ids at D19.
 | D39 | 2026-11-15 | UX pass (P12.4): loading is shown by one shared bar under the navigation, driven by the API client's count of requests in flight (after 300 ms; background polls excluded), rather than per-page spinners; unsaved changes are guarded app-wide by a capture-phase link listener plus beforeunload, used by the plan editor and the monthly report; activity-level status words come from one module (Ahead of plan / On plan / Behind plan / No target) while office results keep the scoring profile's labels; confirmations for lock, unlock, approve and deactivate already stated their consequences and were kept (Claude Code) | One mechanism covers every page and every future page; the router in use (BrowserRouter) has no navigation blocker, so the guard intercepts link clicks before the router |
 | D40 | 2026-11-15 | Browser smoke tests (P12.7): desktop runs the five flows on a brand-new agency created through the platform screens each run; the phone project then uses that agency for phone work (results, photo upload, export) and checks editing screens and horizontal scroll; data-heavy plan entry uses the same API call the grid makes. They need a running server with a worker and a platform owner, so they run as 'make smoke' and a separate CI job, not inside 'make check'. Fixed on the way: page loads and background polls (X-Background: 1, the notification bell) no longer refresh the idle-sign-out timer — before, an open tab never signed out and a page load racing a sign-out returned SessionInterrupted (Claude Code) | Repeatable runs without collisions; the idle timeout (P1.4) must hold even with the bell polling |
 | D41 | 2026-11-15 | Licence (P13.5): JSON {payload, signature}, Ed25519 over the payload with sorted keys; payload agency, expires, seats. Single mode only. Missing, damaged or expired → read-only enforced by middleware for every API write except sign-in/out, own password and two-step settings, notification reads and exports; seat limit blocks only new users. The committed public key is a PLACEHOLDER whose private key was not kept: the vendor generates the real pair with tools/licence.py keygen, keeps the private key offline and replaces backend/apps/tenancy/licence_public_key.txt before a release (release checklist, P14.6) (Claude Code) | Customers can always read and export their data; signing stays offline with the vendor; no real private key may sit in the repository or in a build session |
+| D42 | 2026-11-15 | P13.7 is verified by deploy/test-offline-install.sh instead of a hand-built VM: the offline bundle is installed into an empty folder in single mode, every Docker network is then cut off from the internet with a DOCKER-USER firewall rule (checked from inside the web container), and a browser test opens every page and exports Excel and PowerPoint, failing on any request outside the site. It runs in CI. The test trusts a throwaway licence key; the shipped compose file deliberately does not pass LICENCE_PUBLIC_KEY (Claude Code) | Repeatable on every build rather than once by hand; the firewall gives the same 'no internet after install' condition as disabling the VM's network |
 
 ---
 
@@ -1223,3 +1224,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 10 | Complete. 16:9 deck (title, overall, one dashboard slide per office with native S-curve, funds doughnut and children bars, ranking tables per set with continuation, indicator tables, notes) from the results read path; export_template with system defaults (global_read RLS), settings page and logo; export dialog offers Excel or PowerPoint with slide groups. Tests: MOST December deck charts equal the dashboard API for every office slide, RDS ranking RDI/ILD/AST, the 8.2 provincial vector ranks 1-7, long names cut with an ellipsis, deck opens in python-pptx and LibreOffice. |
 | 2026-11-15 | Phase 11 | Complete. alert_rule and notification (RLS); settings page; daily alert_scan queued once per local day after 06:00 (reminders N days before cutoff, late reports, missing accomplishments 3 days before, delays after locking) and event alerts (returned, locked, unlocked, plan submitted), all with dedupe keys; bell with unread count, panel and notifications page; daily email digest only with SMTP + agency switch, per-user opt-out, one per day, failures isolated. Frozen-clock tests for every trigger; scan twice/next day/replayed event create no duplicates; no-SMTP case sends nothing and the job succeeds. |
 | 2026-11-15 | Phase 12 | Complete. Phone layouts (no horizontal scroll at 360/480 px; charts follow their container; wide tables scroll in place), phone photo upload from the activity history, 'Open on a computer to edit' on editing screens, UX pass (unsaved-changes guard on in-app navigation, loading bar, one set of status words, empty states with next steps), axe WCAG 2.1 A/AA clean at desktop and phone, skip link, help page per role and ? tips on every scoring setting, Playwright smoke tests of the five flows at desktop and phone (make smoke, CI job). Fixed: background polls kept sessions alive past the idle timeout. |
+| 2026-11-15 | Phase 13 | Complete. Production hardening (strict CSP, JSON logs, HSTS only behind TLS, Caddy with upload limit); single-machine compose with Caddy HTTPS and cloud compose (managed PostgreSQL + S3), both started from scratch in CI; backup/restore with checksums and retention, backup-wipe-restore reproduces all 191 frozen results; offline bundle with install/update and automatic rollback (tested with a broken release); signed Ed25519 licence (banner, read-only after expiry, seats); ADMIN_GUIDE.md; offline install verified with the containers cut off from the internet. |

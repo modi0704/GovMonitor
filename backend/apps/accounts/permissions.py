@@ -170,3 +170,36 @@ def get_office_or_404(user, office_id, *, edit: bool = False):
         return qs.get(pk=office_id)
     except (Office.DoesNotExist, ValidationError, ValueError, TypeError) as exc:
         raise Http404("No such office.") from exc
+
+
+def filter_by_scope(queryset, user, *, office_field: str = "office", edit: bool = False):
+    """Base-queryset filter for every office-bound endpoint (P2.6).
+
+    ``office_field`` is the lookup path from the queryset's model to its office (e.g. ``"office"``
+    or ``"plan__office"``). Rows outside the user's scope disappear, so their ids answer 404.
+    """
+    from django.db.models import Q
+
+    q = Q(pk__in=[])
+    for path, level, _ in _assignments(user) if (user and user.is_authenticated) else []:
+        if edit and level != "admin":
+            continue
+        q |= Q(**{f"{office_field}__path__startswith": path})
+    return queryset.filter(q)
+
+
+class OfficeScopedQuerysetMixin:
+    """For DRF views over office-bound models: ``get_queryset`` is always scoped (P2.6).
+
+    Set ``office_field`` and implement ``base_queryset()``. Unsafe methods use the edit scope.
+    """
+
+    office_field = "office"
+
+    def base_queryset(self):  # pragma: no cover - abstract
+        raise NotImplementedError
+
+    def get_queryset(self):
+        request = self.request
+        edit = request.method not in SAFE_METHODS
+        return filter_by_scope(self.base_queryset(), request.user, office_field=self.office_field, edit=edit)

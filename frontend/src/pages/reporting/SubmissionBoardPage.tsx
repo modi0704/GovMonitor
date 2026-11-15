@@ -67,6 +67,10 @@ export default function SubmissionBoardPage() {
 
   async function run(fn: () => Promise<unknown>, done: string) {
     setError(null);
+    // Stay on the month just acted on: without this, locking it would make the board jump to the
+    // next open month.
+    if (board.data && !params.get('period'))
+      setParams({ fy: fyId ?? '', period: board.data.period.id });
     try {
       await fn();
       setNotice(done);

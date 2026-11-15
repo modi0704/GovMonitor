@@ -21,7 +21,8 @@ if DEPLOYMENT_MODE not in {"single", "multi"}:
     raise ValueError("DEPLOYMENT_MODE must be 'single' or 'multi'")
 SESSION_IDLE_MINUTES = env_int("SESSION_IDLE_MINUTES", 60)
 MAX_UPLOAD_MB = env_int("MAX_UPLOAD_MB", 25)
-LICENCE_FILE = env("LICENCE_FILE", "")
+LICENCE_FILE = env("LICENCE_FILE", "")  # office installs (DEPLOYMENT_MODE=single), P13.5
+LICENCE_PUBLIC_KEY = env("LICENCE_PUBLIC_KEY", "")  # override of the key shipped in the image (tests)
 # Public address of the site (e.g. https://monitor.example.gov), used for links in emails.
 PUBLIC_URL = env("PUBLIC_URL", "")
 WORKER_HEARTBEAT_STALE_SECONDS = env_int("WORKER_HEARTBEAT_STALE_SECONDS", 120)
@@ -61,6 +62,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.accounts.middleware.SessionIdleMiddleware",
+    "apps.tenancy.licence.LicenceMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 

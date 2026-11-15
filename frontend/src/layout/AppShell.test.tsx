@@ -28,3 +28,49 @@ it('the first Tab reaches a skip link that leads to the page content', async () 
   expect(skip).toHaveAttribute('href', '#main-content');
   expect(document.getElementById('main-content')?.tagName).toBe('MAIN');
 });
+
+it.each([
+  [
+    'expiring',
+    false,
+    'The licence expires on 25 November 2026 (10 days left).',
+    'Ask your administrator to renew it.',
+  ],
+  [
+    'expired',
+    true,
+    'The licence expired on 1 November 2026: the system is read-only.',
+    'You can still sign in',
+  ],
+])('shows the licence banner when %s', async (status, readOnly, message, hint) => {
+  mockApi({
+    'GET /api/v1/auth/csrf': { body: {} },
+    'GET /api/v1/me': {
+      body: {
+        ...ME,
+        licence: {
+          status,
+          read_only: readOnly,
+          expires: null,
+          days_left: null,
+          seats: 10,
+          seats_used: 3,
+          message,
+        },
+      },
+    },
+  });
+  render(
+    <MemoryRouter initialEntries={['/notifications']}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </MemoryRouter>,
+  );
+  const banner = (await screen.findByText(new RegExp(message.slice(0, 20)))).closest(
+    '.licence-banner',
+  )!;
+  expect(banner).toHaveAttribute('role', readOnly ? 'alert' : 'status');
+  expect(banner).toHaveTextContent(message);
+  expect(banner).toHaveTextContent(hint);
+});

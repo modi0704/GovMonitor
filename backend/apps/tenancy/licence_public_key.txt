@@ -1,0 +1,3 @@
+# Vendor licence-signing public key (Ed25519, raw, base64). PLACEHOLDER: replace with the
+# vendor's own key before a release (docs/RELEASE.md); its private key was never kept.
+O64RY8pGj2l+0kotvf9c5YSZOsNDSqTWGpthGwYDFiI=

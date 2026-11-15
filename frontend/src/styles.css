@@ -1310,3 +1310,17 @@ main.content:focus {
 .help-guide li + li {
   margin-top: 0.4rem;
 }
+
+/* ---- Licence banner (P13.5) ---- */
+.licence-banner {
+  padding: 0.5rem 1rem;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.licence-banner.is-blocking {
+  background: var(--delayed-bg);
+  color: var(--delayed);
+  font-weight: 600;
+}

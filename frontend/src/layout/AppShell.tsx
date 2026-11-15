@@ -52,6 +52,17 @@ export default function AppShell() {
             </NavLink>
           ))}
       </nav>
+      {me?.licence?.message && (
+        <div
+          className={`licence-banner ${me.licence.read_only ? 'is-blocking' : ''}`}
+          role={me.licence.read_only ? 'alert' : 'status'}
+        >
+          {me.licence.message}{' '}
+          {me.licence.read_only
+            ? 'You can still sign in, read everything and export it. Ask your administrator to install a valid licence.'
+            : 'Ask your administrator to renew it.'}
+        </div>
+      )}
       <LoadingBar />
       <main className="content" id="main-content" tabIndex={-1}>
         <Outlet />

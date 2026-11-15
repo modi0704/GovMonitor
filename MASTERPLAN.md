@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 13
-LAST COMPLETED TASK: P13.4
-NEXT TASK          : P13.5
-BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
+LAST COMPLETED TASK: P13.5
+NEXT TASK          : P13.6
+BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys. Release: replace the placeholder licence public key (D41)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -1090,7 +1090,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 - [x] **P13.4** `deploy/make-offline-bundle.sh`: saves images and compose files into one archive
   that installs on a machine with no internet; `install.sh` and `update.sh` inside it (update =
   backup, load images, migrate, restart, health check, automatic rollback on failure).
-- [ ] **P13.5** Office-install licence: a signed licence file (Ed25519; public key in the image)
+- [x] **P13.5** Office-install licence: a signed licence file (Ed25519; public key in the image)
   holding agency name, expiry and seat limit; a banner 30 days before expiry; after expiry the
   system becomes read-only (never locks customers out of their data). Disabled in `multi` mode.
 - [ ] **P13.6** `docs/ADMIN_GUIDE.md`: hardware sizing, install on Windows Server and Linux with
@@ -1200,6 +1200,7 @@ changed, why. Start ids at D19.
 | D38 | 2026-11-15 | Alert recipients: 'admins of an office' are admin assignments at that office, or at its nearest ancestor that has any; 'agency administrators' are admins of the root; delay alerts go to every assignment (admin or read-only) at the office and above. Offices that must report are those owning an approved plan (as the submission board). Missing accomplishments are grouped into one notification per office (owner and implementing) rather than one per activity. Delay alerts use the most recent month locked within the last 14 days, and roll-up offices are included. Notifications are created in bulk and never audited (they derive from audited changes); the scan is queued once per local day after 06:00. PUBLIC_URL (new env var) makes email links absolute (Claude Code) | Agency administrators would otherwise get every office's reminders; per-activity alerts would flood inboxes; a 14-day window stops a first scan from alerting on months locked long ago |
 | D39 | 2026-11-15 | UX pass (P12.4): loading is shown by one shared bar under the navigation, driven by the API client's count of requests in flight (after 300 ms; background polls excluded), rather than per-page spinners; unsaved changes are guarded app-wide by a capture-phase link listener plus beforeunload, used by the plan editor and the monthly report; activity-level status words come from one module (Ahead of plan / On plan / Behind plan / No target) while office results keep the scoring profile's labels; confirmations for lock, unlock, approve and deactivate already stated their consequences and were kept (Claude Code) | One mechanism covers every page and every future page; the router in use (BrowserRouter) has no navigation blocker, so the guard intercepts link clicks before the router |
 | D40 | 2026-11-15 | Browser smoke tests (P12.7): desktop runs the five flows on a brand-new agency created through the platform screens each run; the phone project then uses that agency for phone work (results, photo upload, export) and checks editing screens and horizontal scroll; data-heavy plan entry uses the same API call the grid makes. They need a running server with a worker and a platform owner, so they run as 'make smoke' and a separate CI job, not inside 'make check'. Fixed on the way: page loads and background polls (X-Background: 1, the notification bell) no longer refresh the idle-sign-out timer — before, an open tab never signed out and a page load racing a sign-out returned SessionInterrupted (Claude Code) | Repeatable runs without collisions; the idle timeout (P1.4) must hold even with the bell polling |
+| D41 | 2026-11-15 | Licence (P13.5): JSON {payload, signature}, Ed25519 over the payload with sorted keys; payload agency, expires, seats. Single mode only. Missing, damaged or expired → read-only enforced by middleware for every API write except sign-in/out, own password and two-step settings, notification reads and exports; seat limit blocks only new users. The committed public key is a PLACEHOLDER whose private key was not kept: the vendor generates the real pair with tools/licence.py keygen, keeps the private key offline and replaces backend/apps/tenancy/licence_public_key.txt before a release (release checklist, P14.6) (Claude Code) | Customers can always read and export their data; signing stays offline with the vendor; no real private key may sit in the repository or in a build session |
 
 ---
 

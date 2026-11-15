@@ -94,6 +94,14 @@ class UserListView(APIView):
 
     @transaction.atomic
     def post(self, request):
+        from apps.tenancy import licence
+
+        if not licence.seats_available(User.objects.filter(is_active=True).count()):
+            return Response(
+                {"detail": "The licence's seat limit is reached: deactivate a user or extend the licence.",
+                 "code": "seat_limit"},
+                status=403,
+            )  # fmt: skip
         s = UserCreateSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         d = s.validated_data

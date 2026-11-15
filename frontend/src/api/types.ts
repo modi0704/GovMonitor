@@ -11,6 +11,15 @@ export interface Me {
   must_change_password: boolean;
   has_2fa: boolean;
   email_opt_out?: boolean;
+  licence?: {
+    status: 'not_required' | 'missing' | 'invalid' | 'valid' | 'expiring' | 'expired';
+    read_only: boolean;
+    expires: string | null;
+    days_left: number | null;
+    seats: number | null;
+    seats_used: number | null;
+    message: string;
+  };
   is_agency_admin: boolean;
   agency: {
     id: string;

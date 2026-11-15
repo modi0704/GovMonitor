@@ -59,7 +59,14 @@ def me_payload(user: User) -> dict:
             "setup_complete": bool(agency.settings.get("setup_complete")),
         },
         "roles": [{**r, "id": str(r["id"]), "office_id": str(r["office_id"])} for r in roles],
+        "licence": licence_payload(),
     }
+
+
+def licence_payload() -> dict:
+    from apps.tenancy import licence
+
+    return licence.payload(User.objects.filter(is_active=True).count())
 
 
 class LoginSerializer(serializers.Serializer):

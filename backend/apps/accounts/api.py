@@ -54,6 +54,7 @@ def me_payload(user: User) -> dict:
             "timezone": agency.timezone,
             "fiscal_year_start_month": agency.fiscal_year_start_month,
             "logo": bool(agency.logo_key),
+            "setup_complete": bool(agency.settings.get("setup_complete")),
         },
         "roles": [{**r, "id": str(r["id"]), "office_id": str(r["office_id"])} for r in roles],
     }

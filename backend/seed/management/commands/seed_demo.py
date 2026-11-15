@@ -1,7 +1,8 @@
 """Build the demo agencies (MASTERPLAN P14.4). Idempotent: running it twice changes nothing.
 
-Phase 1 content: two agencies, each with a root office and an administrator. Later phases extend
-this command (structure, plans, reports). Demo passwords come from DEMO_PASSWORD.
+Each agency gets an administrator and its structure, built through the same services the API
+uses (no hard-coded behaviour). Later phases extend this command (plans, reports).
+Demo passwords come from DEMO_PASSWORD.
 """
 
 import os
@@ -9,13 +10,41 @@ import os
 from django.core.management.base import BaseCommand
 
 from apps.accounts.models import User
-from apps.tenancy import services
+from apps.structure import services as structure
+from apps.structure.models import Office, OfficeGroup
+from apps.tenancy import context, services
 from apps.tenancy.models import Agency
+from seed import structures
 
 DEMO_AGENCIES = [
-    {"code": "sample-ministry", "name": "Sample Ministry", "root_level_name": "Ministry", "fy": 1},
-    {"code": "sample-bureau", "name": "Sample Bureau", "root_level_name": "Bureau", "fy": 1},
+    {
+        "code": "sample-ministry",
+        "name": "Sample Ministry",
+        "levels": structures.MINISTRY_LEVELS,
+        "tree": structures.MINISTRY_TREE,
+        "groups": structures.MINISTRY_GROUPS,
+        "root_code": "MIN",
+    },
+    {
+        "code": "sample-bureau",
+        "name": "Sample Bureau",
+        "levels": structures.BUREAU_LEVELS,
+        "tree": structures.BUREAU_TREE,
+        "groups": {},
+        "root_code": "BUR",
+    },
 ]
+
+
+def _build(parent: Office, tree: dict) -> int:
+    created = 0
+    for code, (name, children) in tree.items():
+        office = Office.objects.filter(code__iexact=code).first()
+        if office is None:
+            office = structure.create_office(parent, name, code)
+            created += 1
+        created += _build(office, children)
+    return created
 
 
 class Command(BaseCommand):
@@ -29,8 +58,8 @@ class Command(BaseCommand):
                 agency = services.create_agency(
                     name=spec["name"],
                     code=spec["code"],
-                    fiscal_year_start_month=spec["fy"],
-                    root_level_name=spec["root_level_name"],
+                    root_level_name=spec["levels"][0],
+                    root_code=spec["root_code"],
                 )
                 self.stdout.write(f"created agency {agency.code}")
             email = f"admin@{spec['code']}.demo"
@@ -39,4 +68,16 @@ class Command(BaseCommand):
                     agency, email=email, full_name="Demo Administrator", password=password
                 )
                 self.stdout.write(f"created administrator {email}")
+            with context.agency_context(agency.id):
+                structure.set_level_names(spec["levels"])
+                created = _build(structure.get_root(), spec["tree"])
+                for name, codes in spec["groups"].items():
+                    group, _ = OfficeGroup.objects.get_or_create(name=name)
+                    structure.set_group_members(
+                        group, list(Office.objects.filter(code__in=codes).values_list("id", flat=True))
+                    )
+                agency.settings = {**agency.settings, "setup_complete": True}
+                Agency.objects.filter(pk=agency.pk).update(settings=agency.settings)
+            if created:
+                self.stdout.write(f"{agency.code}: {created} offices created")
         self.stdout.write(f"seed_demo: done (demo administrators use DEMO_PASSWORD, default {password!r})")

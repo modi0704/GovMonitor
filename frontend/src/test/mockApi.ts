@@ -35,6 +35,7 @@ export const ME = {
     timezone: 'Asia/Manila',
     fiscal_year_start_month: 1,
     logo: false,
+    setup_complete: true,
   },
   roles: [],
 };

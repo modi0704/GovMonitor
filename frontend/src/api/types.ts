@@ -18,6 +18,7 @@ export interface Me {
     timezone: string;
     fiscal_year_start_month: number;
     logo: boolean;
+    setup_complete: boolean;
   };
   roles: RoleRef[];
 }

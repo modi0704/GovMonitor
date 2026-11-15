@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 2
-LAST COMPLETED TASK: P2.6
-NEXT TASK          : P2.7
+CURRENT PHASE      : 3
+LAST COMPLETED TASK: P2.7
+NEXT TASK          : P3.1
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -153,7 +153,7 @@ Tick a phase only when all its tasks and exit checks pass.
 
 - [x] **Phase 0** — Repository, tooling, containers, pinned versions
 - [x] **Phase 1** — Agencies, sign-in, roles, row-level security
-- [ ] **Phase 2** — Office structure and user management
+- [x] **Phase 2** — Office structure and user management
 - [ ] **Phase 3** — Audit log
 - [ ] **Phase 4** — Scoring engine (pure module, test vectors)
 - [ ] **Phase 5** — Fiscal years, scoring profiles, plans, activities, indicators
@@ -766,7 +766,7 @@ of one cannot fetch any object id of the other (API returns 404).
   assign to offices with a level; show each user's effective scope.
 - [x] **P2.6** Scope enforcement in the API base queryset: every office-bound endpoint filters by
   `scope(user)`; tests for view vs edit vs out-of-scope.
-- [ ] **P2.7** First-run setup wizard for a new agency: level names → root office → offices →
+- [x] **P2.7** First-run setup wizard for a new agency: level names → root office → offices →
   first users.
 
 **Phase exit checks:** tests prove an `admin` of a mid-level office cannot see or edit a sibling
@@ -1189,3 +1189,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | — | Plan written. No code yet. |
 | 2026-11-15 | Phase 0 | Complete. make up → /api/v1/health ok (db, storage, worker); make check green. Docker builds behind a TLS proxy need EXTRA_CA_FILE. |
 | 2026-11-15 | Phase 1 | Complete. RLS forced on every tenant table and proven by generic tests; sign-in with lockout, idle timeout, TOTP; platform area with support grants; two-agency demo seed. Task order changed per D23. |
+| 2026-11-15 | Phase 2 | Complete. Any-depth structure with moves, groups, paste import, users and scope; setup wizard; demo seed builds 3- and 5-level agencies through the services. |

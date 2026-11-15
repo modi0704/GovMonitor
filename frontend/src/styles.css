@@ -559,3 +559,45 @@ label.check input {
   font-size: 1rem;
   margin: 1rem 0 0.5rem;
 }
+
+.stepper {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+.stepper li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 0.3rem 0.7rem 0.3rem 0.3rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.stepper .step-num {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.stepper li.current {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.stepper li.current .step-num {
+  background: var(--primary);
+  color: var(--primary-contrast);
+}
+.stepper li.done .step-num {
+  background: var(--ahead-bg);
+  color: var(--ahead);
+}

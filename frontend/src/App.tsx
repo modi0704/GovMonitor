@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SecurityPage from './pages/SecurityPage';
+import SetupWizardPage from './pages/SetupWizardPage';
 import SignInPage from './pages/SignInPage';
 import StructurePage from './pages/structure/StructurePage';
 import UsersPage from './pages/UsersPage';
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="structure" element={<StructurePage />} />
         <Route path="groups" element={<GroupsPage />} />
         <Route path="users" element={<UsersPage />} />
+        <Route path="setup" element={<SetupWizardPage />} />
       </Route>
       <Route path="/platform/sign-in" element={<PlatformSignInPage />} />
       <Route path="/platform" element={<PlatformAgenciesPage />} />

@@ -2,6 +2,7 @@
 agency's data for a limited time. Without an unexpired, unrevoked grant the platform area shows
 no agency data."""
 
+import zoneinfo
 from datetime import timedelta
 
 from django.db import connection
@@ -11,8 +12,8 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.permissions import IsAgencyAdmin
-from apps.tenancy.models import SupportGrant
+from apps.accounts.permissions import IsAgencyAdmin, ReadOrAgencyAdmin
+from apps.tenancy.models import Agency, SupportGrant
 
 MAX_GRANT_HOURS = 24 * 14
 
@@ -89,3 +90,49 @@ class SupportGrantRevokeView(APIView):
             grant.revoked_at = timezone.now()
             grant.save(update_fields=["revoked_at"])
         return Response(grant_payload(grant, _emails([grant.platform_admin_id])))
+
+
+# ---- The signed-in user's agency (P2.7) ----------------------------------------------------------
+
+
+def agency_payload(agency: Agency) -> dict:
+    return {
+        "id": str(agency.id),
+        "name": agency.name,
+        "code": agency.code,
+        "timezone": agency.timezone,
+        "fiscal_year_start_month": agency.fiscal_year_start_month,
+        "setup_complete": bool(agency.settings.get("setup_complete")),
+        "settings": agency.settings,
+    }
+
+
+class AgencyView(APIView):
+    """GET the agency; PATCH name / timezone / setup_complete (agency administrator)."""
+
+    permission_classes = [ReadOrAgencyAdmin]
+
+    def get(self, request):
+        return Response(agency_payload(Agency.objects.get(pk=request.user.agency_id)))
+
+    def patch(self, request):
+        agency = Agency.objects.get(pk=request.user.agency_id)
+        fields = []
+        if "name" in request.data:
+            name = str(request.data["name"]).strip()
+            if not name:
+                return Response({"name": ["The agency needs a name."]}, status=400)
+            agency.name = name[:200]
+            fields.append("name")
+        if "timezone" in request.data:
+            tz = str(request.data["timezone"])
+            if tz not in zoneinfo.available_timezones():
+                return Response({"timezone": ["Unknown time zone."]}, status=400)
+            agency.timezone = tz
+            fields.append("timezone")
+        if "setup_complete" in request.data:
+            agency.settings = {**agency.settings, "setup_complete": bool(request.data["setup_complete"])}
+            fields.append("settings")
+        if fields:
+            agency.save(update_fields=fields)
+        return Response(agency_payload(agency))

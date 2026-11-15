@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 12
-LAST COMPLETED TASK: P12.4
-NEXT TASK          : P12.5
+LAST COMPLETED TASK: P12.5
+NEXT TASK          : P12.6
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1064,7 +1064,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 - [x] **P12.4** UX pass on desktop: empty states that say what to do next; consistent status
   words; confirmation with consequences for lock, unlock, approve, deactivate; unsaved-changes
   guard; loading and error states on every page; keyboard access to the grids.
-- [ ] **P12.5** Accessibility checks: colour contrast, focus order, labels on inputs, charts
+- [x] **P12.5** Accessibility checks: colour contrast, focus order, labels on inputs, charts
   with table alternatives.
 - [ ] **P12.6** In-app help: a one-page guide per role and tooltips on every scoring setting.
 - [ ] **P12.7** Playwright smoke tests for the five flows of section 12 at desktop and phone

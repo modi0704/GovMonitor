@@ -1,16 +1,23 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import { useLeaveGuard } from '../lib/unsaved';
+import { useFocusableScrollRegions } from './useFocusableScrollRegions';
 import LoadingBar from './LoadingBar';
 import NotificationBell from './NotificationBell';
 import { NAV_ITEMS } from './nav';
+
+const mainElement = () => document.querySelector<HTMLElement>('main.content');
 
 export default function AppShell() {
   const { me, signOut } = useAuth();
   const navigate = useNavigate();
   useLeaveGuard();
+  useFocusableScrollRegions(mainElement);
   return (
     <div className="shell">
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
       <header className="topbar">
         <NavLink to="/" className="brand brand-inverse">
           <img src="/favicon.svg" alt="" width={24} height={24} />
@@ -46,7 +53,7 @@ export default function AppShell() {
           ))}
       </nav>
       <LoadingBar />
-      <main className="content">
+      <main className="content" id="main-content" tabIndex={-1}>
         <Outlet />
       </main>
     </div>

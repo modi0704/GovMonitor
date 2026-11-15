@@ -78,3 +78,12 @@ def test_most_figures_through_the_application():
         )
         assert abs(rds_result.cum_actual[11] - D("0.8619")) <= TOLERANCE
         assert got["GAS"].funds_total == D("107678522")
+        # The agency computation rolls RDS up the office tree by itself (7.6).
+        from apps.planning.models import ReportingPeriod
+        from apps.results.agency import compute_agency
+
+        december = ReportingPeriod.objects.get(pk=periods[12])
+        agency = compute_agency(december)
+        assert abs(agency.get(rds.id).result.cum_actual[11] - D("0.8619")) <= TOLERANCE
+        for code, expected in EXPECTED.items():
+            assert abs(agency.get(offices[code].id).result.cum_actual[11] - D(expected)) <= TOLERANCE

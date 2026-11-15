@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 7
-LAST COMPLETED TASK: P4.6
-NEXT TASK          : P7.1
-BLOCKERS / NOTES   : Phase 4 complete. Reference files: copy "Monitoring Tool Ground Truth Source/" to reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
+LAST COMPLETED TASK: P7.1
+NEXT TASK          : P7.2
+BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -910,7 +910,7 @@ read-only user gets 403 on save; files are stored under the agency's folder.
 
 **Verify start state:** Phase 6 ticked.
 
-- [ ] **P7.1** `period_result` model; `results/services.py` with `compute_live(period, office,
+- [x] **P7.1** `period_result` model; `results/services.py` with `compute_live(period, office,
   view)` and `compute_agency(period)` (loads data once, calls the engine, returns results for
   every office in both views with ranks).
 - [ ] **P7.2** Cutoff calendar: `cutoff_at` for each period derived from `cutoff_day`, editable

@@ -94,6 +94,25 @@ def _reporting(objs, shared):
         )
 
 
+def _results(objs, shared):
+    from apps.results.models import PeriodResult
+
+    with context.agency_context(objs["agency"].id):
+        PeriodResult.objects.create(
+            period=objs["period"],
+            office=objs["child"],
+            view="owner",
+            periodic_plan=0,
+            periodic_actual=0,
+            cum_plan=0,
+            cum_actual=0,
+            variance=0,
+            status_label="ON-TIME",
+            funds_total=0,
+            funds_used_est=0,
+        )
+
+
 # table name -> builder(objs, shared). Tables filled by _base are listed with None.
 BUILDERS = {
     "agency": None,
@@ -117,6 +136,7 @@ BUILDERS = {
     "activity_actual": None,  # filled by _reporting
     "indicator_actual": None,
     "attachment": None,
+    "period_result": _results,
 }
 
 

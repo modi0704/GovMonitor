@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 11
-LAST COMPLETED TASK: P11.3
-NEXT TASK          : P11.4
+LAST COMPLETED TASK: P11.4
+NEXT TASK          : P11.5
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1040,7 +1040,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 
 - [x] **P11.3** In-app notification centre (bell with unread count, list, mark read, link to the
   relevant screen).
-- [ ] **P11.4** Email delivery when `EMAIL_URL` is set and `email_enabled` is on: plain, short
+- [x] **P11.4** Email delivery when `EMAIL_URL` is set and `email_enabled` is on: plain, short
   messages with a link; per-user opt-out; one digest per user per day at most.
 - [ ] **P11.5** Tests with a frozen clock for each trigger, for deduplication and for the
   no-SMTP case.

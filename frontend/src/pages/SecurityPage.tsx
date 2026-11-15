@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError, api } from '../api/client';
+import { errorMessage } from '../api/useResource';
 import FormError from '../components/FormError';
 import { useAuth } from '../auth/useAuth';
 
@@ -131,6 +132,37 @@ export default function SecurityPage() {
           </button>
         )}
       </div>
+      <EmailAlerts />
     </section>
+  );
+}
+
+/** Personal opt-out from alert emails (P11.4); in-app notifications are not affected. */
+function EmailAlerts() {
+  const { me, refresh } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  if (!me) return null;
+  async function toggle(optOut: boolean) {
+    setError(null);
+    try {
+      await api.patch('me', { email_opt_out: optOut });
+      await refresh();
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  }
+  return (
+    <div className="card">
+      <h2>Email alerts</h2>
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={!me.email_opt_out}
+          onChange={(e) => toggle(!e.target.checked)}
+        />
+        Send me a daily email of my new notifications (when your agency has email turned on)
+      </label>
+      <FormError message={error} />
+    </div>
   );
 }

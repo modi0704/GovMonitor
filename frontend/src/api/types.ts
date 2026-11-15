@@ -10,6 +10,7 @@ export interface Me {
   full_name: string;
   must_change_password: boolean;
   has_2fa: boolean;
+  email_opt_out?: boolean;
   is_agency_admin: boolean;
   agency: {
     id: string;

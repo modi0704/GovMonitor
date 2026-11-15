@@ -47,6 +47,7 @@ def me_payload(user: User) -> dict:
         "full_name": user.full_name,
         "must_change_password": user.must_change_password,
         "has_2fa": user.has_2fa,
+        "email_opt_out": user.email_opt_out,
         "is_agency_admin": is_agency_admin(user),
         "agency": {
             "id": str(agency.id),
@@ -111,6 +112,18 @@ class MeView(APIView):
 
     def get(self, request):
         return Response(me_payload(request.user))
+
+    def patch(self, request):
+        """Personal preferences: ``email_opt_out`` (no alert emails for me, P11.4)."""
+        user = request.user
+        if "email_opt_out" in request.data:
+            value = request.data["email_opt_out"]
+            if not isinstance(value, bool):
+                return Response({"email_opt_out": ["Must be true or false."]}, status=400)
+            if value != user.email_opt_out:
+                user.email_opt_out = value
+                user.save(update_fields=["email_opt_out"])
+        return Response(me_payload(user))
 
 
 class ChangePasswordSerializer(serializers.Serializer):

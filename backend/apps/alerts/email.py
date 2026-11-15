@@ -35,7 +35,10 @@ def digest_text(user, items) -> tuple[str, str]:
             lines.append(f"  {absolute(n.link)}")
     if len(items) > MAX_ITEMS:
         lines.append(f"... and {len(items) - MAX_ITEMS} more in the app.")
-    lines += ["", "You can turn these emails off under Account > Security."]
+    lines += [
+        "",
+        "To stop these emails, click your name at the top of GovMonitor and untick the email option.",
+    ]
     return subject, "\n".join(lines)
 
 

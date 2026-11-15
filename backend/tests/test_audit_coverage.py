@@ -367,6 +367,7 @@ SCENARIOS = {
     ("alert-rules", "PATCH"): lambda w: w.admin.patch("/api/v1/alert-rules", {"remind_days_before": [7, 2]}),
     ("notification-read", "POST"): lambda w: w.admin.post(f"/api/v1/notifications/{_notification(w)}/read"),
     ("notifications-read-all", "POST"): lambda w: w.admin.post("/api/v1/notifications/read-all"),
+    ("me", "PATCH"): lambda w: w.admin.patch("/api/v1/me", {"email_opt_out": True}),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

@@ -32,4 +32,5 @@ export const NAV_ITEMS: NavItem[] = [
     desktopOnly: true,
   },
   { to: '/audit', label: 'Audit log', show: agencyAdmin, desktopOnly: true },
+  { to: '/help', label: 'Help', show: always },
 ];

@@ -29,6 +29,7 @@ const MonthlyReportPage = lazy(() => import('./pages/reporting/MonthlyReportPage
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const RankingsPage = lazy(() => import('./pages/dashboard/RankingsPage'));
 const SubmissionBoardPage = lazy(() => import('./pages/reporting/SubmissionBoardPage'));
+const HelpPage = lazy(() => import('./pages/help/HelpPage'));
 const NotificationsPage = lazy(() => import('./pages/alerts/NotificationsPage'));
 const AlertSettingsPage = lazy(() => import('./pages/alerts/AlertSettingsPage'));
 const ReportTemplatePage = lazy(() => import('./pages/exports/ReportTemplatePage'));
@@ -163,6 +164,14 @@ export default function App() {
               <DesktopOnly what="The plan editor">
                 <PlanEditorPage />
               </DesktopOnly>
+            </Page>
+          }
+        />
+        <Route
+          path="help"
+          element={
+            <Page>
+              <HelpPage />
             </Page>
           }
         />

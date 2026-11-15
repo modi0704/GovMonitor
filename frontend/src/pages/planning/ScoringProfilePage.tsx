@@ -5,6 +5,8 @@ import type { FiscalYear, Preset, ScoringProfile } from '../../api/types';
 import { errorMessage, useResource } from '../../api/useResource';
 import FormError from '../../components/FormError';
 import { useAuth } from '../../auth/useAuth';
+import HelpTip from '../../components/HelpTip';
+import { SCORING_TIPS } from './scoringTips';
 
 type Draft = Omit<ScoringProfile, 'id' | 'fiscal_year_id' | 'version' | 'locked_months'>;
 
@@ -174,7 +176,9 @@ export default function ScoringProfilePage() {
     key: 'weighting' | 'rollup' | 'indicator_weighting' | 'indicator_rollup' | 'ranking_metric',
   ) => (
     <fieldset className="setting" disabled={!isAdmin}>
-      <legend>{HELP[key].title}</legend>
+      <legend>
+        {HELP[key].title} <HelpTip label={HELP[key].title}>{SCORING_TIPS[key]}</HelpTip>
+      </legend>
       {'text' in HELP[key] && <p className="muted small">{(HELP[key] as { text: string }).text}</p>}
       {HELP[key].choices.map((c) => (
         <label key={c.value} className="check">
@@ -201,6 +205,7 @@ export default function ScoringProfilePage() {
         />
         <strong>{HELP[key].title}</strong>
       </label>
+      <HelpTip label={HELP[key].title}>{SCORING_TIPS[key]}</HelpTip>
       <p className="muted small">{HELP[key].text}</p>
     </div>
   );
@@ -221,7 +226,9 @@ export default function ScoringProfilePage() {
         <p className="notice">Only the agency administrator can change these settings.</p>
       )}
       <div className="card stack">
-        <h2>Start from a preset</h2>
+        <h2>
+          Start from a preset <HelpTip label="Presets">{SCORING_TIPS.preset}</HelpTip>
+        </h2>
         {presets.data?.map((p) => (
           <label key={p.name} className="check">
             <input
@@ -258,10 +265,13 @@ export default function ScoringProfilePage() {
               onChange={(e) => set('on_time_tolerance', String(Number(e.target.value) / 100))}
             />
           </label>
+          <HelpTip label={HELP.on_time_tolerance.title}>{SCORING_TIPS.on_time_tolerance}</HelpTip>
           <p className="muted small">{HELP.on_time_tolerance.text}</p>
         </div>
         <fieldset className="setting" disabled={!isAdmin}>
-          <legend>{HELP.labels.title}</legend>
+          <legend>
+            {HELP.labels.title} <HelpTip label={HELP.labels.title}>{SCORING_TIPS.labels}</HelpTip>
+          </legend>
           <p className="muted small">{HELP.labels.text}</p>
           <div className="row">
             <label>
@@ -306,6 +316,7 @@ export default function ScoringProfilePage() {
               onChange={(e) => set('cutoff_day', Number(e.target.value))}
             />
           </label>
+          <HelpTip label={HELP.cutoff_day.title}>{SCORING_TIPS.cutoff_day}</HelpTip>
           <p className="muted small">{HELP.cutoff_day.text}</p>
         </div>
         {toggle('auto_lock')}

@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 8
-LAST COMPLETED TASK: P8.6
-NEXT TASK          : P8.7
+LAST COMPLETED TASK: P8.7
+NEXT TASK          : P8.8
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -958,7 +958,7 @@ database trigger; changing the scoring profile or the plan after locking does no
   horizontal bar chart; rank change against the previous month.
 - [x] **P8.5** Owner / implementing view switch wherever an office has both.
 - [x] **P8.6** Quarter and year-to-date summaries derived from monthly results (D9).
-- [ ] **P8.7** Chart rules: one shared chart theme; status colours always paired with the status
+- [x] **P8.7** Chart rules: one shared chart theme; status colours always paired with the status
   word; every chart has a "view as table" toggle; numbers formatted to two decimals with the
   percent sign; peso amounts with thousands separators.
 - [ ] **P8.8** Performance: the agency dashboard for the D13 sizing ceiling returns in under

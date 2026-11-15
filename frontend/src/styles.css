@@ -1042,3 +1042,14 @@ label.inline {
   color: var(--ahead);
   font-weight: 600;
 }
+
+/* ---- Jobs: exports and imports (P9.1) ---- */
+.job-status {
+  font-weight: 600;
+}
+.job-done {
+  color: var(--ahead);
+}
+.job-failed {
+  color: var(--delayed);
+}

@@ -302,6 +302,10 @@ SCENARIOS = {
     ("period-unlock", "POST"): lambda w: w.admin.post(
         f"/api/v1/periods/{w.locked_period()}/unlock", {"reason": "Late correction"}
     ),
+    ("export-xlsx", "POST"): lambda w: w.admin.post(
+        "/api/v1/exports/xlsx",
+        {"scope": "agency", "period_id": w.fiscal_year()["periods"][0]["id"]},
+    ),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

@@ -9,7 +9,7 @@ export interface NavItem {
 const always = () => true;
 const agencyAdmin = (me: Me) => me.is_agency_admin;
 
-/** Main navigation. Later phases add dashboard, plans, reports, exports. */
+/** Main navigation. Later phases add alerts. */
 export const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Dashboard', show: always },
   { to: '/rankings', label: 'Rankings', show: always },
@@ -21,5 +21,6 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/structure', label: 'Structure', show: always },
   { to: '/groups', label: 'Groups', show: always },
   { to: '/users', label: 'Users', show: agencyAdmin },
+  { to: '/exports', label: 'My exports', show: always },
   { to: '/audit', label: 'Audit log', show: agencyAdmin },
 ];

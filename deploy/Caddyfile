@@ -1,7 +1,7 @@
 # Reverse proxy in front of the web container (P13.1, P13.2).
 #   SITE_ADDRESS   e.g. monitor.example.gov (automatic public certificate),
 #                  https://192.168.1.10 with TLS_MODE "internal" (Caddy's own CA, office LAN),
-#                  or :80 for plain HTTP behind another proxy.
+#                  or http://:80 for plain HTTP (behind another proxy or a VPN only).
 #   TLS_MODE       "internal" for the built-in CA, or "/certs/cert.pem /certs/key.pem" for
 #                  supplied certificates; leave empty for automatic public certificates.
 #   MAX_BODY_MB    largest request accepted; a little above MAX_UPLOAD_MB so the application,
@@ -18,9 +18,7 @@
 	request_body {
 		max_size {$MAX_BODY_MB:30}MB
 	}
-	reverse_proxy web:8000 {
-		header_up X-Forwarded-Proto {scheme}
-	}
+	reverse_proxy web:8000
 	header -Server
 	log {
 		output stdout
@@ -28,7 +26,7 @@
 	}
 }
 
-{$SITE_ADDRESS::80} {
+{$SITE_ADDRESS:localhost} {
 	tls {$TLS_MODE:internal}
 	import app
 }

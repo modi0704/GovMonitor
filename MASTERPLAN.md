@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 13
-LAST COMPLETED TASK: P13.1
-NEXT TASK          : P13.2
+LAST COMPLETED TASK: P13.2
+NEXT TASK          : P13.3
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1082,7 +1082,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 
 - [x] **P13.1** Production settings: secure cookies, HSTS when behind TLS, content security
   policy without external origins, upload size limits at the proxy, structured logs.
-- [ ] **P13.2** `deploy/docker-compose.yml` (single machine: db, web, worker, Caddy with internal
+- [x] **P13.2** `deploy/docker-compose.yml` (single machine: db, web, worker, Caddy with internal
   or supplied certificates) and `deploy/docker-compose.cloud.yml` (external managed PostgreSQL
   and S3-compatible storage). `.env.example` for each.
 - [ ] **P13.3** `deploy/backup.sh` and `restore.sh`: database dump plus file directory, dated,

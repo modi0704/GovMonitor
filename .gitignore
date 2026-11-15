@@ -34,3 +34,10 @@ backend/media/
 .idea/
 .vscode/
 .DS_Store
+
+# Deployment secrets (keep the folders)
+deploy/certs/*
+!deploy/certs/.gitkeep
+deploy/licence/*
+!deploy/licence/.gitkeep
+deploy/cloud.env

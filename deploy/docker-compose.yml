@@ -1,20 +1,27 @@
-# Single-machine stack: db, web, worker. (Caddy and production hardening arrive in Phase 13.)
-# Usage from the repository root:  make up   (or: docker compose -f deploy/docker-compose.yml up -d --build)
-# Values come from deploy/.env if present; the defaults below are for local development only.
+# Single machine (office server or one VM): PostgreSQL, web, worker and Caddy (HTTPS) — D13, P13.2.
+#   cp deploy/.env.example deploy/.env   # then set every password, SECRET_KEY and SITE_ADDRESS
+#   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d
+# Data lives in the named volumes (pgdata, files, caddy_data); deploy/backup.sh saves them.
 name: govmonitor
 
 x-app-env: &app-env
   DEPLOYMENT_MODE: ${DEPLOYMENT_MODE:-multi}
   SECRET_KEY: ${SECRET_KEY:-dev-only-change-me-0123456789abcdef}
   ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,web}
-  CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8000}
+  CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-https://localhost}
   DATABASE_URL: postgres://app_user:${APP_USER_PASSWORD:-app_user_dev}@db:5432/govmonitor
   DATABASE_ADMIN_URL: postgres://app_owner:${APP_OWNER_PASSWORD:-app_owner_dev}@db:5432/govmonitor
   FILE_STORAGE: local
   FILE_ROOT: /data/files
   EMAIL_URL: ${EMAIL_URL:-}
+  PUBLIC_URL: ${PUBLIC_URL:-}
   SESSION_IDLE_MINUTES: ${SESSION_IDLE_MINUTES:-60}
   MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}
+  LICENCE_FILE: ${LICENCE_FILE:-}
+  # Caddy terminates TLS: cookies are marked Secure and client addresses come from X-Forwarded-For.
+  SECURE_SSL: ${SECURE_SSL:-1}
+  TRUST_X_FORWARDED_FOR: "1"
+  LOG_FORMAT: ${LOG_FORMAT:-json}
 
 services:
   db:
@@ -41,10 +48,12 @@ services:
     image: govmonitor:${GOVMONITOR_VERSION:-dev}
     command: ["web"]
     environment: *app-env
+    # Reachable from this machine only (health checks, backups); users come through Caddy.
     ports:
-      - "${WEB_PORT:-8000}:8000"
+      - "127.0.0.1:${WEB_PORT:-8000}:8000"
     volumes:
       - files:/data/files
+      - ./licence:/licence:ro
     depends_on:
       db:
         condition: service_healthy
@@ -62,11 +71,33 @@ services:
     environment: *app-env
     volumes:
       - files:/data/files
+      - ./licence:/licence:ro
     depends_on:
       web:
         condition: service_started
     restart: unless-stopped
 
+  caddy:
+    image: caddy:2
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+      TLS_MODE: ${TLS_MODE:-internal}
+      MAX_BODY_MB: ${MAX_BODY_MB:-30}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   pgdata:
   files:
+  caddy_data:
+  caddy_config:

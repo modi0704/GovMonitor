@@ -60,3 +60,33 @@ export interface OfficeGroup {
   sort_order: number;
   members: { id: string; code: string; name: string; is_active: boolean }[];
 }
+
+export interface Assignment {
+  id: string;
+  office: { id: string; code: string; name: string };
+  level: 'admin' | 'read_only';
+  is_root: boolean;
+}
+
+export interface UserRow {
+  id: string;
+  email: string;
+  full_name: string;
+  is_active: boolean;
+  has_2fa: boolean;
+  must_change_password: boolean;
+  locked: boolean;
+  last_login_at: string | null;
+  created_at: string;
+  assignments: Assignment[];
+  is_agency_admin: boolean;
+  temporary_password?: string;
+}
+
+export interface ScopeOffice {
+  id: string;
+  code: string;
+  name: string;
+  depth: number;
+  can_edit: boolean;
+}

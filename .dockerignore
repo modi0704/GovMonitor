@@ -10,3 +10,6 @@ backend/staticfiles
 var
 deploy/.env
 *.log
+
+# Customer source files uploaded to the repository: never part of an image
+Monitoring Tool Ground Truth Source

@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 7
-LAST COMPLETED TASK: P6.8
-NEXT TASK          : P7.1
-BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
+LAST COMPLETED TASK: P4.2
+NEXT TASK          : P4.6
+BLOCKERS / NOTES   : reference workbooks supplied 2026-11-15 and copied to reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -805,7 +805,7 @@ agency with no code changes.
 
 - [x] **P4.1** Data classes for engine input and output (activity, indicator, profile, office
   result, ranking row). No ORM imports in `engine.py` (enforce with a test that inspects imports).
-- [ ] **P4.2** `tools/extract_fixtures.py`: read `reference/MOST MONITORING TOOL 2024.xlsx` with
+- [x] **P4.2** `tools/extract_fixtures.py`: read `reference/MOST MONITORING TOOL 2024.xlsx` with
   openpyxl (formulas ignored, values from typed cells only) and write
   `backend/fixtures/most_fy2023_<sheet>.json` for PME, HRM, RDI, AST, ILD and GAS following the
   notes in 8.2. Commit the JSON (it is sample data), not the workbook.
@@ -1191,6 +1191,7 @@ changed, why. Start ids at D19.
 | D28 | 2026-11-15 | `reporting_period` lives in the `planning` app (5.3 listed it under reporting). `plan` also has `updated_at` and a partial unique constraint allowing at most one draft-or-submitted version per office and fiscal year. `scoring_profile` adds `show_actual_amounts` (the P6.7 switch) and defaults `cutoff_day` to 10. (Claude Code) | Creating a fiscal year creates its periods, and activity/indicator targets reference periods; one app avoids a cross-app cycle. One open version at a time keeps revision (P5.7) unambiguous. The actual-amount column is per agency per year like the other profile switches. |
 | D29 | 2026-11-15 | `POST results/preview` is read-only (POST for payload size) and is allow-listed in the P3.4 audit test; `GET offices/directory` returns code and name of every active office to any signed-in user of the agency. (Claude Code) | The plan editor must get weights and curves from the engine (rule 0.2). Choosing an implementing office (D6) needs offices outside the user's own scope; only names are exposed. |
 | D30 | 2026-11-15 | `activity_actual`, `indicator_actual` and `attachment` also store the owning `office_id`; `attachment` stores its `period_id`. (Claude Code) | Actuals are keyed by lineage, so the office would otherwise need a join through plan versions for every scope check, audit filter and submission-status check; the period on attachments lets the P7.5 trigger refuse changes in locked months directly. |
+| D31 | 2026-11-15 | Fixture extraction (P4.2) reads Excel's saved result for a formula inside an activity's data cells (e.g. a total cost written as =K20*14), instead of treating it as empty. GAS is extracted from row 311 (GRAND TOTAL PLAN, budget K311) and row 312 (ACTUAL MONTHLY DISBURSMENT) as one money-measure line; the 4-decimal rounding residue of its monthly plan (Excel itself sums to 107678521.99999993) goes into the last planned month. (Claude Code) | Several sheets compute total cost by formula; reading them as 0 distorted cost-share weights (PME came out 100%). With these rules all six December 2023 figures and the RDS roll-up match 8.2 exactly. |
 
 ---
 

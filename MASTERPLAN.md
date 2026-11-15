@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 12
-LAST COMPLETED TASK: P11.5
-NEXT TASK          : P12.1
+LAST COMPLETED TASK: P12.1
+NEXT TASK          : P12.2
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1055,7 +1055,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 
 **Verify start state:** Phase 11 ticked.
 
-- [ ] **P12.1** Responsive layouts (≤ 480 px wide) for: sign-in, agency dashboard, office
+- [x] **P12.1** Responsive layouts (≤ 480 px wide) for: sign-in, agency dashboard, office
   dashboard, ranking, notifications, activity detail with MOV list.
 - [ ] **P12.2** Phone MOV upload: from an activity's month detail, take or choose a photo and
   attach it (same rules and permissions as desktop).

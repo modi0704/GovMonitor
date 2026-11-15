@@ -653,6 +653,7 @@ label.check input {
 
 /* ---- Charts ---------------------------------------------------------------------------------- */
 .chart {
+  min-width: 0;
   margin: 0;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1016,7 +1017,7 @@ label.inline {
 }
 @media (max-width: 900px) {
   .dash-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 .badge {
@@ -1168,4 +1169,26 @@ label.inline {
 }
 .notification-list p {
   margin: 0.25rem 0;
+}
+
+/* ---- Phones (P12.1, D12): nothing may push the page sideways; wide tables scroll in place ---- */
+@media (max-width: 600px) {
+  .table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .content {
+    padding: 0.75rem 0.5rem;
+  }
+  .page {
+    padding: 0.75rem 0.5rem;
+  }
+  .card {
+    padding: 0.75rem;
+  }
+  .page-header h1 {
+    font-size: 1.35rem;
+  }
 }

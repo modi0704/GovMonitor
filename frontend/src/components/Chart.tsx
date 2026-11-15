@@ -56,9 +56,13 @@ export default function Chart({
     } catch {
       return; // environments without layout (tests): the table view still works
     }
+    // Follow the container, not just the window: grids reflow on phones and when panels change.
     const onResize = () => chart?.resize();
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onResize) : null;
+    observer?.observe(ref.current);
     window.addEventListener('resize', onResize);
     return () => {
+      observer?.disconnect();
       window.removeEventListener('resize', onResize);
       chart?.dispose();
     };

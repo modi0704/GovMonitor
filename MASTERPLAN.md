@@ -1200,3 +1200,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 1 | Complete. RLS forced on every tenant table and proven by generic tests; sign-in with lockout, idle timeout, TOTP; platform area with support grants; two-agency demo seed. Task order changed per D23. |
 | 2026-11-15 | Phase 2 | Complete. Any-depth structure with moves, groups, paste import, users and scope; setup wizard; demo seed builds 3- and 5-level agencies through the services. |
 | 2026-11-15 | Phase 3 | Complete. Append-only audit_log (DB-enforced), model-level field diffs, explicit events, route-walking coverage test, audit page with CSV. |
+| 2026-11-15 | Phase 4 (not ticked) | Engine complete: 8.1 vectors, all of section 7, presets, property tests, 100% coverage. P4.2/P4.6 BLOCKED on the missing reference workbook; extractor and golden tests ready. |

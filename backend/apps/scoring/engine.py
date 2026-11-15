@@ -332,22 +332,28 @@ def rollup(components: Sequence[OfficeResult], profile: Profile) -> OfficeResult
 # ---- 7.8 Ranking ---------------------------------------------------------------------------------
 
 
+def ranking_metric_value(
+    cum_plan: Decimal, cum_actual: Decimal, variance: Decimal, profile: Profile
+) -> Decimal:
+    """The value an office is ranked by (7.8), from one month's figures."""
+    if profile.ranking_metric == "cumulative_actual":
+        return cum_actual
+    if profile.ranking_metric == "variance":
+        return variance
+    if profile.ranking_metric == "actual_over_plan":
+        if cum_plan == ZERO:
+            return ZERO
+        with localcontext() as ctx:
+            ctx.prec = PRECISION
+            return cum_actual / cum_plan
+    raise ValueError(f"unknown ranking metric {profile.ranking_metric!r}")
+
+
 def ranking_value(result: OfficeResult | None, month: int, profile: Profile) -> Decimal | None:
     if result is None:
         return None
     i = month - 1
-    if profile.ranking_metric == "cumulative_actual":
-        return result.cum_actual[i]
-    if profile.ranking_metric == "variance":
-        return result.variance[i]
-    if profile.ranking_metric == "actual_over_plan":
-        plan = result.cum_plan[i]
-        if plan == ZERO:
-            return ZERO
-        with localcontext() as ctx:
-            ctx.prec = PRECISION
-            return result.cum_actual[i] / plan
-    raise ValueError(f"unknown ranking metric {profile.ranking_metric!r}")
+    return ranking_metric_value(result.cum_plan[i], result.cum_actual[i], result.variance[i], profile)
 
 
 def rank(values: Sequence[tuple[str, Decimal | None]], labels: dict | None = None) -> list[RankingRow]:

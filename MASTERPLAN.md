@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 8
-LAST COMPLETED TASK: P7.8
-NEXT TASK          : P8.1
+LAST COMPLETED TASK: P8.1
+NEXT TASK          : P8.2
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -945,7 +945,7 @@ database trigger; changing the scoring profile or the plan after locking does no
 
 **Verify start state:** Phase 7 ticked.
 
-- [ ] **P8.1** Dashboard API: for (office, period, view) return headline figures, twelve-month
+- [x] **P8.1** Dashboard API: for (office, period, view) return headline figures, twelve-month
   cumulative plan and actual series (actual stops at the selected period), funds, status,
   indicator table, children summary, rankings for the office's children and for groups in scope.
   One call per screen.

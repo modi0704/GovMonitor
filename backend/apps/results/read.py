@@ -92,7 +92,7 @@ def _from_entry(entry, month: int, profile, snapshot: dict) -> ResultView:
 
     result = entry.result
     at = result.at(month)
-    detail = _detail(entry, month)
+    detail = _detail(entry, month, profile)
     return ResultView(
         office_id=str(entry.office.id),
         view=entry.view,
@@ -167,3 +167,16 @@ def headline_of(rv: ResultView | None) -> dict | None:
             "final": rv.final,
         }
     )
+
+
+def period_profile(period: ReportingPeriod, results: dict | None = None):
+    """The engine profile that judged this month: the locked snapshot, or today's settings."""
+    if period.status == ReportingPeriod.Status.LOCKED:
+        row = next(iter((results or {}).values()), None)
+        if row is None:
+            row_obj = PeriodResult.objects.filter(period=period).first()
+            snapshot = row_obj.profile_snapshot if row_obj else period.fiscal_year.profile.snapshot()
+        else:
+            snapshot = row.profile
+        return _engine_profile(snapshot)
+    return period.fiscal_year.profile.to_engine()

@@ -36,6 +36,8 @@ class OfficeEntry:
     group_ranks: dict = field(default_factory=dict)  # group id -> rank (or None)
     activity_rows: list = field(default_factory=list)  # (Activity, ActivityResult)
     indicator_rows: list = field(default_factory=list)  # (Indicator, IndicatorResult)
+    actuals: dict = field(default_factory=dict)  # lineage -> {month: ActivityActual} (shared)
+    indicator_actuals: dict = field(default_factory=dict)  # lineage -> {month: IndicatorActual} (shared)
 
 
 @dataclass
@@ -120,6 +122,7 @@ def compute_agency(period: ReportingPeriod) -> AgencyResults:
         if plan_info:
             entry.activity_rows = list(zip(plan_info[2], plan_info[1].activities, strict=True))
             entry.indicator_rows = list(zip(plan_info[3], plan_info[1].indicators, strict=True))
+        entry.actuals, entry.indicator_actuals = actuals, ind_actuals
         entries[(office_id, OWNER)] = entry
 
     # Implementing view (7.7): display and ranking only.
@@ -130,6 +133,7 @@ def compute_agency(period: ReportingPeriod) -> AgencyResults:
             view=IMPLEMENTING,
             result=res,
             activity_rows=list(zip(impl_rows, res.activities, strict=True)),
+            actuals=actuals,
         )
 
     agency = AgencyResults(

@@ -40,30 +40,66 @@ def _money(v):
     return None if v is None else Decimal(v).quantize(MONEY_PLACES)
 
 
-def _detail(entry, month: int) -> dict:
+def _detail(entry, month: int, profile=None) -> dict:
+    """Per-activity and per-indicator figures for one month, as stored in a frozen row (6.4)."""
+    from apps.scoring import engine
+
     i = month - 1
     activities = []
     for row, res in entry.activity_rows:
         planned = {t.period.month_index: t.planned_qty for t in row.targets.all()}
+        reported = entry.actuals.get(row.lineage_id, {})
+        this = reported.get(month)
+        variance = res.actual_ratio[i] - res.planned_ratio[i]
         activities.append(
             {
                 "lineage_id": str(row.lineage_id),
                 "code": row.code,
                 "title": row.title,
+                "unit": row.unit,
                 "owner_office_id": str(row.plan.office_id),
+                "implementing_office_id": str(row.implementing_office_id or row.plan.office_id),
+                "annual_target": jsonable(row.annual_target),
                 "weight": jsonable(res.weight),
                 "planned_ratio": jsonable(res.planned_ratio[i]),
                 "actual_ratio": jsonable(res.actual_ratio[i]),
+                "variance": jsonable(variance),
+                "status_kind": "no_target"
+                if res.no_target
+                else (engine.status_kind(variance, profile) if profile else None),
                 "cum_target": jsonable(
                     sum((planned.get(m, Decimal(0)) for m in range(1, month + 1)), Decimal(0))
                 ),
+                "cum_actual": jsonable(
+                    sum((a.actual_qty for m, a in reported.items() if m <= month), Decimal(0))
+                ),
+                "month_target": jsonable(planned.get(month, Decimal(0))),
+                "month_actual": jsonable(this.actual_qty) if this else None,
+                "delay_reason": this.delay_reason if this else "",
+                "remarks": this.remarks if this else "",
                 "no_target": res.no_target,
             }
         )
-    indicators = [
-        {"lineage_id": str(ind.lineage_id), "code": ind.code, "name": ind.name, "rate": jsonable(res.rate[i])}
-        for ind, res in entry.indicator_rows
-    ]
+    indicators = []
+    for ind, res in entry.indicator_rows:
+        reported = {
+            m: a.actual_value
+            for m, a in entry.indicator_actuals.get(ind.lineage_id, {}).items()
+            if m <= month
+        }
+        values = [v for m, v in sorted(reported.items()) if v is not None]
+        to_date = (values[-1] if values else None) if ind.aggregation == "last" else sum(values, Decimal(0))
+        indicators.append(
+            {
+                "lineage_id": str(ind.lineage_id),
+                "code": ind.code,
+                "name": ind.name,
+                "unit": ind.unit,
+                "annual_target": jsonable(ind.annual_target),
+                "actual_to_date": jsonable(to_date),
+                "rate": jsonable(res.rate[i]),
+            }
+        )
     result = entry.result
     return {
         "activities": activities,
@@ -117,7 +153,7 @@ def lock_period(period: ReportingPeriod, user) -> int:
                 funds_used_actual=_money(at["funds_used_actual"]),
                 indicator_score=_ratio(at["indicator_score"]),
                 rank_sibling=entry.rank_sibling if view == "owner" else None,
-                detail=_detail(entry, month),
+                detail=_detail(entry, month, agency.profile),
                 profile_snapshot=snapshot,
             )
         )

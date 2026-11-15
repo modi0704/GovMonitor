@@ -1,0 +1,184 @@
+"""Dashboard API (MASTERPLAN P8.1): everything one dashboard screen needs, in one call.
+
+    GET dashboard?office&period[&view=owner|implementing]
+
+Numbers come only from ``results.read`` (frozen when the month is locked, live otherwise).
+"""
+
+from decimal import Decimal
+
+from django.http import Http404
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.accounts import permissions as perm
+from apps.audit.services import jsonable
+from apps.planning.models import ReportingPeriod
+from apps.results import read
+from apps.results.agency import IMPLEMENTING, OWNER
+from apps.structure.models import Office, OfficeGroupMember
+
+
+def get_period(period_id) -> ReportingPeriod:
+    period = None
+    if period_id:
+        try:
+            period = (
+                ReportingPeriod.objects.select_related("fiscal_year__profile", "locked_by")
+                .filter(pk=period_id)
+                .first()
+            )
+        except (ValueError, TypeError, Exception):  # noqa: BLE001 — malformed id
+            period = None
+    if period is None:
+        raise Http404()
+    return period
+
+
+def office_ref(o: Office) -> dict:
+    return {"id": str(o.id), "code": o.code, "name": o.name, "depth": o.depth, "is_active": o.is_active}
+
+
+def summary(rv: read.ResultView | None) -> dict | None:
+    if rv is None:
+        return None
+    return {
+        "cum_plan": jsonable(rv.cum_plan),
+        "cum_actual": jsonable(rv.cum_actual),
+        "variance": jsonable(rv.variance),
+        "status": rv.status_label,
+        "status_kind": rv.status_kind,
+        "funds_total": jsonable(rv.funds_total),
+        "rank_sibling": rv.rank_sibling,
+    }
+
+
+def series(rv: read.ResultView, month: int) -> dict:
+    plan = rv.series.get("cum_plan", [])
+    actual = rv.series.get("cum_actual", [])
+    # The actual curve stops at the selected month (P8.1).
+    return {"cum_plan": plan, "cum_actual": [v if i < month else None for i, v in enumerate(actual)]}
+
+
+def ranking_rows(results: dict, offices: dict, rows: list[tuple[str, int | None, Decimal | None]]) -> list:
+    out = []
+    for office_id, rank, value in rows:
+        office = offices.get(office_id)
+        if office is None:
+            continue
+        rv = results.get((office_id, OWNER)) or results.get((office_id, IMPLEMENTING))
+        out.append(
+            {"office": office_ref(office), "rank": rank, "value": jsonable(value), "result": summary(rv)}
+        )
+    return out
+
+
+def rank_set(results: dict, office_ids: list[str], profile, month: int, *, allow_implementing: bool) -> list:
+    """Rank a set of offices with the engine (7.8): same rule as the frozen ranks."""
+    from apps.scoring import engine
+
+    values = []
+    for oid in office_ids:
+        rv = results.get((oid, OWNER))
+        if rv is None and allow_implementing:
+            rv = results.get((oid, IMPLEMENTING))
+        values.append((oid, _metric(rv, profile)))
+    return [(r.office_id, r.rank, r.value) for r in engine.rank(values)]
+
+
+def _metric(rv, profile):
+    from apps.scoring import engine
+
+    if rv is None:
+        return None
+    return engine.ranking_metric_value(rv.cum_plan, rv.cum_actual, rv.variance, profile)
+
+
+class DashboardView(APIView):
+    def get(self, request):
+        p = request.query_params
+        period = get_period(p.get("period"))
+        view = IMPLEMENTING if p.get("view") == IMPLEMENTING else OWNER
+        office = perm.get_office_or_404(request.user, p.get("office"))
+        month = period.month_index
+        results = read.get_agency_results(period)
+        profile = read.period_profile(period, results)
+        rv = results.get((str(office.id), view))
+
+        scope = perm.scope(request.user)
+        visible = {str(o.id): o for o in scope}
+        children = [
+            o
+            for o in Office.objects.filter(parent=office).order_by("sort_order", "name")
+            if str(o.id) in visible
+        ]
+        ancestors = [
+            o
+            for o in Office.objects.filter(pk__in=office.ancestor_ids).order_by("path")
+            if str(o.id) in visible
+        ]
+
+        rankings = []
+        if len(children) >= 1:
+            rankings.append(
+                {
+                    "set": {"kind": "children", "id": str(office.id), "name": f"Offices under {office.code}"},
+                    "rows": ranking_rows(
+                        results,
+                        visible,
+                        rank_set(
+                            results, [str(c.id) for c in children], profile, month, allow_implementing=False
+                        ),
+                    ),
+                }
+            )
+        groups = {}
+        for m in (
+            OfficeGroupMember.objects.select_related("group")
+            .filter(office_id__in=list(visible))
+            .order_by("group__sort_order", "group__name")
+        ):
+            groups.setdefault(m.group, []).append(str(m.office_id))
+        for group, member_ids in groups.items():
+            ordered = sorted(member_ids, key=lambda oid: visible[oid].path)
+            rankings.append(
+                {
+                    "set": {"kind": "group", "id": str(group.id), "name": group.name},
+                    "rows": ranking_rows(
+                        results, visible, rank_set(results, ordered, profile, month, allow_implementing=True)
+                    ),
+                }
+            )
+
+        periods = list(period.fiscal_year.periods.order_by("month_index"))
+        data = {
+            "office": {
+                **office_ref(office),
+                "has_children": bool(children),
+                "ancestors": [office_ref(a) for a in ancestors],
+            },
+            "period": {
+                "id": str(period.id),
+                "month_index": month,
+                "start_date": period.start_date.isoformat(),
+                "status": period.status,
+                "fiscal_year": {"id": str(period.fiscal_year_id), "label": period.fiscal_year.label},
+            },
+            "months": [pp.start_date.isoformat() for pp in periods],
+            "view": view,
+            "views": [v for v in (OWNER, IMPLEMENTING) if (str(office.id), v) in results],
+            "final": period.is_locked,
+            "label": "FINAL" if period.is_locked else "PROVISIONAL",
+            "has_result": rv is not None,
+            "headline": read.headline_of(rv),
+            "rank_sibling": rv.rank_sibling if rv else None,
+            "plan_version": rv.plan_version if rv else None,
+            "series": series(rv, month) if rv else None,
+            "indicators": rv.indicators if rv else [],
+            "children": [
+                {"office": office_ref(c), "result": summary(results.get((str(c.id), OWNER)))}
+                for c in children
+            ],
+            "rankings": rankings,
+        }
+        return Response(data)

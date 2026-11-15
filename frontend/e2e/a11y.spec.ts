@@ -24,6 +24,11 @@ test('sign-in page', async ({ page }) => {
 });
 
 test('pages after sign-in', async ({ page }, info) => {
+  // P13.1: the content security policy must never block anything the app itself uses.
+  const blocked: string[] = [];
+  page.on('console', (m) => {
+    if (/Content Security Policy|Refused to/.test(m.text())) blocked.push(m.text());
+  });
   await signIn(page);
   await audit(page, 'dashboard');
   const rdi = await officeId(page, 'RDI');
@@ -54,4 +59,5 @@ test('pages after sign-in', async ({ page }, info) => {
       await audit(page, path);
     }
   }
+  expect(blocked, blocked.join('\n')).toEqual([]);
 });

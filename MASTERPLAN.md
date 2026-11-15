@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 9
-LAST COMPLETED TASK: P9.3
-NEXT TASK          : P9.4
+LAST COMPLETED TASK: P9.4
+NEXT TASK          : P9.5
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -983,7 +983,7 @@ read-only user scoped to one division sees only that division.
   constants module (column letters and header texts in one place so a paid custom template can
   override them).
 - [x] **P9.3** SUMMARY sheet (9.2).
-- [ ] **P9.4** Export dialog: scope (one office / office and everything beneath / whole agency),
+- [x] **P9.4** Export dialog: scope (one office / office and everything beneath / whole agency),
   month, view. Export is audited.
 - [ ] **P9.5** Acceptance test of 9.3 (recalculate and compare with the engine) for the worked
   example of 8.1 and for the RDI fixture.

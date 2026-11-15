@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import type { FiscalYear, OfficeRow } from '../../api/types';
 import { errorMessage, useResource } from '../../api/useResource';
@@ -10,6 +10,8 @@ import ResultPanel, { StatusChip } from '../../components/ResultTiles';
 import { money, monthName, monthYear, percent } from '../../lib/format';
 import ActivitiesPanel from './ActivitiesPanel';
 import type { Dashboard, RankingSet } from './types';
+
+const ExportDialog = lazy(() => import('../exports/ExportDialog'));
 
 /** Default month: the latest locked month, otherwise the first open one. */
 function defaultPeriod(fy: FiscalYear | null): string | null {
@@ -42,6 +44,7 @@ export default function DashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<'overview' | 'activities'>('overview');
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (!officeId || !periodId) return;
@@ -101,11 +104,29 @@ export default function DashboardPage() {
           <h1>{data ? data.office.name : 'Dashboard'}</h1>
         </div>
         {data && (
-          <span className={`badge ${data.final ? 'badge-final' : 'badge-provisional'}`}>
-            {data.label}
-          </span>
+          <div className="row">
+            <span className={`badge ${data.final ? 'badge-final' : 'badge-provisional'}`}>
+              {data.label}
+            </span>
+            <button type="button" className="btn" onClick={() => setExporting(true)}>
+              Export
+            </button>
+          </div>
         )}
       </div>
+      {exporting && data && (
+        <Suspense fallback={null}>
+          <ExportDialog
+            officeId={data.office.id}
+            officeLabel={`${data.office.code} ${data.office.name}`}
+            periods={fy.data?.periods ?? []}
+            periodId={data.period.id}
+            view={view}
+            canExportAgency={(offices.data ?? []).some((o) => o.depth === 0)}
+            onClose={() => setExporting(false)}
+          />
+        </Suspense>
+      )}
       <div className="filters">
         <label>
           Fiscal year

@@ -203,3 +203,12 @@ it('offers every chart as a table', async () => {
   await userEvent.click(buttons[1]!);
   expect(screen.getAllByText('₱48,086,600.00')).toHaveLength(2); // the funds tile and the table
 });
+
+it('opens the export dialog for the office shown', async () => {
+  setup();
+  const user = userEvent.setup();
+  await screen.findByRole('heading', { name: 'RDS office' });
+  await user.click(screen.getByRole('button', { name: 'Export' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Export to Excel' });
+  expect(within(dialog).getByLabelText('RDS RDS office only')).toBeChecked();
+});

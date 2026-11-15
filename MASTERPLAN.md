@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 6
-LAST COMPLETED TASK: P6.3
-NEXT TASK          : P6.4
+LAST COMPLETED TASK: P6.4
+NEXT TASK          : P6.5
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -886,7 +886,7 @@ approves, revises and re-approves a plan; every action appears in the audit log.
 - [x] **P6.3** Reporting API: read one office's month (activities with target for the month,
   cumulative target, previous cumulative actual, this month's actual, remarks, attachments);
   bulk save; submit; agency administrator returns with a note.
-- [ ] **P6.4** Edit rules: actuals can be saved only when the period is `open` and the submission
+- [x] **P6.4** Edit rules: actuals can be saved only when the period is `open` and the submission
   is `draft` or `returned`; only by a user with `can_edit` on the plan's office **or** on the
   activity's implementing office (D6: field units report their own activities).
 - [ ] **P6.5** Monthly entry page: month picker; grid with one row per activity (target this

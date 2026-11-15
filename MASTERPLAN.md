@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 4
-LAST COMPLETED TASK: P4.1
-NEXT TASK          : P4.3 (P4.2 blocked)
+LAST COMPLETED TASK: P4.3
+NEXT TASK          : P4.4
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 BLOCKED (marked in place); working from the 8.1 worked example. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -810,7 +810,7 @@ agency with no code changes.
   `backend/fixtures/most_fy2023_<sheet>.json` for PME, HRM, RDI, AST, ILD and GAS following the
   notes in 8.2. Commit the JSON (it is sample data), not the workbook.
   > BLOCKED: reference files missing (`reference/` is not in this environment, 2026-11-15).
-- [ ] **P4.3** Write the tests of 8.1 first; then implement weights (7.2), progress (7.3) for all
+- [x] **P4.3** Write the tests of 8.1 first; then implement weights (7.2), progress (7.3) for all
   three measure types, office result (7.4) including status rounding and funds.
 - [ ] **P4.4** Indicators (7.5), roll-up (7.6) for both rules, implementing view (7.7), ranking
   (7.8) with ties.

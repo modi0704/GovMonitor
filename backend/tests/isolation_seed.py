@@ -113,6 +113,13 @@ def _results(objs, shared):
         )
 
 
+def _jobs(objs, shared):
+    from apps.jobs.models import Job
+
+    with context.agency_context(objs["agency"].id):
+        Job.objects.create(kind="alert_scan")
+
+
 # table name -> builder(objs, shared). Tables filled by _base are listed with None.
 BUILDERS = {
     "agency": None,
@@ -137,6 +144,7 @@ BUILDERS = {
     "indicator_actual": None,
     "attachment": None,
     "period_result": _results,
+    "job": _jobs,
 }
 
 

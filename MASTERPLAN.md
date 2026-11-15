@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 7
-LAST COMPLETED TASK: P7.6
-NEXT TASK          : P7.7
+LAST COMPLETED TASK: P7.7
+NEXT TASK          : P7.8
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -926,7 +926,7 @@ read-only user gets 403 on save; files are stored under the agency's folder.
 - [x] **P7.6** Submission board page: every office × status for the chosen month, who submitted
   and when, days to cutoff, buttons Return / Lock / Unlock, and a list of offices that have not
   submitted.
-- [ ] **P7.7** `job` model (RLS, audit), the worker loop of section 6.7 replacing the stub from
+- [x] **P7.7** `job` model (RLS, audit), the worker loop of section 6.7 replacing the stub from
   P0.5, and the `lock_period` job that locks automatically when `auto_lock` is on and `cutoff_at`
   has passed.
 - [ ] **P7.8** Results read path: one function `get_result(period, office, view)` that returns
@@ -1190,6 +1190,7 @@ changed, why. Start ids at D19.
 | D29 | 2026-11-15 | `POST results/preview` is read-only (POST for payload size) and is allow-listed in the P3.4 audit test; `GET offices/directory` returns code and name of every active office to any signed-in user of the agency. (Claude Code) | The plan editor must get weights and curves from the engine (rule 0.2). Choosing an implementing office (D6) needs offices outside the user's own scope; only names are exposed. |
 | D30 | 2026-11-15 | `activity_actual`, `indicator_actual` and `attachment` also store the owning `office_id`; `attachment` stores its `period_id`. (Claude Code) | Actuals are keyed by lineage, so the office would otherwise need a join through plan versions for every scope check, audit filter and submission-status check; the period on attachments lets the P7.5 trigger refuse changes in locked months directly. |
 | D31 | 2026-11-15 | Fixture extraction (P4.2) reads Excel's saved result for a formula inside an activity's data cells (e.g. a total cost written as =K20*14), instead of treating it as empty. GAS is extracted from row 311 (GRAND TOTAL PLAN, budget K311) and row 312 (ACTUAL MONTHLY DISBURSMENT) as one money-measure line; the 4-decimal rounding residue of its monthly plan (Excel itself sums to 107678521.99999993) goes into the last planned month. (Claude Code) | Several sheets compute total cost by formula; reading them as 0 distorted cost-share weights (PME came out 100%). With these rules all six December 2023 figures and the RDS roll-up match 8.2 exactly. |
+| D32 | 2026-11-15 | The worker (app_user) claims jobs through SECURITY DEFINER functions `claim_next_job()`, `requeue_stale_jobs(minutes)` and `active_agency_ids()`; `job` gains `result` (jsonb, a small summary for the UI). (Claude Code) | Without an agency set, app_user cannot see any job row, so the cross-agency claim must run with the owner's rights; the worker still needs no owner credentials. The summary lets 'My exports' and the board show outcomes without opening files. |
 
 ---
 

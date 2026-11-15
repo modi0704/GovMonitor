@@ -1,10 +1,12 @@
 from datetime import UTC, datetime, timedelta
 
+import pytest
 from django.core.management import call_command
 
 from apps.jobs import heartbeat
 
 
+@pytest.mark.django_db
 def test_run_worker_once_records_heartbeat(tmp_path, settings):
     settings.STORAGES = {
         **settings.STORAGES,

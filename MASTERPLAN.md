@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 7
-LAST COMPLETED TASK: P7.4
-NEXT TASK          : P7.5
+LAST COMPLETED TASK: P7.5
+NEXT TASK          : P7.6
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -921,7 +921,7 @@ read-only user gets 403 on save; files are stored under the agency's folder.
 - [x] **P7.4** Unlock: agency administrator only, reason required; allowed only for the latest
   locked period; deletes that period's `period_result` rows after copying them into the audit
   row; re-lock recomputes.
-- [ ] **P7.5** Database trigger (defence in depth): reject insert/update/delete on
+- [x] **P7.5** Database trigger (defence in depth): reject insert/update/delete on
   `activity_actual`, `indicator_actual` and `attachment` rows whose period is `locked`.
 - [ ] **P7.6** Submission board page: every office × status for the chosen month, who submitted
   and when, days to cutoff, buttons Return / Lock / Unlock, and a list of offices that have not

@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 2
-LAST COMPLETED TASK: P2.3
-NEXT TASK          : P2.4
+LAST COMPLETED TASK: P2.4
+NEXT TASK          : P2.5
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -761,7 +761,7 @@ of one cannot fetch any object id of the other (API returns 404).
 - [x] **P2.3** Frontend "Structure" page: tree view with add / rename / move (drag or "move to")
   / deactivate; level names editor; paste-a-list import (one office per line, indentation or a
   parent-code column sets the parent) with preview before saving.
-- [ ] **P2.4** Frontend "Groups" page.
+- [x] **P2.4** Frontend "Groups" page.
 - [ ] **P2.5** Users page (agency administrator only): create user, deactivate, reset password,
   assign to offices with a level; show each user's effective scope.
 - [ ] **P2.6** Scope enforcement in the API base queryset: every office-bound endpoint filters by

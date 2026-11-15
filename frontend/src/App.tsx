@@ -3,6 +3,7 @@ import RequireAuth from './auth/RequireAuth';
 import AppShell from './layout/AppShell';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import GroupsPage from './pages/GroupsPage';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -36,6 +37,7 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="account/security" element={<SecurityPage />} />
         <Route path="structure" element={<StructurePage />} />
+        <Route path="groups" element={<GroupsPage />} />
       </Route>
       <Route path="/platform/sign-in" element={<PlatformSignInPage />} />
       <Route path="/platform" element={<PlatformAgenciesPage />} />

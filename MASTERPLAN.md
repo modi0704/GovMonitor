@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 1
-LAST COMPLETED TASK: P1.5
-NEXT TASK          : P1.8 (then P1.6, P1.7 — see D23)
-BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked
+LAST COMPLETED TASK: P1.8
+NEXT TASK          : P1.6
+BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. Phase 1 order is P1.8 → P1.6 → P1.7 → P1.9 → P1.10 (D23)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -735,7 +735,7 @@ deliberately wrong query.
   `DEPLOYMENT_MODE=single`. `manage.py bootstrap_single_agency` for single mode.
 - [ ] **P1.7** Support grants: an agency administrator can grant a platform admin time-limited
   read access; without a grant the platform area shows no agency data.
-- [ ] **P1.8** `accounts/permissions.py` with the functions of 6.6 and DRF permission classes.
+- [x] **P1.8** `accounts/permissions.py` with the functions of 6.6 and DRF permission classes.
 - [ ] **P1.9** Isolation tests: (a) with agency A set, raw SQL `SELECT` on every tenant table
   returns no rows of agency B; (b) inserting a row with another agency's id fails; (c) with no
   agency set, every tenant table returns zero rows; (d) a meta-test lists all models and fails if
@@ -1174,6 +1174,7 @@ changed, why. Start ids at D19.
 | D22 | 2026-11-15 | Property tests (P4.7) use seeded `random` generators instead of Hypothesis. (Claude Code, P0.2) | Avoid an MPL-2.0 dependency; seeded tests are reproducible. |
 | D24 | 2026-11-15 | Extra columns: `user.recovery_codes` (jsonb, hashed TOTP recovery codes), `user.email_opt_out` (P11.4), `platform_admin.failed_attempts`/`locked_until`/`created_at`, `support_grant.revoked_at`/`created_at`. Table count unchanged. (Claude Code) | Needed by P1.5 recovery codes, P11.4 opt-out, platform sign-in lockout, and early revocation of a support grant. |
 | D25 | 2026-11-15 | RLS policy expression is `agency_id = NULLIF(current_setting('app.agency_id', true), '')::uuid` (6.1 wrote it without NULLIF). `platform_admin` has ALL privileges revoked from app_user. (Claude Code) | After a transaction-local SET the setting reads back as '' and a bare cast raises an error; NULLIF keeps 'no agency = zero rows'. Revoking makes 6.2's 'reachable only through app_owner' a database rule. |
+| D23 | 2026-11-15 | Order inside Phase 1: P1.8 is done before P1.6/P1.7, and the bare `org_level` and `office` models (fields, path computed on create, RLS) are created in P1.8 instead of P2.1. `role_assignment.office_id` becomes a foreign key then. P2.1 still adds moves, cycle checks, remaining constraints and groups. (Claude Code) | Permissions (6.6) are defined over office paths, and the platform area (P1.6) must create an agency's root office so its first administrator is an agency administrator (D1). |
 
 ---
 

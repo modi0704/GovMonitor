@@ -72,15 +72,12 @@ class RoleAssignment(TenantModel):
         READ_ONLY = "read_only"
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="role_assignments")
-    # Plain UUID until the office table exists; P1.8/P2.1 turn it into a foreign key (D23).
-    office_id = models.UUIDField()
+    office = models.ForeignKey("structure.Office", on_delete=models.CASCADE, related_name="role_assignments")
     level = models.CharField(max_length=16, choices=Level.choices)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "role_assignment"
-        constraints = [
-            models.UniqueConstraint(fields=["user", "office_id"], name="role_assignment_user_office")
-        ]
-        indexes = [models.Index(fields=["agency", "office_id"])]
+        constraints = [models.UniqueConstraint(fields=["user", "office"], name="role_assignment_user_office")]
+        indexes = [models.Index(fields=["agency", "office"], name="role_assign_agency_office")]

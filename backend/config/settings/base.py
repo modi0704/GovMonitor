@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.sessions",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     "rest_framework",
     "apps.tenancy",
     "apps.accounts",

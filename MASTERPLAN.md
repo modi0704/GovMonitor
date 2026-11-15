@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 13
-LAST COMPLETED TASK: P13.5
-NEXT TASK          : P13.6
+LAST COMPLETED TASK: P13.6
+NEXT TASK          : P13.7
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys. Release: replace the placeholder licence public key (D41)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1093,7 +1093,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 - [x] **P13.5** Office-install licence: a signed licence file (Ed25519; public key in the image)
   holding agency name, expiry and seat limit; a banner 30 days before expiry; after expiry the
   system becomes read-only (never locks customers out of their data). Disabled in `multi` mode.
-- [ ] **P13.6** `docs/ADMIN_GUIDE.md`: hardware sizing, install on Windows Server and Linux with
+- [x] **P13.6** `docs/ADMIN_GUIDE.md`: hardware sizing, install on Windows Server and Linux with
   Docker, network and VPN notes for field offices, backups, updates, SMTP, troubleshooting.
 - [ ] **P13.7** Verify the single-mode install end to end on a clean VM with networking disabled
   after install: all pages load, exports work, no external requests in the browser's network log.

@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 5
-LAST COMPLETED TASK: P4.7
-NEXT TASK          : P5.1
-BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing; extractor and golden tests are ready). Phase 5 started per 8.2's instruction to continue with 8.1. See the P14.1 note on cross-agency foreign keys
+LAST COMPLETED TASK: P5.1
+NEXT TASK          : P5.2
+BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing; extractor and golden tests ready). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -836,7 +836,7 @@ agency with no code changes.
 
 **Verify start state:** Phases 3 and 4 ticked.
 
-- [ ] **P5.1** Models: `fiscal_year`, `reporting_period`, `scoring_profile`, `plan`, `activity`,
+- [x] **P5.1** Models: `fiscal_year`, `reporting_period`, `scoring_profile`, `plan`, `activity`,
   `activity_target`, `indicator`, `indicator_target`; RLS; audit.
 - [ ] **P5.2** Fiscal-year API and page: create (generates 12 periods from the agency's start
   month and a profile from the default preset), open, close. Scoring-profile page with every
@@ -1188,6 +1188,7 @@ changed, why. Start ids at D19.
 | D23 | 2026-11-15 | Order inside Phase 1: P1.8 is done before P1.6/P1.7, and the bare `org_level` and `office` models (fields, path computed on create, RLS) are created in P1.8 instead of P2.1. `role_assignment.office_id` becomes a foreign key then. P2.1 still adds moves, cycle checks, remaining constraints and groups. (Claude Code) | Permissions (6.6) are defined over office paths, and the platform area (P1.6) must create an agency's root office so its first administrator is an agency administrator (D1). |
 | D26 | 2026-11-15 | `audit_log` gains `office_id` (uuid, the office the entity belongs to) and `actor_label` (the actor's email at the time). (Claude Code) | P3.5 filters by office, and the audit page must name actors even after a user is renamed or a platform admin (invisible to app_user) acted. |
 | D27 | 2026-11-15 | Engine details not fixed by section 7: a `budget_weighted` roll-up whose components all have funds_total 0 uses the simple average; a roll-up's funds_used_actual is the sum of its components' actual amounts when any component has one; offices tied in a ranking are listed in the order given (tree order). (Claude Code) | Avoid division by zero and keep results defined; ordering ties by tree order is stable and predictable for exports. |
+| D28 | 2026-11-15 | `reporting_period` lives in the `planning` app (5.3 listed it under reporting). `plan` also has `updated_at` and a partial unique constraint allowing at most one draft-or-submitted version per office and fiscal year. `scoring_profile` adds `show_actual_amounts` (the P6.7 switch) and defaults `cutoff_day` to 10. (Claude Code) | Creating a fiscal year creates its periods, and activity/indicator targets reference periods; one app avoids a cross-app cycle. One open version at a time keeps revision (P5.7) unambiguous. The actual-amount column is per agency per year like the other profile switches. |
 
 ---
 

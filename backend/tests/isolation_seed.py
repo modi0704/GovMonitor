@@ -47,6 +47,28 @@ def _audit(objs, shared):
         AuditLog.objects.create(agency_id=objs["agency"].id, actor_type="system", action="seed")
 
 
+def _planning(objs, shared):
+    from apps.planning.models import Activity, ActivityTarget, Indicator, IndicatorTarget, Plan
+    from apps.planning.services import create_fiscal_year
+
+    with context.agency_context(objs["agency"].id):
+        fy = create_fiscal_year("2026", 2026)
+        period = fy.periods.get(month_index=1)
+        plan = Plan.objects.create(office=objs["child"], fiscal_year=fy)
+        act = Activity.objects.create(
+            plan=plan,
+            row_kind="activity",
+            title="Do things",
+            measure_type="quantity",
+            annual_target=1,
+            total_cost=1,
+        )
+        ActivityTarget.objects.create(activity=act, period=period, planned_qty=1)
+        ind = Indicator.objects.create(plan=plan, name="Things done", annual_target=1)
+        IndicatorTarget.objects.create(indicator=ind, period=period, planned_value=1)
+        objs.update(fy=fy, plan=plan, activity=act, indicator=ind, period=period)
+
+
 # table name -> builder(objs, shared). Tables filled by _base are listed with None.
 BUILDERS = {
     "agency": None,
@@ -58,6 +80,14 @@ BUILDERS = {
     "office_group": _group,
     "office_group_member": None,  # filled by _group
     "audit_log": _audit,
+    "fiscal_year": _planning,
+    "reporting_period": None,  # filled by _planning
+    "scoring_profile": None,
+    "plan": None,
+    "activity": None,
+    "activity_target": None,
+    "indicator": None,
+    "indicator_target": None,
 }
 
 

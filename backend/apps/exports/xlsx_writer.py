@@ -74,20 +74,16 @@ def sheet_name(code: str, used: set) -> str:
     return name
 
 
-def write_office_sheet(
-    wb, ws, sheet: office_sheet.OfficeSheet, ctx: dict, fmt: Formats, L: OfficeSheetLayout = DEFAULT
-) -> SheetMap:
-    """Write one office sheet (9.1). ``ctx``: agency name, fiscal year label, as-of text, level-0 name."""
+def write_headers(
+    ws, ctx: dict, office_name: str, month_starts: list, fmt: Formats, L: OfficeSheetLayout = DEFAULT
+):
+    """Title block (A1:A4) and header rows 5–7 of an office sheet; also the whole import template."""
     months, weighted = L.month_cols, L.weighted_cols
-    m_sel = sheet.month
-    result = sheet.result
-    exact = sheet.formulas_reproduce_engine
-
-    # ---- Title block and header rows 5–7 ----
     ws.write(L.fiscal_year_cell, f"Fiscal Year {ctx['fiscal_year']}", fmt.title)
     ws.write(L.agency_cell, ctx["agency"], fmt.bold)
-    ws.write(L.office_cell, sheet.office.name, fmt.bold)
-    ws.write(L.as_of_cell, f"As of {ctx['as_of']}", fmt.bold)
+    ws.write(L.office_cell, office_name, fmt.bold)
+    if ctx.get("as_of"):
+        ws.write(L.as_of_cell, f"As of {ctx['as_of']}", fmt.bold)
     r5, r6, r7 = L.header_rows
     ws.merge_range(f"A{r5}:A{r7}", ctx["level0"].upper(), fmt.header)
     for col, text in L.outline_headers.items():
@@ -109,10 +105,22 @@ def write_office_sheet(
         (L.remarks_col, L.remarks_header),
     ):
         ws.write(f"{col}{r7}", text, fmt.header)
-    abbr = [MONTH_ABBR[d.month - 1] for d in sheet.month_starts]
+    abbr = [MONTH_ABBR[d.month - 1] for d in month_starts]
     for i in range(12):
         ws.write(f"{months[i]}{r7}", abbr[i], fmt.header)
         ws.write(f"{weighted[i]}{r7}", abbr[i], fmt.header)
+
+
+def write_office_sheet(
+    wb, ws, sheet: office_sheet.OfficeSheet, ctx: dict, fmt: Formats, L: OfficeSheetLayout = DEFAULT
+) -> SheetMap:
+    """Write one office sheet (9.1). ``ctx``: agency name, fiscal year label, as-of text, level-0 name."""
+    months, weighted = L.month_cols, L.weighted_cols
+    m_sel = sheet.month
+    result = sheet.result
+    exact = sheet.formulas_reproduce_engine
+
+    write_headers(ws, ctx, sheet.office.name, sheet.month_starts, fmt, L)
 
     # ---- Plan rows ----
     first = L.first_data_row
@@ -311,7 +319,7 @@ def write_office_sheet(
     ws.set_landscape()
     ws.set_paper(8)  # A3
     ws.fit_to_pages(1, 0)
-    ws.repeat_rows(r5 - 1, r7 - 1)
+    ws.repeat_rows(L.header_rows[0] - 1, L.header_rows[-1] - 1)
     ws.print_area(f"A1:{L.last_col}{smap.last_row}")
     return smap
 
@@ -452,3 +460,43 @@ def write_summary(ws, sc, ctx, fmt, profile, sheets: dict) -> int:
     ws.fit_to_pages(1, 0)
     ws.print_area(0, 0, max(row - 1, hr), len(SUMMARY_HEADERS) - 1)
     return row - hr - 1
+
+
+TEMPLATE_SHEET = "PLAN"
+TEMPLATE_NOTES = (
+    "How to fill in this sheet",
+    "Start at row 8. Put each outline row (outcome, outcome indicator, output, output indicator, "
+    "program, project) in its own column, B to G: code, a space, then the title.",
+    "Each activity takes two rows: the PLAN row (column N = PLAN) with the activity in H, the annual "
+    "target in I, the unit in J, the unit cost in K, the total cost in L and the monthly targets in "
+    "O to Z; then the ACTUAL row beneath it (column N = ACTUAL). Actuals are not imported.",
+    "Optionally, end with a TOTAL COST row and, below it, an OUTPUT INDICATORS header row followed "
+    "by two rows per indicator: code in H, name in I, weight in N and monthly targets in O to Z, "
+    "then a row for actuals.",
+    "The file becomes a draft plan. Nothing is imported if any row has a problem; the list of "
+    "problems names each row.",
+)
+
+
+def build_template(office, fiscal_year, layout: OfficeSheetLayout = DEFAULT) -> bytes:
+    """The plan import template (9.4, D17): the office sheet with headers only."""
+    out = io.BytesIO()
+    wb = xlsxwriter.Workbook(out, {"in_memory": True})
+    fmt = Formats(wb)
+    agency = Agency.objects.get(pk=fiscal_year.agency_id)
+    ctx = {"agency": agency.name, "fiscal_year": fiscal_year.label, "as_of": None, "level0": _level0_name()}
+    starts = [p.start_date for p in fiscal_year.periods.order_by("month_index")]
+    ws = wb.add_worksheet(TEMPLATE_SHEET)
+    write_headers(ws, ctx, office.name if office else "", starts, fmt, layout)
+    if office is not None:
+        ws.write(f"{layout.office_caps_col}{layout.first_data_row}", office.name.upper(), fmt.bold)
+    ws.freeze_panes(layout.first_data_row - 1, 14)
+    for col, width in {"A": 14, "B": 30, "C": 30, "D": 30, "E": 30, "F": 30, "G": 30, "H": 50}.items():
+        ws.set_column(f"{col}:{col}", width)
+    notes = wb.add_worksheet("INSTRUCTIONS")
+    notes.set_column("A:A", 120)
+    notes.write("A1", TEMPLATE_NOTES[0], fmt.title)
+    for i, line in enumerate(TEMPLATE_NOTES[1:], start=3):
+        notes.write(f"A{i}", line, fmt.text)
+    wb.close()
+    return out.getvalue()

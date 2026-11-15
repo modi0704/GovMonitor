@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useResource } from '../../api/useResource';
 import { dateTime } from '../../lib/format';
 import { isPending, KIND_LABEL, SCOPE_LABEL, STATUS_LABEL, type Job } from './types';
@@ -56,8 +57,10 @@ export default function MyExportsPage() {
                     <a href={job.download_url} download>
                       {job.file_name ?? 'Download'}
                     </a>
+                  ) : job.kind === 'import_plan' && typeof job.result.plan_id === 'string' ? (
+                    <Link to={`/plans/${job.result.plan_id}`}>Open the draft plan</Link>
                   ) : (
-                    '—'
+                    String(job.result.file_name ?? '—')
                   )}
                 </td>
               </tr>

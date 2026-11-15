@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/client';
 import type { FiscalYear, OfficeRow, PlanSummary } from '../../api/types';
 import { errorMessage, useResource } from '../../api/useResource';
 import FormError from '../../components/FormError';
 import { money } from '../../lib/format';
+
+const ImportPlanDialog = lazy(() => import('../exports/ImportPlanDialog'));
 
 const STATUS_LABEL = {
   draft: 'Draft',
@@ -32,6 +34,8 @@ export default function PlansPage() {
     previous ? `plans?fiscal_year=${previous.id}&status=approved` : null,
   );
   const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState<OfficeRow | null>(null);
+  const reloadPlans = plans.reload;
 
   const byOffice = useMemo(() => {
     const map = new Map<string, PlanSummary[]>();
@@ -149,6 +153,13 @@ export default function PlansPage() {
                           <button type="button" className="btn btn-small" onClick={() => start(o)}>
                             Start empty plan
                           </button>
+                          <button
+                            type="button"
+                            className="btn btn-small"
+                            onClick={() => setImporting(o)}
+                          >
+                            Import from Excel
+                          </button>
                         </>
                       )
                     )}
@@ -158,6 +169,16 @@ export default function PlansPage() {
             })}
           </tbody>
         </table>
+      )}
+      {importing && fyId && (
+        <Suspense fallback={null}>
+          <ImportPlanDialog
+            office={importing}
+            fiscalYear={{ id: fyId, label: yearList.find((y) => y.id === fyId)?.label ?? '' }}
+            onClose={() => setImporting(null)}
+            onImported={reloadPlans}
+          />
+        </Suspense>
       )}
     </section>
   );

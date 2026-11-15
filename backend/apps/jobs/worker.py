@@ -25,6 +25,17 @@ STALE_MINUTES = 30
 HANDLERS: dict[str, Callable[[Job], dict | None]] = {}
 
 
+class JobRejected(Exception):  # noqa: N818 — a refusal, not a crash
+    """Raised by a handler when the job cannot succeed as asked (e.g. an import with errors): the
+    handler's database work is rolled back and the job fails at once, without retries, keeping
+    ``result`` (e.g. a row-by-row error list) for the UI."""
+
+    def __init__(self, message: str, result: dict | None = None):
+        super().__init__(message)
+        self.message = message
+        self.result = result or {}
+
+
 def handler(kind: str):
     def register(fn):
         HANDLERS[kind] = fn
@@ -60,6 +71,15 @@ def run_job(job_id, agency_id) -> str:
                 raise RuntimeError(f"no handler for job kind {job.kind!r}")
             with transaction.atomic(), audit.acting_as("system", label=f"worker:{job.kind}"):
                 result = fn(job) or {}
+        except JobRejected as exc:
+            job.refresh_from_db()
+            job.status = Job.Status.FAILED
+            job.error = exc.message[:8000]
+            job.result = exc.result
+            job.result_key = ""
+            job.finished_at = timezone.now()
+            job.save(update_fields=["status", "error", "result", "result_key", "finished_at"])
+            return job.status
         except Exception as exc:  # noqa: BLE001 — every failure is recorded on the job
             job.refresh_from_db()
             job.error = f"{type(exc).__name__}: {exc}\n{traceback.format_exc(limit=5)}"[:8000]

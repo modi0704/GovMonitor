@@ -1,12 +1,15 @@
 """Export job handlers, run by the worker (P9.1)."""
 
+import io
 import re
+
+from django.core.files.storage import default_storage
 
 from apps.exports import scope as export_scope
 from apps.exports import xlsx_writer
 from apps.jobs import storage
 from apps.jobs.models import Job
-from apps.jobs.worker import handler
+from apps.jobs.worker import JobRejected, handler
 from apps.tenancy.models import Agency
 
 
@@ -24,3 +27,25 @@ def export_xlsx(job: Job) -> dict:
     name = file_name(sc, "xlsx")
     storage.store_result(job, name, data)
     return {"file_name": name, **summary}
+
+
+@handler(Job.Kind.IMPORT_PLAN)
+def import_plan(job: Job) -> dict:
+    from apps.exports.plan_import import ImportFailed
+    from apps.exports.plan_import import import_plan as run_import
+    from apps.planning.models import FiscalYear
+    from apps.structure.models import Office
+
+    p = job.params
+    office = Office.objects.get(pk=p["office_id"])
+    fy = FiscalYear.objects.select_related("profile").get(pk=p["fiscal_year_id"])
+    with default_storage.open(p["upload_key"], "rb") as fh:
+        data = io.BytesIO(fh.read())
+    try:
+        result = run_import(office, fy, data)
+    except ImportFailed as exc:
+        raise JobRejected(
+            f"{len(exc.issues)} problem(s) in the file; nothing was imported.",
+            {"file_name": p["file_name"], "errors": exc.issues},
+        ) from exc
+    return {"file_name": p["file_name"], **result}

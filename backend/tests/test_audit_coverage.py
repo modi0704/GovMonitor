@@ -169,6 +169,25 @@ def _reset_confirm(w):
     )
 
 
+def _import_plan(w):
+    import io
+
+    import openpyxl
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "PLAN"
+    ws["H8"], ws["I8"], ws["L8"], ws["N8"], ws["O8"], ws["N9"] = "A-1 Task", 1, 100, "PLAN", 1, "ACTUAL"
+    out = io.BytesIO()
+    wb.save(out)
+    upload = SimpleUploadedFile("plan.xlsx", out.getvalue())
+    fy = w.fiscal_year()
+    return w.admin.c.post(
+        "/api/v1/imports/plan", {"file": upload, "office_id": str(w.a.id), "fiscal_year_id": fy["id"]}
+    )
+
+
 def _platform_agency(w):
     c = w.platform()
     created = c.post("/platform/api/agencies", {"name": "Other", "code": "other"}).json()
@@ -306,6 +325,7 @@ SCENARIOS = {
         "/api/v1/exports/xlsx",
         {"scope": "agency", "period_id": w.fiscal_year()["periods"][0]["id"]},
     ),
+    ("import-plan", "POST"): lambda w: _import_plan(w),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

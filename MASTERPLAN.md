@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 9
-LAST COMPLETED TASK: P9.6
-NEXT TASK          : P9.7
+LAST COMPLETED TASK: P9.7
+NEXT TASK          : P9.8
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -990,7 +990,7 @@ read-only user scoped to one division sees only that division.
 - [x] **P9.6** Layout test: for the RDI fixture, assert the header cells of rows 5–7, the column
   of each field, the PLAN/ACTUAL pairing and the formulas of the first activity and of the total
   rows, cell by cell, against 9.1.
-- [ ] **P9.7** Import template download (headers only) and `import_plan` job (9.4) with a
+- [x] **P9.7** Import template download (headers only) and `import_plan` job (9.4) with a
   row-by-row error report shown in the UI; imported plans arrive as drafts.
 - [ ] **P9.8** Round-trip test: export a plan, import the file into a new fiscal year, compare
   activities and targets.
@@ -1192,6 +1192,8 @@ changed, why. Start ids at D19.
 | D31 | 2026-11-15 | Fixture extraction (P4.2) reads Excel's saved result for a formula inside an activity's data cells (e.g. a total cost written as =K20*14), instead of treating it as empty. GAS is extracted from row 311 (GRAND TOTAL PLAN, budget K311) and row 312 (ACTUAL MONTHLY DISBURSMENT) as one money-measure line; the 4-decimal rounding residue of its monthly plan (Excel itself sums to 107678521.99999993) goes into the last planned month. (Claude Code) | Several sheets compute total cost by formula; reading them as 0 distorted cost-share weights (PME came out 100%). With these rules all six December 2023 figures and the RDS roll-up match 8.2 exactly. |
 | D32 | 2026-11-15 | The worker (app_user) claims jobs through SECURITY DEFINER functions `claim_next_job()`, `requeue_stale_jobs(minutes)` and `active_agency_ids()`; `job` gains `result` (jsonb, a small summary for the UI). (Claude Code) | Without an agency set, app_user cannot see any job row, so the cross-agency claim must run with the owner's rights; the worker still needs no owner credentials. The summary lets 'My exports' and the board show outcomes without opening files. |
 | D33 | 2026-11-15 | Live results are cached per (agency, period, profile version, latest audit-log id). The latest audit id is the 'latest data timestamp' of P8.8; an index on (agency_id, id) keeps it cheap. Read paths load monthly targets and actuals as plain rows, and the audit mixin builds its before-snapshot only when an object is saved. (Claude Code) | Every change writes an audit row (Phase 3, enforced by the route-walking test), so the id moves with anything results depend on — including moves, group edits and approvals that no single table timestamp covers. The plain-row loading cut the ceiling dashboard from 5.5 s to 1.4 s uncached. |
+| D34 | 2026-11-15 | Excel export: office sheets always show each office's own plan (the version scored for the month); the view choice (owner/implementing) applies to the SUMMARY figures. Every formula is written with its computed value cached. Formulas reproduce the engine only under workbook_compatible with cost-share weights and no cap; otherwise M and the total rows hold engine values (with a comment). Activities without a target get value 0 cells instead of a #DIV/0! formula (Claude Code) | 9.1 lays out a plan, which only the owner view has; cached values make the file correct in viewers that never recalculate (phone previews), and LibreOffice/Excel recalculation gives the same numbers (P9.5) |
+| D35 | 2026-11-15 | Plan import: a leading token is read as the row code only if it contains a digit or a dot; measure type is quantity unless the PLAN row carries the export's 'Recurring measure' comment; indicators below an OUTPUT INDICATORS header are imported too (annual target = sum of the monthly targets); import is refused (409) when the office already has a plan for that year. A rejected import fails at once without retries (worker JobRejected) and its whole transaction is rolled back (Claude Code) | The sheet has no code or measure columns, so these keep a round trip of an exported plan faithful without adding columns to the fixed 9.1 layout; refusing over an existing plan avoids overwriting work (use revise instead) |
 
 ---
 

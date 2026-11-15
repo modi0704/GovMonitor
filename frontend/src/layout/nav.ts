@@ -22,5 +22,6 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/groups', label: 'Groups', show: always },
   { to: '/users', label: 'Users', show: agencyAdmin },
   { to: '/exports', label: 'My exports', show: always },
+  { to: '/settings/report-template', label: 'Report template', show: agencyAdmin },
   { to: '/audit', label: 'Audit log', show: agencyAdmin },
 ];

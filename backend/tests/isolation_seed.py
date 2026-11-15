@@ -120,6 +120,15 @@ def _jobs(objs, shared):
         Job.objects.create(kind="alert_scan")
 
 
+def _export_template(objs, shared):
+    from apps.exports.models import ExportTemplate
+
+    with context.agency_context(objs["agency"].id):
+        ExportTemplate.objects.create(
+            agency_id=objs["agency"].id, kind="pptx", name="Agency", is_default=True, settings={}
+        )
+
+
 # table name -> builder(objs, shared). Tables filled by _base are listed with None.
 BUILDERS = {
     "agency": None,
@@ -145,6 +154,7 @@ BUILDERS = {
     "attachment": None,
     "period_result": _results,
     "job": _jobs,
+    "export_template": _export_template,
 }
 
 

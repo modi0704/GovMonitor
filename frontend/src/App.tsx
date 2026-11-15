@@ -28,6 +28,7 @@ const MonthlyReportPage = lazy(() => import('./pages/reporting/MonthlyReportPage
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const RankingsPage = lazy(() => import('./pages/dashboard/RankingsPage'));
 const SubmissionBoardPage = lazy(() => import('./pages/reporting/SubmissionBoardPage'));
+const ReportTemplatePage = lazy(() => import('./pages/exports/ReportTemplatePage'));
 const MyExportsPage = lazy(() => import('./pages/exports/MyExportsPage'));
 const PlatformAgenciesPage = lazy(() => import('./platform/PlatformAgenciesPage'));
 const PlatformSignInPage = lazy(() => import('./platform/PlatformSignInPage'));
@@ -143,6 +144,14 @@ export default function App() {
           element={
             <Page>
               <PlanEditorPage />
+            </Page>
+          }
+        />
+        <Route
+          path="settings/report-template"
+          element={
+            <Page>
+              <ReportTemplatePage />
             </Page>
           }
         />

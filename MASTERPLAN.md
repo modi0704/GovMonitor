@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 10
-LAST COMPLETED TASK: P10.1
-NEXT TASK          : P10.2
+LAST COMPLETED TASK: P10.2
+NEXT TASK          : P10.3
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1007,7 +1007,7 @@ read-only user scoped to one division sees only that division.
 
 - [x] **P10.1** `exports/pptx_writer.py` following section 10, with native line, doughnut and bar
   charts and tables; layout constants in one module.
-- [ ] **P10.2** `export_template` model and settings page: logo upload, primary colour, report
+- [x] **P10.2** `export_template` model and settings page: logo upload, primary colour, report
   title, footer text; system default template.
 - [ ] **P10.3** Export dialog (scope, month, which slide groups to include) using the job queue.
 - [ ] **P10.4** Tests: slide count and order for a known tree; every chart's data equals the
@@ -1194,6 +1194,7 @@ changed, why. Start ids at D19.
 | D33 | 2026-11-15 | Live results are cached per (agency, period, profile version, latest audit-log id). The latest audit id is the 'latest data timestamp' of P8.8; an index on (agency_id, id) keeps it cheap. Read paths load monthly targets and actuals as plain rows, and the audit mixin builds its before-snapshot only when an object is saved. (Claude Code) | Every change writes an audit row (Phase 3, enforced by the route-walking test), so the id moves with anything results depend on — including moves, group edits and approvals that no single table timestamp covers. The plain-row loading cut the ceiling dashboard from 5.5 s to 1.4 s uncached. |
 | D34 | 2026-11-15 | Excel export: office sheets always show each office's own plan (the version scored for the month); the view choice (owner/implementing) applies to the SUMMARY figures. Every formula is written with its computed value cached. Formulas reproduce the engine only under workbook_compatible with cost-share weights and no cap; otherwise M and the total rows hold engine values (with a comment). Activities without a target get value 0 cells instead of a #DIV/0! formula (Claude Code) | 9.1 lays out a plan, which only the owner view has; cached values make the file correct in viewers that never recalculate (phone previews), and LibreOffice/Excel recalculation gives the same numbers (P9.5) |
 | D35 | 2026-11-15 | Plan import: a leading token is read as the row code only if it contains a digit or a dot; measure type is quantity unless the PLAN row carries the export's 'Recurring measure' comment; indicators below an OUTPUT INDICATORS header are imported too (annual target = sum of the monthly targets); import is refused (409) when the office already has a plan for that year. A rejected import fails at once without retries (worker JobRejected) and its whole transaction is rolled back (Claude Code) | The sheet has no code or measure columns, so these keep a round trip of an exported plan faithful without adding columns to the fixed 9.1 layout; refusing over an existing plan avoids overwriting work (use revise instead) |
+| D36 | 2026-11-15 | export_template rows with agency_id NULL are the system defaults (created by migration; readable by every agency through the global_read policy, writable by none). Effective settings = built-in values < system row < the agency's own row, which is created on the first change. The isolation test 'no agency sees nothing' now counts only rows that belong to an agency, and a new test proves system rows cannot be changed or inserted by app_user (Claude Code) | 6.4 asks for system-wide rows; built-in values keep exports working even if a test flush or an operator removes the system rows |
 
 ---
 

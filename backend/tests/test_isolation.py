@@ -156,17 +156,42 @@ def test_b_writing_another_agencys_id_fails(two_agencies):
 
 @pytest.mark.django_db(databases=DBS, transaction=True)
 def test_c_no_agency_sees_nothing(two_agencies):
+    # System-wide rows (agency_id NULL, e.g. the default export templates) are readable by design;
+    # no row that belongs to an agency may be.
     with transaction.atomic(), connection.cursor() as cur:
         context.set_agency(None)
-        for table in TENANT_TABLES:
-            cur.execute(f"SELECT count(*) FROM {_q(table)}")
+        for table, col in TENANT_TABLES.items():
+            cur.execute(f"SELECT count(*) FROM {_q(table)} WHERE {_q(col)} IS NOT NULL")
             assert cur.fetchone()[0] == 0, f"{table} visible with no agency set"
     # Also on a fresh connection where app.agency_id was never set (NULL, not '').
     connection.close()
     with connection.cursor() as cur:
-        for table in TENANT_TABLES:
-            cur.execute(f"SELECT count(*) FROM {_q(table)}")
+        for table, col in TENANT_TABLES.items():
+            cur.execute(f"SELECT count(*) FROM {_q(table)} WHERE {_q(col)} IS NOT NULL")
             assert cur.fetchone()[0] == 0, f"{table} visible on a fresh connection"
+
+
+@pytest.mark.django_db(databases=DBS, transaction=True)
+def test_system_rows_are_readable_but_not_writable(two_agencies):
+    """export_template rows with no agency: every agency reads them, none can change them."""
+    a, _ = two_agencies
+    with connections["owner"].cursor() as cur:
+        cur.execute(
+            "INSERT INTO export_template (id, agency_id, kind, name, settings, is_default, updated_at) "
+            "VALUES (gen_random_uuid(), NULL, 'pptx', 'System', '{}'::jsonb, false, now())"
+        )
+    with context.agency_context(a["agency"].id), connection.cursor() as cur:
+        cur.execute("SELECT count(*) FROM export_template WHERE agency_id IS NULL")
+        assert cur.fetchone()[0] >= 1
+        cur.execute("UPDATE export_template SET name = 'mine' WHERE agency_id IS NULL")
+        assert cur.rowcount == 0
+        cur.execute("DELETE FROM export_template WHERE agency_id IS NULL")
+        assert cur.rowcount == 0
+        with pytest.raises(DatabaseError, match="row-level security"), transaction.atomic():
+            cur.execute(
+                "INSERT INTO export_template (id, agency_id, kind, name, settings, is_default, updated_at) "
+                "VALUES (gen_random_uuid(), NULL, 'pptx', 'Mine', '{}'::jsonb, false, now())"
+            )
 
 
 @pytest.mark.django_db(databases=DBS, transaction=True)

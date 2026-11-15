@@ -14,7 +14,7 @@ from decimal import Decimal
 
 import xlsxwriter
 
-from apps.exports import office_sheet
+from apps.exports import office_sheet, templates
 from apps.exports.layout import DEFAULT, MONTH_ABBR, MONTH_FULL, OfficeSheetLayout
 from apps.results.read import period_profile
 from apps.results.services import load_activity_actuals, load_indicator_actuals
@@ -43,12 +43,18 @@ class SheetMap:
 
 
 class Formats:
-    def __init__(self, wb):
+    def __init__(self, wb, header_fill: str = HEADER_FILL):
         border = {"border": 1, "border_color": "#808080"}
         self.title = wb.add_format({"bold": True, "font_size": 13})
         self.bold = wb.add_format({"bold": True})
         self.header = wb.add_format(
-            {"bold": True, "bg_color": HEADER_FILL, "align": "center", "valign": "vcenter", "text_wrap": True}
+            {
+                "bold": True,
+                "bg_color": "#" + header_fill.lstrip("#"),
+                "align": "center",
+                "valign": "vcenter",
+                "text_wrap": True,
+            }
             | border
         )
         self.text = wb.add_format({"text_wrap": True, "valign": "top"})
@@ -350,7 +356,7 @@ def build(sc, layout: OfficeSheetLayout = DEFAULT) -> tuple[bytes, dict]:
     """The workbook for one export scope. Returns (file bytes, summary for the job result)."""
     out = io.BytesIO()
     wb = xlsxwriter.Workbook(out, {"in_memory": True})
-    fmt = Formats(wb)
+    fmt = Formats(wb, templates.effective("xlsx")["header_fill"])
     ctx = context_for(sc)
     summary_ws = wb.add_worksheet(SUMMARY_SHEET)
     used = {SUMMARY_SHEET}

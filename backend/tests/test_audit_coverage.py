@@ -169,6 +169,14 @@ def _reset_confirm(w):
     )
 
 
+def _logo(w):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from tests.reporting_helpers import PNG
+
+    return w.admin.c.post("/api/v1/export-templates/pptx/logo", {"file": SimpleUploadedFile("logo.png", PNG)})
+
+
 def _import_plan(w):
     import io
 
@@ -326,6 +334,18 @@ SCENARIOS = {
         {"scope": "agency", "period_id": w.fiscal_year()["periods"][0]["id"]},
     ),
     ("import-plan", "POST"): lambda w: _import_plan(w),
+    ("export-template", "PATCH"): lambda w: w.admin.patch(
+        "/api/v1/export-templates/pptx", {"report_title": "Quarterly review"}
+    ),
+    ("export-template", "DELETE"): lambda w: (
+        w.admin.patch("/api/v1/export-templates/pptx", {"footer_text": "x"}),
+        w.admin.delete("/api/v1/export-templates/pptx"),
+    )[1],
+    ("export-template-logo", "POST"): lambda w: _logo(w),
+    ("export-template-logo", "DELETE"): lambda w: (
+        _logo(w),
+        w.admin.delete("/api/v1/export-templates/pptx/logo"),
+    )[1],
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

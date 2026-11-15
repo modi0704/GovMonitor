@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 8
-LAST COMPLETED TASK: P8.3
-NEXT TASK          : P8.4
+LAST COMPLETED TASK: P8.4
+NEXT TASK          : P8.5
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -954,7 +954,7 @@ database trigger; changing the scoring profile or the plan after locking does no
 - [x] **P8.3** Office page (same layout) with breadcrumb drill-down to children, then to the
   activity list (target, actual, variance, status, delay reason), then to an activity's month
   history and MOVs.
-- [ ] **P8.4** Ranking page: choose a ranking set (children of an office, or a group); table and
+- [x] **P8.4** Ranking page: choose a ranking set (children of an office, or a group); table and
   horizontal bar chart; rank change against the previous month.
 - [ ] **P8.5** Owner / implementing view switch wherever an office has both.
 - [ ] **P8.6** Quarter and year-to-date summaries derived from monthly results (D9).

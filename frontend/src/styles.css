@@ -1038,3 +1038,7 @@ label.inline {
   display: block;
   font-size: 0.85rem;
 }
+.text-ahead {
+  color: var(--ahead);
+  font-weight: 600;
+}

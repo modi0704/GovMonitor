@@ -288,3 +288,73 @@ class ActivityHistoryView(APIView):
                 "months": months,
             }
         )
+
+
+class RankingsView(APIView):
+    """GET ``?period[&set=children:<office id>|group:<group id>]`` — one ranking set with each office's
+    rank change against the previous month, plus the sets the user can choose from (P8.4)."""
+
+    def get(self, request):
+
+        period = get_period(request.query_params.get("period"))
+        scope = {str(o.id): o for o in perm.scope(request.user)}
+        parents = {}
+        for o in Office.objects.filter(parent_id__in=[o.pk for o in scope.values()]).order_by("path"):
+            if str(o.id) in scope:
+                parents.setdefault(str(o.parent_id), []).append(o)
+        sets = [
+            {
+                "key": f"children:{pid}",
+                "kind": "children",
+                "name": f"Offices under {scope[pid].code} {scope[pid].name}",
+            }
+            for pid in sorted(parents, key=lambda p: scope[p].path)
+            if len(parents[pid]) >= 2
+        ]
+        group_members = {}
+        for m in OfficeGroupMember.objects.select_related("group").filter(office_id__in=list(scope)):
+            group_members.setdefault(m.group, []).append(str(m.office_id))
+        for g in sorted(group_members, key=lambda g: (g.sort_order, g.name)):
+            sets.append({"key": f"group:{g.id}", "kind": "group", "name": g.name})
+
+        key = request.query_params.get("set") or (sets[0]["key"] if sets else "")
+        kind, _, ident = key.partition(":")
+        if kind == "children" and ident in parents:
+            member_ids, allow_impl = [str(o.id) for o in parents[ident]], False
+        elif kind == "group" and any(str(g.id) == ident for g in group_members):
+            group = next(g for g in group_members if str(g.id) == ident)
+            member_ids, allow_impl = sorted(group_members[group], key=lambda oid: scope[oid].path), True
+        elif not sets:
+            return Response({"sets": [], "set": None, "rows": []})
+        else:
+            raise Http404()
+
+        results = read.get_agency_results(period)
+        profile = read.period_profile(period, results)
+        current = rank_set(results, member_ids, profile, period.month_index, allow_implementing=allow_impl)
+        previous_ranks = {}
+        prev = period.fiscal_year.periods.filter(month_index=period.month_index - 1).first()
+        if prev is not None:
+            prev_results = read.get_agency_results(prev)
+            prev_profile = read.period_profile(prev, prev_results)
+            previous_ranks = {
+                oid: rank
+                for oid, rank, _ in rank_set(
+                    prev_results, member_ids, prev_profile, prev.month_index, allow_implementing=allow_impl
+                )
+            }
+        rows = ranking_rows(results, scope, current)
+        for row in rows:
+            before = previous_ranks.get(row["office"]["id"])
+            row["previous_rank"] = before
+            row["change"] = (before - row["rank"]) if (before and row["rank"]) else None
+        return Response(
+            {
+                "sets": sets,
+                "set": next((s for s in sets if s["key"] == key), None),
+                "metric": profile.ranking_metric,
+                "label": "FINAL" if period.is_locked else "PROVISIONAL",
+                "previous_month": prev.start_date.isoformat() if prev else None,
+                "rows": rows,
+            }
+        )

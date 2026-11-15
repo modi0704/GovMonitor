@@ -122,3 +122,34 @@ def test_activity_list_and_history(w):
         ).status_code
         == 200
     )
+
+
+def test_rankings_with_change_against_previous_month(w):
+    from tests.factories import make_office
+
+    with context.agency_context(w["agency"].id):
+        g = OfficeGroup.objects.create(name="Field")
+        for o in (w["div"], w["unit"]):
+            OfficeGroupMember.objects.create(group=g, office=o)
+    boss = client(w, "boss")
+    make_office(w["root"], "THIRD")  # the root then has 3 children: a "children" set
+    r = boss.get("/api/v1/rankings", period=w["periods"][2]["id"]).json()
+    assert [s["kind"] for s in r["sets"]] == ["children", "group"]
+    assert r["set"]["key"] == r["sets"][0]["key"] and r["metric"] == "cumulative_actual"
+    assert [(x["office"]["code"], x["rank"]) for x in r["rows"]] == [
+        ("DIV", 1),
+        ("OTHER", None),
+        ("THIRD", None),
+    ]
+    grp = boss.get("/api/v1/rankings", period=w["periods"][2]["id"], set=f"group:{g.id}").json()
+    rows = {x["office"]["code"]: x for x in grp["rows"]}
+    # February: UNIT 0.4 (implementing view) beats DIV 0.315; January: UNIT 0.2 beat DIV 0.12 too.
+    assert (rows["UNIT"]["rank"], rows["UNIT"]["previous_rank"], rows["UNIT"]["change"]) == (1, 1, 0)
+    assert rows["DIV"]["rank"] == 2 and grp["previous_month"] == "2026-01-01"
+    assert boss.get("/api/v1/rankings", period=w["periods"][2]["id"], set="group:nope").status_code == 404
+    assert (
+        client(w, "viewer")
+        .get("/api/v1/rankings", period=w["periods"][2]["id"], set=f"children:{w['root'].id}")
+        .status_code
+        == 404
+    )

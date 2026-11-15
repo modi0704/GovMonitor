@@ -79,3 +79,14 @@ def fixture_plans() -> dict[str, list]:
             )
         out[data["sheet"]] = rows
     return out
+
+
+def fixture_actuals() -> dict[str, dict[str, list]]:
+    """office code -> {row code: 12 monthly actuals}, from the MOST fixtures (same codes as fixture_plans)."""
+    out = {}
+    for path in sorted(FIXTURES.glob("most_fy2023_*.json")):
+        data = json.loads(path.read_text())
+        out[data["sheet"]] = {
+            f"{data['sheet']}-{i}": a["actual"] for i, a in enumerate(data["activities"], start=1)
+        }
+    return out

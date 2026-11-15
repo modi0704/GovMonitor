@@ -46,6 +46,31 @@ def test_seed_demo_is_idempotent_and_builds_three_and_five_level_agencies():
         }
     else:
         assert counts == {"PME": ("approved", 3)}
+    if "RDI" in counts:
+        # Phase 8 exit: December locked; the dashboard shows the MOST December 2023 figures.
+        from apps.planning.models import ReportingPeriod
+        from apps.results.models import PeriodResult
+
+        dec = ReportingPeriod.objects.using("owner").get(
+            fiscal_year__agency=agencies["sample-ministry"], month_index=12
+        )
+        assert dec.status == "locked"
+        frozen = {
+            r.office.code: round(float(r.cum_actual) * 100, 2)
+            for r in PeriodResult.objects.using("owner")
+            .select_related("office")
+            .filter(period=dec, view="owner")
+        }
+        assert {k: frozen[k] for k in ("PME", "HRM", "RDI", "AST", "ILD", "GAS", "RDS")} == {
+            "PME": 95.83,
+            "HRM": 83.68,
+            "RDI": 99.07,
+            "AST": 58.76,
+            "ILD": 90.23,
+            "GAS": 80.16,
+            "RDS": 86.19,
+        }
+        assert Office.objects.using("owner").filter(agency=agencies["sample-ministry"], code="RDS").exists()
     actions = set(
         AuditLog.objects.using("owner")
         .filter(agency=agencies["sample-ministry"])

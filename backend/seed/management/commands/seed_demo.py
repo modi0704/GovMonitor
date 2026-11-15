@@ -87,18 +87,25 @@ class Command(BaseCommand):
         self.stdout.write(f"seed_demo: done (demo administrators use DEMO_PASSWORD, default {password!r})")
 
     def _ministry_plans(self, email: str, password: str) -> None:
-        """Fiscal year 2026 and approved plans, created through the public API (Phase 5 exit)."""
+        """Plans, accomplishments and locked months, all through the public API.
+
+        With the MOST fixtures (P4.2): fiscal year 2023 with the six real plans, the twelve months of
+        accomplishments from the workbook and every month locked, so the dashboard shows the
+        December 2023 figures of MASTERPLAN 8.2. Without them: the 8.1 worked example for PME.
+        """
         api = ApiSession(email, password)
+        fixtures = demo_plans.fixture_plans()
+        label, start_year = ("2023", 2023) if fixtures else ("2026", 2026)
+        rows_by_office = fixtures or {"PME": demo_plans.worked_example_rows()}
         years = {y["label"]: y for y in api.get("/api/v1/fiscal-years")}
         fy = (
-            years.get("2026")
-            or api.post("/api/v1/fiscal-years", {"label": "2026", "start_year": 2026}).json()
+            years.get(label)
+            or api.post("/api/v1/fiscal-years", {"label": label, "start_year": start_year}).json()
         )
         if fy["status"] == "draft":
             api.patch(f"/api/v1/fiscal-years/{fy['id']}", {"status": "open"})
         offices = {o["code"]: o for o in api.get("/api/v1/offices")}
         existing = {p["office"]["code"] for p in api.get("/api/v1/plans", fiscal_year=fy["id"])}
-        rows_by_office = demo_plans.fixture_plans() or {"PME": demo_plans.worked_example_rows()}
         for code, rows in rows_by_office.items():
             if code in existing or code not in offices:
                 continue
@@ -109,3 +116,34 @@ class Command(BaseCommand):
             api.post(f"/api/v1/plans/{plan['id']}/submit")
             api.post(f"/api/v1/plans/{plan['id']}/approve")
             self.stdout.write(f"sample-ministry: plan for {code} approved ({len(rows)} rows)")
+        if not fixtures:
+            return
+        actuals = demo_plans.fixture_actuals()
+        periods = api.get(f"/api/v1/fiscal-years/{fy['id']}")["periods"]
+        plans = {
+            p["office"]["code"]: p for p in api.get("/api/v1/plans", fiscal_year=fy["id"], status="approved")
+        }
+        lineage = {}
+        for code, plan in plans.items():
+            detail = api.get(f"/api/v1/plans/{plan['id']}")
+            lineage[code] = {r["code"]: r["lineage_id"] for r in detail["rows"]}
+        locked = 0
+        for period in periods:
+            if period["status"] == "locked":
+                continue
+            m = period["month_index"]
+            for code, by_row in actuals.items():
+                if code not in plans:
+                    continue
+                acts = [
+                    {"lineage_id": lineage[code][row_code], "actual": values[m - 1]}
+                    for row_code, values in by_row.items()
+                ]
+                api.post(
+                    "/api/v1/reports/save",
+                    {"office": offices[code]["id"], "period": period["id"], "activities": acts},
+                )
+            api.post(f"/api/v1/periods/{period['id']}/lock")
+            locked += 1
+        if locked:
+            self.stdout.write(f"sample-ministry: {locked} month(s) of {label} reported and locked")

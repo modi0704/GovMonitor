@@ -1000,3 +1000,41 @@ label.inline {
 .tile .chip {
   align-self: flex-start;
 }
+
+/* ---- Dashboard ------------------------------------------------------------------------------- */
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.dash-grid .card {
+  margin: 0;
+}
+.dash-wide {
+  grid-column: 1 / -1;
+}
+@media (max-width: 900px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.badge {
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+}
+.badge-final {
+  background: var(--ahead-bg);
+  color: var(--ahead);
+}
+.badge-provisional {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.file-link {
+  display: block;
+  font-size: 0.85rem;
+}

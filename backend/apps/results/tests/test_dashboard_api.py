@@ -51,6 +51,18 @@ def test_root_dashboard_in_one_call(w):
     assert group["UNIT"]["rank"] == 1 and group["DIV"]["rank"] == 2  # UNIT ranked by its implementing view
 
 
+def test_office_dashboard_shows_only_groups_beneath_it(w):
+    with context.agency_context(w["agency"].id):
+        g = OfficeGroup.objects.create(name="Elsewhere")
+        OfficeGroupMember.objects.create(group=g, office=w["other"])
+    boss = client(w, "boss")
+    assert [r["set"]["name"] for r in dash(boss, w, "root").json()["rankings"]] == [
+        "Offices under ROOT",
+        "Elsewhere",
+    ]
+    assert [r["set"]["name"] for r in dash(boss, w, "div").json()["rankings"]] == ["Offices under DIV"]
+
+
 def test_implementing_view_and_scope(w):
     unit = client(w, "unit")
     d = dash(unit, w, "unit", view="implementing").json()
@@ -71,3 +83,42 @@ def test_locked_month_is_final(w):
     d = dash(boss, w, "div", m=1).json()
     assert d["final"] is True and d["label"] == "FINAL"
     assert round(float(d["headline"]["cum_actual"]), 6) == 0.12 and d["headline"]["final"] is True
+
+
+def test_activity_list_and_history(w):
+    div = client(w, "div")
+    div.post(
+        "/api/v1/reports/save",
+        {
+            "office": str(w["div"].id),
+            "period": w["periods"][2]["id"],
+            "activities": [{"lineage_id": w["acts"]["B"]["lineage_id"], "delay_reason": "Printer broke"}],
+        },
+    )
+    acts = div.get(
+        "/api/v1/dashboard/activities", office=str(w["div"].id), period=w["periods"][2]["id"]
+    ).json()
+    rows = {a["code"]: a for a in acts["activities"]}
+    a, b = rows["A"], rows["B"]
+    assert (a["cum_target"], a["cum_actual"], a["status_kind"]) == ("5", "4", "delayed")
+    assert a["implementing_office_code"] == "UNIT" and b["delay_reason"] == "Printer broke"
+    hist = div.get(
+        "/api/v1/dashboard/activity", lineage=w["acts"]["A"]["lineage_id"], period=w["periods"][2]["id"]
+    ).json()
+    assert [m["planned"] for m in hist["months"][:3]] == ["2", "3", "5"]
+    assert [m["actual"] for m in hist["months"][:3]] == ["2", "2", None]
+    assert hist["activity"]["implementing_office"]["code"] == "UNIT" and hist["activity"]["editable"]
+    other = client(w, "other")
+    assert (
+        other.get(
+            "/api/v1/dashboard/activity", lineage=w["acts"]["A"]["lineage_id"], period=w["periods"][2]["id"]
+        ).status_code
+        == 404
+    )
+    unit = client(w, "unit")
+    assert (
+        unit.get(
+            "/api/v1/dashboard/activity", lineage=w["acts"]["A"]["lineage_id"], period=w["periods"][2]["id"]
+        ).status_code
+        == 200
+    )

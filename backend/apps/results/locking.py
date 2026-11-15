@@ -16,6 +16,7 @@ from django.utils import timezone
 from apps.audit import services as audit
 from apps.audit.services import jsonable
 from apps.planning.models import Plan, ReportingPeriod
+from apps.planning.numbers import plain
 from apps.reporting.models import OfficeSubmission
 from apps.results.agency import compute_agency
 from apps.results.models import PeriodResult
@@ -59,7 +60,7 @@ def _detail(entry, month: int, profile=None) -> dict:
                 "unit": row.unit,
                 "owner_office_id": str(row.plan.office_id),
                 "implementing_office_id": str(row.implementing_office_id or row.plan.office_id),
-                "annual_target": jsonable(row.annual_target),
+                "annual_target": plain(row.annual_target),
                 "weight": jsonable(res.weight),
                 "planned_ratio": jsonable(res.planned_ratio[i]),
                 "actual_ratio": jsonable(res.actual_ratio[i]),
@@ -67,14 +68,14 @@ def _detail(entry, month: int, profile=None) -> dict:
                 "status_kind": "no_target"
                 if res.no_target
                 else (engine.status_kind(variance, profile) if profile else None),
-                "cum_target": jsonable(
+                "cum_target": plain(
                     sum((planned.get(m, Decimal(0)) for m in range(1, month + 1)), Decimal(0))
                 ),
-                "cum_actual": jsonable(
+                "cum_actual": plain(
                     sum((a.actual_qty for m, a in reported.items() if m <= month), Decimal(0))
                 ),
-                "month_target": jsonable(planned.get(month, Decimal(0))),
-                "month_actual": jsonable(this.actual_qty) if this else None,
+                "month_target": plain(planned.get(month, Decimal(0))),
+                "month_actual": plain(this.actual_qty) if this else None,
                 "delay_reason": this.delay_reason if this else "",
                 "remarks": this.remarks if this else "",
                 "no_target": res.no_target,
@@ -95,8 +96,8 @@ def _detail(entry, month: int, profile=None) -> dict:
                 "code": ind.code,
                 "name": ind.name,
                 "unit": ind.unit,
-                "annual_target": jsonable(ind.annual_target),
-                "actual_to_date": jsonable(to_date),
+                "annual_target": plain(ind.annual_target),
+                "actual_to_date": plain(to_date),
                 "rate": jsonable(res.rate[i]),
             }
         )

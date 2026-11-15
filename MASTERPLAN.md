@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 8
-LAST COMPLETED TASK: P8.1
-NEXT TASK          : P8.2
+LAST COMPLETED TASK: P8.2
+NEXT TASK          : P8.3
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -949,7 +949,7 @@ database trigger; changing the scoring profile or the plan after locking does no
   cumulative plan and actual series (actual stops at the selected period), funds, status,
   indicator table, children summary, rankings for the office's children and for groups in scope.
   One call per screen.
-- [ ] **P8.2** Agency dashboard page: month picker; headline tiles; S-curve; funds doughnut;
+- [x] **P8.2** Agency dashboard page: month picker; headline tiles; S-curve; funds doughnut;
   ranking table of top-level offices; FINAL / PROVISIONAL badge.
 - [ ] **P8.3** Office page (same layout) with breadcrumb drill-down to children, then to the
   activity list (target, actual, variance, status, delay reason), then to an activity's month

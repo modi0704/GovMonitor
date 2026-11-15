@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from apps.accounts import permissions as perm
 from apps.audit.services import jsonable
 from apps.planning.models import ReportingPeriod
+from apps.planning.numbers import plain
 from apps.results import read
 from apps.results.agency import IMPLEMENTING, OWNER
 from apps.structure.models import Office, OfficeGroupMember
@@ -135,7 +136,13 @@ class DashboardView(APIView):
         groups = {}
         for m in (
             OfficeGroupMember.objects.select_related("group")
-            .filter(office_id__in=list(visible))
+            # Groups shown: those with a member at or beneath this office (all of them on the root).
+            .filter(
+                office_id__in=list(visible),
+                group_id__in=OfficeGroupMember.objects.filter(office__path__startswith=office.path).values(
+                    "group_id"
+                ),
+            )
             .order_by("group__sort_order", "group__name")
         ):
             groups.setdefault(m.group, []).append(str(m.office_id))
@@ -182,3 +189,102 @@ class DashboardView(APIView):
             "rankings": rankings,
         }
         return Response(data)
+
+
+class DashboardActivitiesView(APIView):
+    """GET ``?office&period[&view]`` — the activity list behind an office's figures (P8.3)."""
+
+    def get(self, request):
+        p = request.query_params
+        period = get_period(p.get("period"))
+        view = IMPLEMENTING if p.get("view") == IMPLEMENTING else OWNER
+        office = perm.get_office_or_404(request.user, p.get("office"))
+        rv = read.get_result(period, office, view)
+        offices = {str(o.id): o.code for o in Office.objects.all()}
+        rows = [
+            {
+                **a,
+                "owner_office_code": offices.get(a.get("owner_office_id"), ""),
+                "implementing_office_code": offices.get(a.get("implementing_office_id"), ""),
+            }
+            for a in (rv.activities if rv else [])
+        ]
+        return Response(
+            {
+                "office": office_ref(office),
+                "label": "FINAL" if period.is_locked else "PROVISIONAL",
+                "headline": read.headline_of(rv),
+                "activities": rows,
+            }
+        )
+
+
+class ActivityHistoryView(APIView):
+    """GET ``?lineage&period`` — one activity month by month with its files (P8.3)."""
+
+    def get(self, request):
+        from apps.reporting import rules
+        from apps.reporting.models import ActivityActual, Attachment
+
+        period = get_period(request.query_params.get("period"))
+        ref = (
+            rules.activity_in_period(request.query_params.get("lineage"), period)
+            if request.query_params.get("lineage")
+            else None
+        )
+        if ref is None or not rules.can_view_activity(request.user, ref):
+            raise Http404()
+        act = ref.activity
+        planned = {t.period.month_index: t.planned_qty for t in act.targets.select_related("period")}
+        actuals = {
+            a.period.month_index: a
+            for a in ActivityActual.objects.select_related("period").filter(
+                activity_lineage_id=act.lineage_id, period__fiscal_year=period.fiscal_year
+            )
+        }
+        files = {}
+        for f in Attachment.objects.filter(
+            target_type="activity_actual", target_id__in=[a.pk for a in actuals.values()], deleted_at=None
+        ).select_related("period", "uploaded_by"):
+            files.setdefault(f.period.month_index, []).append(
+                {
+                    "id": str(f.id),
+                    "file_name": f.file_name,
+                    "download_url": f"/api/v1/attachments/{f.id}/download",
+                }
+            )
+        months = []
+        for pp in period.fiscal_year.periods.order_by("month_index"):
+            m = pp.month_index
+            a = actuals.get(m)
+            months.append(
+                {
+                    "month_index": m,
+                    "start_date": pp.start_date.isoformat(),
+                    "period_id": str(pp.id),
+                    "status": pp.status,
+                    "planned": plain(planned.get(m, Decimal(0))),
+                    "actual": plain(a.actual_qty) if a else None,
+                    "actual_amount": jsonable(a.actual_amount) if a else None,
+                    "remarks": a.remarks if a else "",
+                    "delay_reason": a.delay_reason if a else "",
+                    "files": files.get(m, []),
+                }
+            )
+        return Response(
+            {
+                "activity": {
+                    "lineage_id": str(act.lineage_id),
+                    "code": act.code,
+                    "title": act.title,
+                    "unit": act.unit,
+                    "measure_type": act.measure_type,
+                    "annual_target": plain(act.annual_target),
+                    "total_cost": jsonable(act.total_cost),
+                    "owner_office": office_ref(ref.owner_office),
+                    "implementing_office": office_ref(ref.implementing_office),
+                    "editable": rules.can_edit_activity(request.user, ref),
+                },
+                "months": months,
+            }
+        )

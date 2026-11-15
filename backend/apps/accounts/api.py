@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from apps.accounts import services
 from apps.accounts.models import RoleAssignment, User
 from apps.accounts.permissions import is_agency_admin
+from apps.audit import services as audit
 
 
 class CsrfEnforcedMixin:
@@ -99,6 +100,8 @@ class LogoutView(APIView):
     allow_pending_password_change = True
 
     def post(self, request):
+        if request.user.is_authenticated:
+            audit.record("logout", request.user)
         logout(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 

@@ -22,6 +22,7 @@ from django.utils import timezone
 
 from apps.accounts.lookup import lookup_user_by_email
 from apps.accounts.models import User
+from apps.audit import services as audit
 from apps.tenancy import context
 from apps.tenancy.middleware import SESSION_AGENCY_KEY
 from apps.tenancy.models import Agency
@@ -64,12 +65,20 @@ def check_credentials(email: str, password: str) -> SignInResult:
     found = lookup_user_by_email(email)
     if found is None:
         check_password(password or "", _DUMMY_HASH)  # same work as a real check
+        # Unknown email: no agency to file it under, so it is a platform-level event.
+        audit.record(
+            "login_failed",
+            entity_type="user",
+            after={"email": (email or "")[:254], "reason": "unknown_email"},
+            using="owner",
+        )
         raise AuthError("invalid_credentials", "Email or password is incorrect.")
 
     context.set_agency(found.agency_id)
     user = User.objects.select_related("agency").select_for_update().get(pk=found.id)
     now = _now()
     if user.locked_until and user.locked_until > now:
+        audit.record("login_failed", user, after={"reason": "locked"})
         raise AuthError(
             "locked",
             "This account is locked after too many failed attempts. Try again later.",
@@ -83,10 +92,17 @@ def check_credentials(email: str, password: str) -> SignInResult:
             user.failed_attempts = 0
             fields.append("locked_until")
         user.save(update_fields=fields)
+        audit.record(
+            "login_failed",
+            user,
+            after={"reason": "wrong_password", "locked": "locked_until" in fields},
+        )
         raise AuthError("invalid_credentials", "Email or password is incorrect.")
     if not user.is_active:
+        audit.record("login_failed", user, after={"reason": "inactive"})
         raise AuthError("inactive", "This account has been deactivated. Contact your administrator.")
     if user.agency.status != Agency.Status.ACTIVE:
+        audit.record("login_failed", user, after={"reason": "agency_suspended"})
         raise AuthError("agency_suspended", "Your agency's access is suspended. Contact the vendor.")
     if user.failed_attempts or user.locked_until:
         user.failed_attempts = 0
@@ -101,6 +117,7 @@ def start_session(request, user: User) -> None:
     django_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     request.session[SESSION_AGENCY_KEY] = str(user.agency_id)
     request.session[SESSION_LAST_ACTIVITY_KEY] = int(_now().timestamp())
+    audit.record("login", user, after={"two_factor": user.has_2fa})
 
 
 def remember_pending_2fa(request, user: User) -> None:
@@ -153,6 +170,7 @@ def change_own_password(request, current_password: str, new_password: str) -> No
     if current_password == new_password:
         raise AuthError("same_password", "Choose a password different from the current one.")
     set_new_password(user, new_password)
+    audit.record("password_change", user)
     update_session_auth_hash(request, user)  # keep this session, sign out the others
 
 
@@ -176,6 +194,7 @@ def admin_reset_password(user: User) -> str:
     user.failed_attempts = 0
     user.locked_until = None
     user.save(update_fields=["password", "must_change_password", "failed_attempts", "locked_until"])
+    audit.record("password_reset", user, after={"by": "administrator"})
     if settings.EMAIL_ENABLED and not user.email_opt_out:
         send_mail(
             "Your password was reset",
@@ -223,4 +242,5 @@ def confirm_password_reset(agency_id: str, user_id: str, token: str, new_passwor
     if user is None or not token_generator.check_token(user, token):
         raise AuthError("invalid_token", "This reset link is invalid or has expired.")
     set_new_password(user, new_password)
+    audit.record("password_reset", user, after={"by": "email_link"})
     return user

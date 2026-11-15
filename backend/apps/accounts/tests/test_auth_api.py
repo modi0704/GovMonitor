@@ -49,6 +49,7 @@ def test_sign_in_and_me_and_sign_out(client, user):
     assert client.get("/api/v1/me").json()["code"] == "not_authenticated"
 
 
+@pytest.mark.django_db(databases=["default", "owner"])
 def test_wrong_password_and_unknown_email_look_the_same(client, user):
     a = login(client, "ana@alpha.gov", "wrong-password-123")
     b = login(client, "nobody@alpha.gov", "wrong-password-123")

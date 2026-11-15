@@ -9,6 +9,7 @@ RLS-scoped manager, so an id from another agency is simply "not found".
 from django.db import IntegrityError, connection, transaction
 from django.db.models import Max, ProtectedError
 
+from apps.audit import services as audit
 from apps.structure.models import Office, OfficeGroup, OfficeGroupMember, OrgLevel
 
 
@@ -100,12 +101,14 @@ def move_office(office: Office, new_parent: Office) -> Office:
     if office.parent_id == new_parent.pk:
         return office
     old_prefix = office.path
+    old_parent_id = office.parent_id
     new_prefix = f"{new_parent.path}{office.pk}/"
     depth_shift = (new_parent.depth + 1) - office.depth
     # Lock the subtree, then rewrite every path with one statement.
     list(subtree(office).select_for_update().values_list("pk", flat=True))
     office.parent = new_parent
-    office.save(update_fields=["parent"])
+    with audit.suppressed():  # one "move" event below instead of a bare parent update
+        office.save(update_fields=["parent"])
     with connection.cursor() as cur:
         cur.execute(
             "UPDATE office SET path = %s || substr(path, %s) WHERE path LIKE %s",
@@ -116,6 +119,13 @@ def move_office(office: Office, new_parent: Office) -> Office:
             level = level_for_depth(moved.depth)
             Office.objects.filter(pk=moved.pk).update(level=level)
     office.refresh_from_db()
+    moved_count = subtree(office).count()
+    audit.record(
+        "move",
+        office,
+        before={"parent_id": old_parent_id},
+        after={"parent_id": new_parent.pk, "offices_moved": moved_count},
+    )
     return office
 
 
@@ -125,8 +135,10 @@ def reorder_children(parent: Office, ordered_ids: list) -> None:
     wanted = [str(i) for i in ordered_ids]
     if set(wanted) != set(children):
         raise StructureError("bad_order", "The new order must list every child office exactly once.")
+    before = [str(o.pk) for o in sorted(children.values(), key=lambda o: (o.sort_order, o.name))]
     for position, office_id in enumerate(wanted):
         Office.objects.filter(pk=office_id).update(sort_order=(position + 1) * 10)
+    audit.record("reorder", parent, before={"order": before}, after={"order": wanted})
 
 
 def set_active(office: Office, active: bool) -> Office:
@@ -135,10 +147,16 @@ def set_active(office: Office, active: bool) -> Office:
     if active and office.parent and not office.parent.is_active:
         raise StructureError("parent_inactive", "Reactivate the parent office first.")
     if not active:
+        affected = [str(i) for i in subtree(office).filter(is_active=True).values_list("pk", flat=True)]
         subtree(office).update(is_active=False)
+        audit.record(
+            "deactivate", office, before={"is_active": True}, after={"is_active": False, "offices": affected}
+        )
     else:
         office.is_active = True
-        office.save(update_fields=["is_active"])
+        with audit.suppressed():
+            office.save(update_fields=["is_active"])
+        audit.record("activate", office, before={"is_active": False}, after={"is_active": True})
     office.refresh_from_db()
     return office
 

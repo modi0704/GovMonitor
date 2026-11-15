@@ -22,6 +22,7 @@ from rest_framework.views import APIView
 
 from apps.accounts import twofactor
 from apps.accounts.models import RoleAssignment, User
+from apps.audit import services as audit
 from apps.structure.models import Office
 from apps.tenancy import services
 from apps.tenancy.models import Agency, PlatformAdmin
@@ -52,6 +53,7 @@ class PlatformSessionAuthentication(BaseAuthentication):
         store[SESSION_ACTIVITY_KEY] = int(timezone.now().timestamp())
         store.save()
         request._request.platform_session = store
+        request._request.audit_platform_admin = admin
         SessionAuthentication().enforce_csrf(request)  # unsafe methods need the CSRF header
         return (admin, None)
 
@@ -115,6 +117,8 @@ class PlatformLoginView(PlatformView):
             if admin.locked_until and admin.locked_until > now:
                 return _error("locked", "This account is locked after too many failed attempts.")
             if not admin.check_password(password) or not admin.is_active:
+                with audit.acting_as("platform_admin", admin.id, admin.email):
+                    audit.record("login_failed", admin, using=OWNER, after={"area": "platform"})
                 admin.failed_attempts += 1
                 if admin.failed_attempts >= 5:
                     admin.locked_until = now + timedelta(minutes=15)
@@ -126,6 +130,8 @@ class PlatformLoginView(PlatformView):
             admin.failed_attempts = 0
             admin.locked_until = None
             admin.save(using=OWNER, update_fields=["failed_attempts", "locked_until"])
+        with audit.acting_as("platform_admin", admin.id, admin.email):
+            audit.record("login", admin, using=OWNER, after={"area": "platform"})
         store = SessionStore()
         store[SESSION_ADMIN_KEY] = str(admin.id)
         store[SESSION_ACTIVITY_KEY] = int(timezone.now().timestamp())
@@ -235,6 +241,7 @@ class AgencySupportView(PlatformView):
                 "No active support grant. The agency administrator must grant access first.",
                 http=status.HTTP_403_FORBIDDEN,
             )
+        audit.record("support_access", agency, using=OWNER, after={"grant_id": str(grant.id)})
         users = User.objects.using(OWNER).filter(agency=agency).order_by("email")
         offices = Office.objects.using(OWNER).filter(agency=agency).order_by("path")
         roles = RoleAssignment.objects.using(OWNER).filter(agency=agency)

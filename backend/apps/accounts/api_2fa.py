@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 
 from apps.accounts import services, twofactor
 from apps.accounts.api import CsrfEnforcedMixin, me_payload
+from apps.audit import services as audit
 
 
 def _error(code, message, http=status.HTTP_400_BAD_REQUEST):
@@ -37,6 +38,7 @@ class TwoFactorVerifyView(CsrfEnforcedMixin, APIView):
             if ok:
                 user.save(update_fields=["recovery_codes"])
         if not ok:
+            audit.record("login_failed", user, after={"reason": "wrong_2fa_code"})
             pending["attempts"] += 1
             request.session.modified = True
             return _error("invalid_code", "The code is not correct.")
@@ -73,6 +75,7 @@ class TwoFactorEnableView(APIView):
         user.recovery_codes = hashes
         user.save(update_fields=["totp_secret", "recovery_codes"])
         del request.session[twofactor.SESSION_SETUP_KEY]
+        audit.record("2fa_enabled", user)
         return Response({"status": "ok", "recovery_codes": plain})
 
 
@@ -84,4 +87,5 @@ class TwoFactorDisableView(APIView):
         user.totp_secret = None
         user.recovery_codes = []
         user.save(update_fields=["totp_secret", "recovery_codes"])
+        audit.record("2fa_disabled", user)
         return Response({"status": "ok"})

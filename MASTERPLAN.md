@@ -13,7 +13,7 @@
 CURRENT PHASE      : 7
 LAST COMPLETED TASK: P4.6
 NEXT TASK          : P7.1
-BLOCKERS / NOTES   : Phase 4 complete. See the P14.1 note on cross-agency foreign keys
+BLOCKERS / NOTES   : Phase 4 complete. Reference files: copy "Monitoring Tool Ground Truth Source/" to reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -809,19 +809,17 @@ agency with no code changes.
   openpyxl (formulas ignored, values from typed cells only) and write
   `backend/fixtures/most_fy2023_<sheet>.json` for PME, HRM, RDI, AST, ILD and GAS following the
   notes in 8.2. Commit the JSON (it is sample data), not the workbook.
-  > BLOCKED: reference files missing (`reference/` is not in this environment, 2026-11-15).
-  > IN PROGRESS: `tools/extract_fixtures.py` is written for PME, HRM, RDI, AST, ILD from the 8.2
-  > notes but has never run against the real file; GAS refuses until its rows are confirmed in the
-  > workbook (`GAS_LAYOUT`). Next: put the workbook in `reference/`, run the script, check counts.
+  > DONE 2026-11-15: workbook supplied by the owner; fixtures extracted for all six sheets (PME 6,
+  > HRM 9, RDI 10, AST 6, ILD 31 activities; GAS as one money-measure line from rows 311/312).
+  > Formula data cells use Excel's saved results (D31).
 - [x] **P4.3** Write the tests of 8.1 first; then implement weights (7.2), progress (7.3) for all
   three measure types, office result (7.4) including status rounding and funds.
 - [x] **P4.4** Indicators (7.5), roll-up (7.6) for both rules, implementing view (7.7), ranking
   (7.8) with ties.
 - [x] **P4.5** Presets (7.10) as data, with a test that each preset loads into a valid profile.
 - [x] **P4.6** Golden tests for 8.2: six sheet results, the RDS roll-up, the ranking vector.
-  > BLOCKED: reference files missing (`reference/` is not in this environment, 2026-11-15).
-  > IN PROGRESS: `apps/scoring/tests/test_golden_most.py` holds all 8.2 expectations; the six sheet
-  > tests and the RDS roll-up skip until the P4.2 fixtures exist. The ranking vector already passes.
+  > DONE 2026-11-15: all six sheets, the RDS roll-up (86.19%) and the ranking vector pass; the same
+  > figures are reproduced through the API in `backend/tests/test_most_end_to_end.py`.
 - [x] **P4.7** Property tests: weights sum to 1; cumulative values are non-decreasing when
   actuals are non-negative; with `cap_at_100` no office exceeds 1; `budget_weighted` roll-up of
   identical children equals the child value.

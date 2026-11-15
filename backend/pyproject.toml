@@ -25,4 +25,5 @@ known-first-party = ["apps", "config"]
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["test_*.py"]
 addopts = "-q --strict-markers"
+markers = ["perf: timing tests; run without coverage tracing (make test-backend runs them separately)"]
 testpaths = ["apps", "tests"]

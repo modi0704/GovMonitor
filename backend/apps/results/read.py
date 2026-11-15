@@ -5,6 +5,8 @@ the live computation for an open one, flagged ``final`` / ``provisional``. Dashb
 exports and alerts (Phases 8–11) read results only through this module.
 """
 
+import threading
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from decimal import Decimal
 
@@ -87,12 +89,22 @@ def _from_row(row: PeriodResult, month: int) -> ResultView:
     )
 
 
-def _from_entry(entry, month: int, profile, snapshot: dict) -> ResultView:
+def _from_entry(entry, month: int, profile, snapshot: dict, with_detail: bool = True) -> ResultView:
     from apps.results.locking import _detail  # same per-activity detail as a frozen row
 
     result = entry.result
     at = result.at(month)
-    detail = _detail(entry, month, profile)
+    if with_detail:
+        detail = _detail(entry, month, profile)
+    else:  # summaries for the whole agency: figures and curves, no per-activity lists (P8.8)
+        detail = {
+            "series": {
+                "cum_plan": [jsonable(v) for v in result.cum_plan],
+                "cum_actual": [jsonable(v) for v in result.cum_actual],
+            },
+            "activities": [],
+            "indicators": [],
+        }
     return ResultView(
         office_id=str(entry.office.id),
         view=entry.view,
@@ -129,43 +141,77 @@ def data_stamp() -> int:
     return AuditLog.objects.aggregate(m=Max("id"))["m"] or 0
 
 
-def get_agency_results(period: ReportingPeriod) -> dict:
-    """(office id as str, view) -> ResultView, for every office with a result in this month.
+_LIVE: "OrderedDict[str, tuple]" = OrderedDict()
+_LIVE_LOCK = threading.Lock()
+_LIVE_MAX = 8
 
-    Locked months read their frozen rows. Open months are computed live and cached per (period,
-    profile version, latest data stamp) — P8.8.
+
+def clear_live_cache() -> None:
+    with _LIVE_LOCK:
+        _LIVE.clear()
+
+
+def _live(period: ReportingPeriod) -> tuple:
+    """(AgencyResults, engine profile, snapshot, summary views) for an open month.
+
+    Cached in this process per (agency, period, profile version, latest data stamp) — P8.8. Kept
+    in memory as objects (no pickling): a few entries of one computed month each.
     """
-    from django.core.cache import cache
+    profile_row = period.fiscal_year.profile
+    key = f"{period.agency_id}:{period.pk}:{profile_row.version}:{data_stamp()}"
+    with _LIVE_LOCK:
+        if key in _LIVE:
+            _LIVE.move_to_end(key)
+            return _LIVE[key]
+    agency = compute_agency(period)
+    snapshot = profile_row.snapshot()
+    month = period.month_index
+    views = {
+        (str(office_id), view): _from_entry(entry, month, agency.profile, snapshot, with_detail=False)
+        for (office_id, view), entry in agency.entries.items()
+        if entry.result is not None
+    }
+    value = (agency, agency.profile, snapshot, views)
+    with _LIVE_LOCK:
+        _LIVE[key] = value
+        while len(_LIVE) > _LIVE_MAX:
+            _LIVE.popitem(last=False)
+    return value
 
+
+def get_agency_results(period: ReportingPeriod) -> dict:
+    """(office id as str, view) -> ResultView for every office with a result in this month.
+
+    Locked months: the frozen rows (with their stored detail). Open months: live summaries (figures
+    and curves; per-activity detail comes from ``get_result``).
+    """
     month = period.month_index
     if period.status == ReportingPeriod.Status.LOCKED:
         rows = PeriodResult.objects.filter(period=period)
         return {(str(r.office_id), r.view): _from_row(r, month) for r in rows}
-    profile_row = period.fiscal_year.profile
-    key = f"gm:results:{period.agency_id}:{period.pk}:{profile_row.version}:{data_stamp()}"
-    cached = cache.get(key)
-    if cached is not None:
-        return cached
-    agency = compute_agency(period)
-    snapshot = profile_row.snapshot()
-    results = {
-        (str(office_id), view): _from_entry(entry, month, agency.profile, snapshot)
-        for (office_id, view), entry in agency.entries.items()
-        if entry.result is not None
-    }
-    cache.set(key, results, timeout=3600)
-    return results
+    return _live(period)[3]
 
 
 def get_result(period: ReportingPeriod, office, view: str = OWNER) -> ResultView | None:
-    """One office's result for one month: frozen when the month is locked, live otherwise."""
+    """One office's result for one month, with its activity and indicator detail: frozen when the
+    month is locked, live otherwise."""
     if view not in (OWNER, IMPLEMENTING):
         raise ValueError(f"unknown view {view!r}")
     office_id = getattr(office, "id", office)
     if period.status == ReportingPeriod.Status.LOCKED:
         row = PeriodResult.objects.filter(period=period, office_id=office_id, view=view).first()
         return _from_row(row, period.month_index) if row else None
-    return get_agency_results(period).get((str(office_id), view))
+    agency, profile, snapshot, _ = _live(period)
+    entry = agency.entries.get((office_id if not isinstance(office_id, str) else _as_uuid(office_id), view))
+    if entry is None or entry.result is None:
+        return None
+    return _from_entry(entry, period.month_index, profile, snapshot, with_detail=True)
+
+
+def _as_uuid(value):
+    import uuid
+
+    return uuid.UUID(value)
 
 
 def headline_of(rv: ResultView | None) -> dict | None:

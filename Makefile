@@ -69,7 +69,8 @@ lint-frontend:
 lint: lint-backend lint-frontend ## Ruff, ESLint and Prettier
 
 test-backend:
-	cd backend && $(PY) -m pytest --cov=apps.scoring.engine --cov-fail-under=95 --cov-report=term:skip-covered
+	cd backend && $(PY) -m pytest -m "not perf" --cov=apps.scoring.engine --cov-fail-under=95 --cov-report=term:skip-covered
+	cd backend && $(PY) -m pytest -m perf  # timing tests, without coverage tracing (P8.8)
 
 test-frontend:
 	cd frontend && npm test

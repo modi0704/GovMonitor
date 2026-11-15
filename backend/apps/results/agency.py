@@ -21,6 +21,7 @@ from apps.results.services import (
 from apps.scoring import engine
 from apps.scoring.types import OfficeResult
 from apps.structure.models import Office, OfficeGroup
+from apps.structure.ordering import tree_key
 
 OWNER = "owner"
 IMPLEMENTING = "implementing"
@@ -145,7 +146,13 @@ def compute_agency(period: ReportingPeriod) -> AgencyResults:
         offices=offices,
         entries=entries,
         groups=[
-            (g, list(g.members.order_by("office__path").values_list("office_id", flat=True)))
+            (
+                g,
+                sorted(
+                    g.members.values_list("office_id", flat=True),
+                    key=lambda oid: tree_key(offices[oid], offices),
+                ),
+            )
             for g in OfficeGroup.objects.order_by("sort_order", "name")
         ],
     )
@@ -160,7 +167,7 @@ def compute_agency(period: ReportingPeriod) -> AgencyResults:
         return engine.ranking_value(result, month, profile)
 
     for parent_id, kids in children.items():
-        ordered = sorted(kids, key=lambda k: offices[k].path)
+        ordered = sorted(kids, key=lambda k: tree_key(offices[k], offices))
         rows_ranked = engine.rank([(str(k), value(k)) for k in ordered])
         agency.sibling_rankings[parent_id] = rows_ranked
         for r in rows_ranked:

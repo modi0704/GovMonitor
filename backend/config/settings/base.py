@@ -158,15 +158,6 @@ _email = parse_email_url(env("EMAIL_URL", ""))
 EMAIL_ENABLED = _email.pop("EMAIL_ENABLED")
 globals().update(_email)
 
-# --- Cache (live results, P8.8). Per process; entries are keyed by a data stamp, never stale. -----
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "govmonitor",
-        "OPTIONS": {"MAX_ENTRIES": 200},
-    }
-}
-
 # --- REST framework --------------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication"],

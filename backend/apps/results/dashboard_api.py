@@ -18,6 +18,7 @@ from apps.planning.numbers import plain
 from apps.results import read
 from apps.results.agency import IMPLEMENTING, OWNER
 from apps.structure.models import Office, OfficeGroupMember
+from apps.structure.ordering import tree_key
 
 
 def get_period(period_id) -> ReportingPeriod:
@@ -117,9 +118,9 @@ class DashboardView(APIView):
         view = IMPLEMENTING if p.get("view") == IMPLEMENTING else OWNER
         office = perm.get_office_or_404(request.user, p.get("office"))
         month = period.month_index
-        results = read.get_agency_results(period)
+        results = read.get_agency_results(period)  # summaries for children and rankings
         profile = read.period_profile(period, results)
-        rv = results.get((str(office.id), view))
+        rv = read.get_result(period, office, view)  # this office with its detail
 
         scope = perm.scope(request.user)
         visible = {str(o.id): o for o in scope}
@@ -162,7 +163,7 @@ class DashboardView(APIView):
         ):
             groups.setdefault(m.group, []).append(str(m.office_id))
         for group, member_ids in groups.items():
-            ordered = sorted(member_ids, key=lambda oid: visible[oid].path)
+            ordered = sorted(member_ids, key=lambda oid: tree_key(visible[oid], visible))
             rankings.append(
                 {
                     "set": {"kind": "group", "id": str(group.id), "name": group.name},
@@ -315,7 +316,9 @@ class RankingsView(APIView):
         period = get_period(request.query_params.get("period"))
         scope = {str(o.id): o for o in perm.scope(request.user)}
         parents = {}
-        for o in Office.objects.filter(parent_id__in=[o.pk for o in scope.values()]).order_by("path"):
+        for o in Office.objects.filter(parent_id__in=[o.pk for o in scope.values()]).order_by(
+            "sort_order", "name"
+        ):
             if str(o.id) in scope:
                 parents.setdefault(str(o.parent_id), []).append(o)
         sets = [
@@ -324,7 +327,7 @@ class RankingsView(APIView):
                 "kind": "children",
                 "name": f"Offices under {scope[pid].code} {scope[pid].name}",
             }
-            for pid in sorted(parents, key=lambda p: scope[p].path)
+            for pid in sorted(parents, key=lambda p: tree_key(scope[p], scope))
             if len(parents[pid]) >= 2
         ]
         group_members = {}
@@ -339,7 +342,10 @@ class RankingsView(APIView):
             member_ids, allow_impl = [str(o.id) for o in parents[ident]], False
         elif kind == "group" and any(str(g.id) == ident for g in group_members):
             group = next(g for g in group_members if str(g.id) == ident)
-            member_ids, allow_impl = sorted(group_members[group], key=lambda oid: scope[oid].path), True
+            member_ids, allow_impl = (
+                sorted(group_members[group], key=lambda oid: tree_key(scope[oid], scope)),
+                True,
+            )
         elif not sets:
             return Response({"sets": [], "set": None, "rows": []})
         else:

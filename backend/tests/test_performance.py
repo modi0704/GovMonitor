@@ -6,15 +6,15 @@ import os
 import time
 
 import pytest
-from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
+from apps.results import read
 from tests.factories import Json, api_client
 from tests.perf_world import build
 from tests.reporting_helpers import client, reporting_world
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.perf]
 # Slower CI machines may scale the budget (e.g. PERF_FACTOR=1.5); the product target is 2 s.
 BUDGET = 2.0 * float(os.environ.get("PERF_FACTOR", "1"))
 
@@ -29,12 +29,12 @@ def dashboard(c, office, period):
 
 
 def test_ceiling_dashboard_under_two_seconds_and_constant_queries():
-    cache.clear()
+    read.clear_live_cache()
     small = reporting_world("small")
     _, _, small_queries = dashboard(
         client(small, "boss"), small["root"], type("P", (), {"id": small["periods"][2]["id"]})
     )
-    cache.clear()
+    read.clear_live_cache()
     w = build()
     assert (w["offices"], w["activities"]) == (501, 5000)
     c = Json(api_client("boss@perf.gov"))
@@ -45,7 +45,7 @@ def test_ceiling_dashboard_under_two_seconds_and_constant_queries():
 
 
 def test_live_results_are_cached_until_data_changes():
-    cache.clear()
+    read.clear_live_cache()
     w = reporting_world()
     boss, div = client(w, "boss"), client(w, "div")
     feb = type("P", (), {"id": w["periods"][2]["id"]})

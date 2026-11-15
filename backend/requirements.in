@@ -1,0 +1,16 @@
+# Runtime dependencies. Compile with:  make lock   (uv pip compile --generate-hashes)
+# Licence rule (MASTERPLAN 5.2): MIT, BSD, Apache-2.0, PSF, ISC or PostgreSQL only — see docs/THIRD_PARTY.md
+Django>=5.2.19,<5.3
+djangorestframework==3.18.3
+psycopg[binary]==3.3.9
+dj-database-url==3.1.2
+whitenoise==6.12.0
+gunicorn==27.0.1
+pyotp==2.11.2
+qrcode==8.2
+XlsxWriter==3.3.1
+openpyxl==3.1.5
+python-pptx==1.0.2
+django-storages[s3]==1.14.6
+boto3==1.44.3
+cryptography==50.0.2

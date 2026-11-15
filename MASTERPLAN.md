@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 0
-LAST COMPLETED TASK: P0.1
-NEXT TASK          : P0.2
-BLOCKERS / NOTES   : reference/ not present in this environment: P4.2 and P4.6 will be blocked
+LAST COMPLETED TASK: P0.2
+NEXT TASK          : P0.3
+BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -199,23 +199,25 @@ must be checked in task P0.2 and the exact versions written into this table.
 
 | Layer | Choice | Version to pin | Notes |
 |---|---|---|---|
-| Language | Python | 3.13.x | Must be supported by the chosen Django release. |
-| Backend framework | Django | 5.2 LTS (*verified*: extended support to April 2028) | Do not use 6.0/6.1 (short support). Plan an upgrade to 6.2 LTS after its release (expected April 2027). |
-| API | Django REST Framework | latest compatible | JSON only. |
-| Database | PostgreSQL | 18.x (*verified* current major; 19 reaches general availability late November 2026 — do not adopt until Django 5.2 lists it as supported) | Minimum supported by the app: 16. |
-| Frontend | React + TypeScript + Vite | check in P0.2 | Built to `frontend/dist`, served by WhiteNoise. |
-| Data grid | AG Grid Community **or** TanStack Table | check in P0.2 | Licence must be MIT, BSD or Apache-2.0. No commercial-licence grid. |
-| Charts (web) | Apache ECharts | check in P0.2 | Bundled, no CDN. |
-| Excel writing | XlsxWriter | check in P0.2 | Writes formulas and formats. |
-| Excel reading | openpyxl | check in P0.2 | Used by plan import and fixture extraction. |
-| PowerPoint | python-pptx | check in P0.2 | Native charts. |
-| Two-factor | django-otp (TOTP) | check in P0.2 | Optional per user. |
-| File storage | Django storage API; `django-storages` for S3-compatible | check in P0.2 | Selected by environment variable. |
-| App server | Gunicorn + WhiteNoise | check in P0.2 | |
-| Reverse proxy / TLS | Caddy | check in P0.2 | Optional container. |
+| Language | Python | 3.13.18 (image `python:3.13-slim`) | Supported by Django 5.2. |
+| Backend framework | Django | 5.2.19 (5.2 LTS, *verified*: extended support to April 2028) | Do not use 6.0/6.1 (short support). Plan an upgrade to 6.2 LTS after its release (expected April 2027). |
+| API | Django REST Framework | 3.18.3 | JSON only. |
+| DB driver | psycopg (binary) | 3.3.9 | LGPL-3.0 — licence exception D20. |
+| Database | PostgreSQL | 18.7 in the compose image (`postgres:18`); CI and dev tested on 16 (the minimum) | Minimum supported by the app: 16. Do not adopt 19 until Django 5.2 lists it. |
+| Frontend | React + TypeScript + Vite | React 19.3.1, react-router-dom 7.18.5, TypeScript 6.0.3, Vite 8.3.8, Node 22 | TypeScript 7 not used: typescript-eslint 8.72 supports <6.1 (D21). Built to `frontend/dist`, served by WhiteNoise. |
+| Data grid | TanStack Table | 9.3.1 (MIT) | Headless; the grid UI is our own component. |
+| Charts (web) | Apache ECharts | 6.1.0 (Apache-2.0) | Bundled, no CDN. |
+| Excel writing | XlsxWriter | 3.3.1 | Writes formulas and formats. |
+| Excel reading | openpyxl | 3.1.5 | Used by plan import and fixture extraction. |
+| PowerPoint | python-pptx | 1.0.2 | Native charts. |
+| Two-factor | pyotp (TOTP) + qrcode (SVG) | 2.11.2 / 8.2 | Replaces django-otp (Unlicense, not on the allow-list) — D19. Optional per user. |
+| File storage | Django storage API; `django-storages[s3]` + boto3 | 1.14.6 / 1.44.3 | Selected by environment variable. |
+| Licence signatures | cryptography | 50.0.2 | Ed25519 (Phase 13). |
+| App server | Gunicorn + WhiteNoise | 27.0.1 / 6.12.0 | |
+| Reverse proxy / TLS | Caddy | 2.11.9 (image `caddy:2`) | Optional container. |
 | Packaging | Docker + Docker Compose | — | Same images for both deployment modes. |
-| Tests | pytest + pytest-django; Vitest; Playwright (smoke only) | check in P0.2 | |
-| Lint/format | Ruff; ESLint + Prettier | check in P0.2 | |
+| Tests | pytest + pytest-django + pytest-cov; Vitest + jsdom + Testing Library; Playwright (smoke only) | 9.2.0 / 4.14.0 / 7.1.0; 5.1.0 / 31.0.1 / 16.3.3; 1.63.0 | Property tests use seeded random generators (no Hypothesis — MPL-2.0, D22). |
+| Lint/format | Ruff; ESLint + typescript-eslint + Prettier | 0.17.5; 10.15.0 / 8.72.2 / 3.10.1 | |
 
 **Licence rule:** every runtime dependency must be MIT, BSD, Apache-2.0, PSF, ISC or PostgreSQL
 licensed. P0.2 records each licence in `docs/THIRD_PARTY.md`. No GPL/AGPL and no "free for
@@ -685,7 +687,7 @@ passes.
 
 - [x] **P0.1** Initialise git, `.gitignore` (include `reference/`, `.env`, `node_modules`,
   `frontend/dist`, `__pycache__`), `README.md`, the directory layout of section 5.3.
-- [ ] **P0.2** Decide exact versions for every row of the table in 5.2 by checking each project's
+- [x] **P0.2** Decide exact versions for every row of the table in 5.2 by checking each project's
   official site; write them into the table in this file and into `backend/requirements.txt`
   (hashes pinned with `pip-compile` or `uv`) and `frontend/package.json` + lockfile. Record every
   dependency's licence in `docs/THIRD_PARTY.md`; replace any that breaks the licence rule.
@@ -1164,6 +1166,10 @@ changed, why. Start ids at D19.
 | ID | Date | Change | Reason |
 |---|---|---|---|
 | — | 2026-11-15 | `export_job` and `import_job` from the Step 1 proposal are merged into one `job` table; `support_grant` table added. Table count stays 27. | Simpler queue; makes the platform owner's "no data access without a grant" rule enforceable. |
+| D19 | 2026-11-15 | Two-factor uses `pyotp` + `qrcode` instead of `django-otp`. (Claude Code, P0.2) | django-otp is under the Unlicense, which is not on the 5.2 licence allow-list; pyotp is MIT. |
+| D20 | 2026-11-15 | Licence exception: `psycopg` (LGPL-3.0) is allowed as the PostgreSQL driver. (Claude Code, P0.2) | Django supports only psycopg/psycopg2, both LGPL. Used unmodified and dynamically loaded, which LGPL permits commercially. Product owner should confirm. |
+| D21 | 2026-11-15 | TypeScript pinned to 6.0.3, not 7.x. (Claude Code, P0.2) | typescript-eslint 8.72 requires TypeScript <6.1. Revisit when it supports 7. |
+| D22 | 2026-11-15 | Property tests (P4.7) use seeded `random` generators instead of Hypothesis. (Claude Code, P0.2) | Avoid an MPL-2.0 dependency; seeded tests are reproducible. |
 
 ---
 

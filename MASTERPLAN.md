@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 1
-LAST COMPLETED TASK: P0.7
-NEXT TASK          : P1.1
+LAST COMPLETED TASK: P1.1
+NEXT TASK          : P1.2
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -717,7 +717,7 @@ deliberately wrong query.
 
 **Verify start state:** Phase 0 exit checks pass.
 
-- [ ] **P1.1** Models and migrations: `agency`, `user`, `platform_admin`, `support_grant`,
+- [x] **P1.1** Models and migrations: `agency`, `user`, `platform_admin`, `support_grant`,
   `role_assignment` (the `office_id` foreign key is added in P2.1; create the column now as a
   plain uuid if needed).
 - [ ] **P1.2** A reusable migration operation `EnableTenantRLS(table)` that enables and forces RLS
@@ -1170,6 +1170,7 @@ changed, why. Start ids at D19.
 | D20 | 2026-11-15 | Licence exception: `psycopg` (LGPL-3.0) is allowed as the PostgreSQL driver. (Claude Code, P0.2) | Django supports only psycopg/psycopg2, both LGPL. Used unmodified and dynamically loaded, which LGPL permits commercially. Product owner should confirm. |
 | D21 | 2026-11-15 | TypeScript pinned to 6.0.3, not 7.x. (Claude Code, P0.2) | typescript-eslint 8.72 requires TypeScript <6.1. Revisit when it supports 7. |
 | D22 | 2026-11-15 | Property tests (P4.7) use seeded `random` generators instead of Hypothesis. (Claude Code, P0.2) | Avoid an MPL-2.0 dependency; seeded tests are reproducible. |
+| D24 | 2026-11-15 | Extra columns: `user.recovery_codes` (jsonb, hashed TOTP recovery codes), `user.email_opt_out` (P11.4), `platform_admin.failed_attempts`/`locked_until`/`created_at`, `support_grant.revoked_at`/`created_at`. Table count unchanged. (Claude Code) | Needed by P1.5 recovery codes, P11.4 opt-out, platform sign-in lockout, and early revocation of a support grant. |
 
 ---
 

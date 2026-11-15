@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 9
-LAST COMPLETED TASK: P9.2
-NEXT TASK          : P9.3
+LAST COMPLETED TASK: P9.3
+NEXT TASK          : P9.4
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -982,7 +982,7 @@ read-only user scoped to one division sees only that division.
 - [x] **P9.2** `exports/xlsx_writer.py`: office sheet exactly as 9.1, driven by a layout
   constants module (column letters and header texts in one place so a paid custom template can
   override them).
-- [ ] **P9.3** SUMMARY sheet (9.2).
+- [x] **P9.3** SUMMARY sheet (9.2).
 - [ ] **P9.4** Export dialog: scope (one office / office and everything beneath / whole agency),
   month, view. Export is audited.
 - [ ] **P9.5** Acceptance test of 9.3 (recalculate and compare with the engine) for the worked

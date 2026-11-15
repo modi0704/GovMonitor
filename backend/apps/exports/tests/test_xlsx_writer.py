@@ -90,3 +90,37 @@ def test_sheet_names_are_valid_and_unique():
     assert sheet_name("a-b", used) == "a-b-2"
     assert sheet_name("summary", used) == "summary-2"
     assert len(sheet_name("X" * 40, used)) == 31
+
+
+def test_summary_sheet_lists_the_scope_in_tree_order_with_dashboard_figures():
+    w = worked_example_world()
+    period = w["periods"][3]["id"]
+    data, _ = build(w["agency"], w["root"], period, scope="agency")
+    wb = openpyxl.load_workbook(data)
+    assert wb.sheetnames == ["SUMMARY", "DIV"]  # only DIV owns a plan
+    ws = wb["SUMMARY"]
+    assert ws["A2"].value == w["agency"].name
+    assert ws["A4"].value == "As of March 2026"
+    assert ws["A5"].value.startswith("Scoring preset: workbook compatible")
+    assert ws["A6"].value.startswith("PROVISIONAL")
+    assert [ws[f"I{9}"].value, ws["D9"].value] == ["Rank among siblings", "Cumulative plan"]
+    codes = [ws[f"A{r}"].value for r in range(10, ws.max_row + 1)]
+    assert codes == ["ROOT", "DIV", "UNIT", "OTHER"]
+    assert ws["A11"].hyperlink.location == "'DIV'!A1"
+    assert ws["A11"].alignment.indent == 1 and ws["A12"].alignment.indent == 2
+    dash = w["boss"].get(f"/api/v1/dashboard?office={w['div'].id}&period={period}").json()["headline"]
+    assert ws["E11"].value == pytest.approx(float(dash["cum_actual"]))
+    assert ws["D11"].value == pytest.approx(0.45 + 0.55)  # March cumulative plan 1.00
+    assert ws["G11"].value == "DELAYED" and ws["C11"].value == pytest.approx(1_000_000)
+    assert ws["G12"].value == "No result" and ws["G13"].value == "No result"  # UNIT owns no plan
+
+
+def test_summary_states_a_non_default_profile_and_final_months():
+    w = worked_example_world(profile={"preset": "capped_with_tolerance"})
+    period = w["periods"][1]["id"]
+    assert w["boss"].post(f"/api/v1/periods/{period}/lock").status_code == 200
+    data, _ = build(w["agency"], w["div"], period)
+    ws = openpyxl.load_workbook(data)["SUMMARY"]
+    assert ws["A5"].value.startswith("Scoring preset: capped with tolerance")
+    assert ws["A6"].value.startswith("FINAL")
+    assert "computed by the system" in ws["A8"].value

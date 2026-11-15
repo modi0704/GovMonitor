@@ -16,6 +16,7 @@ import xlsxwriter
 
 from apps.exports import office_sheet
 from apps.exports.layout import DEFAULT, MONTH_ABBR, MONTH_FULL, OfficeSheetLayout
+from apps.results.read import period_profile
 from apps.results.services import load_activity_actuals, load_indicator_actuals
 from apps.tenancy.models import Agency
 
@@ -348,18 +349,106 @@ def build(sc, layout: OfficeSheetLayout = DEFAULT) -> tuple[bytes, dict]:
     fy = sc.fiscal_year
     actuals = load_activity_actuals(fy)
     ind_actuals = load_indicator_actuals(fy)
-    sheets = []
+    profile = period_profile(sc.period)
+    sheets = {}
     for office in sc.offices:
-        data = office_sheet.load(office, sc.period, actuals, ind_actuals)
+        data = office_sheet.load(office, sc.period, actuals, ind_actuals, profile)
         if data is None:
             continue
         ws = wb.add_worksheet(sheet_name(office.code, used))
-        sheets.append(write_office_sheet(wb, ws, data, ctx, fmt, layout))
-    write_summary(wb, summary_ws, sc, ctx, fmt)
+        sheets[office.id] = write_office_sheet(wb, ws, data, ctx, fmt, layout)
+    rows = write_summary(summary_ws, sc, ctx, fmt, profile, sheets)
     wb.close()
-    return out.getvalue(), {"offices": len(sc.offices), "sheets": len(sheets) + 1}
+    return out.getvalue(), {"offices": rows, "sheets": len(sheets) + 1}
 
 
-def write_summary(wb, ws, sc, ctx, fmt) -> None:
-    """SUMMARY sheet (9.2) — filled in by P9.3."""
+SUMMARY_HEADERS = (
+    ("Office", 16),
+    ("Name", 44),
+    ("Funds total", 18),
+    ("Cumulative plan", 14),
+    ("Cumulative actual", 14),
+    ("Variance", 12),
+    ("Status", 14),
+    ("Indicator score", 14),
+    ("Rank among siblings", 12),
+)
+SUMMARY_HEADER_ROW = 9  # 1-based
+
+
+def profile_text(profile) -> str:
+    from apps.scoring.presets import PRESET_DESCRIPTIONS
+
+    name = profile.preset or "custom"
+    described = PRESET_DESCRIPTIONS.get(name)
+    if described:
+        return f"{name.replace('_', ' ')} — {described}"
+    tolerance = f"{float(profile.on_time_tolerance) * 100:g}"
+    ceiling = "yes" if profile.cap_at_100 else "no"
+    parts = [
+        f"weights: {profile.weighting.replace('_', ' ')}",
+        f"100% ceiling: {ceiling}",
+        f"on-time tolerance: {tolerance} points",
+        f"roll-up: {profile.rollup.replace('_', ' ')}",
+    ]
+    return "custom — " + "; ".join(parts)
+
+
+def write_summary(ws, sc, ctx, fmt, profile, sheets: dict) -> int:
+    """SUMMARY sheet (9.2): one row per office in scope, in tree order, indented by depth. Every
+    figure comes from the results read path, so it is the dashboard's number for the same month."""
+    from apps.planning.models import ReportingPeriod
+    from apps.results import read
+
+    results = read.get_agency_results(sc.period)
+    final = sc.period.status == ReportingPeriod.Status.LOCKED
     ws.write("A1", "Performance summary", fmt.title)
+    ws.write("A2", ctx["agency"], fmt.bold)
+    ws.write("A3", f"Fiscal Year {ctx['fiscal_year']}")
+    ws.write("A4", f"As of {ctx['as_of']}")
+    ws.write("A5", f"Scoring preset: {profile_text(profile)}")
+    ws.write(
+        "A6",
+        "FINAL — this month is locked" if final else "PROVISIONAL — this month is still open and may change",
+        fmt.bold,
+    )
+    ws.write("A7", f"{'Implementing' if sc.view == 'implementing' else 'Owner'} view")
+    if not office_sheet.formulas_reproduce(profile):
+        ws.write(
+            "A8",
+            "Under this scoring profile the total rows of each office sheet hold values computed by "
+            "the system instead of formulas.",
+        )
+    hr = SUMMARY_HEADER_ROW - 1
+    for c, (text, width) in enumerate(SUMMARY_HEADERS):
+        ws.write(hr, c, text, fmt.header)
+        ws.set_column(c, c, width)
+    row = hr + 1
+    for office in sc.offices:
+        rv = results.get((str(office.id), sc.view))
+        indent = fmt.indent[min(sc.depth(office), len(fmt.indent) - 1)]
+        smap = sheets.get(office.id) if sc.view == "owner" else None
+        if smap is not None:
+            ws.write_url(row, 0, f"internal:'{smap.name}'!A1", indent, string=office.code)
+        else:
+            ws.write(row, 0, office.code, indent)
+        ws.write(row, 1, office.name)
+        if rv is None:
+            ws.write(row, 6, "No result")
+        else:
+            ws.write_number(row, 2, f(rv.funds_total), fmt.money)
+            ws.write_number(row, 3, f(rv.cum_plan), fmt.pct)
+            ws.write_number(row, 4, f(rv.cum_actual), fmt.pct)
+            ws.write_number(row, 5, f(rv.variance), fmt.pct)
+            ws.write(row, 6, rv.status_label)
+            if rv.indicator_score is not None:
+                ws.write_number(row, 7, f(rv.indicator_score), fmt.pct)
+            if rv.rank_sibling is not None:
+                ws.write_number(row, 8, rv.rank_sibling)
+        row += 1
+    ws.freeze_panes(SUMMARY_HEADER_ROW, 2)
+    ws.set_landscape()
+    ws.set_paper(9)  # A4
+    ws.fit_to_pages(1, 0)
+    ws.print_area(0, 0, max(row - 1, hr), len(SUMMARY_HEADERS) - 1)
+    return row - hr - 1

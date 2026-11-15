@@ -50,14 +50,17 @@ class OfficeSheet:
 
     @property
     def formulas_reproduce_engine(self) -> bool:
-        """``=O*M/I`` and ``=L/$L$t`` give the engine's numbers only under cost-share weights
-        without the 100% cap; any other profile gets engine values in the total rows (9.1)."""
-        p = self.profile
-        return p.preset == DEFAULT_PRESET and p.weighting == "cost_share" and not p.cap_at_100
+        return formulas_reproduce(self.profile)
 
     @property
     def status(self) -> str:
         return self.result.status[self.month - 1]
+
+
+def formulas_reproduce(profile) -> bool:
+    """``=O*M/I`` and ``=L/$L$t`` give the engine's numbers only under the default preset's cost-share
+    weights without the 100% cap; any other profile gets engine values in the total rows (9.1)."""
+    return profile.preset == DEFAULT_PRESET and profile.weighting == "cost_share" and not profile.cap_at_100
 
 
 def plan_for(office, period: ReportingPeriod) -> Plan | None:

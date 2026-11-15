@@ -877,3 +877,7 @@ label.inline {
   background: var(--surface-2);
   color: var(--text-muted);
 }
+.text-delayed {
+  color: var(--delayed);
+  font-weight: 600;
+}

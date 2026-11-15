@@ -13,6 +13,7 @@ const agencyAdmin = (me: Me) => me.is_agency_admin;
 export const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Home', show: always },
   { to: '/plans', label: 'Plans', show: always },
+  { to: '/plans/approvals', label: 'Approvals', show: agencyAdmin },
   { to: '/fiscal-years', label: 'Fiscal years', show: always },
   { to: '/structure', label: 'Structure', show: always },
   { to: '/groups', label: 'Groups', show: always },

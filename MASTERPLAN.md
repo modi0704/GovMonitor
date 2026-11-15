@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 5
-LAST COMPLETED TASK: P5.7
-NEXT TASK          : P5.8
+LAST COMPLETED TASK: P5.8
+NEXT TASK          : P5.9
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -861,7 +861,7 @@ agency with no code changes.
   with the same `lineage_id` per row; approving the new version marks the old one `superseded`;
   rows removed in the new version keep their past actuals but stop being scored for open months;
   a version comparison view lists added, removed and changed rows.
-- [ ] **P5.8** Plan approval queue for the agency administrator; approved budget entry and a
+- [x] **P5.8** Plan approval queue for the agency administrator; approved budget entry and a
   "budget vs planned cost" line per office.
 - [ ] **P5.9** Copy last year's plan into a new fiscal year as a draft (targets kept, actuals
   not).

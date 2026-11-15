@@ -22,6 +22,7 @@ const ScoringProfilePage = lazy(() => import('./pages/planning/ScoringProfilePag
 const PlansPage = lazy(() => import('./pages/planning/PlansPage'));
 const PlanEditorPage = lazy(() => import('./pages/planning/PlanEditorPage'));
 const PlanVersionsPage = lazy(() => import('./pages/planning/PlanVersionsPage'));
+const ApprovalsPage = lazy(() => import('./pages/planning/ApprovalsPage'));
 const PlatformAgenciesPage = lazy(() => import('./platform/PlatformAgenciesPage'));
 const PlatformSignInPage = lazy(() => import('./platform/PlatformSignInPage'));
 
@@ -128,6 +129,14 @@ export default function App() {
           element={
             <Page>
               <PlanEditorPage />
+            </Page>
+          }
+        />
+        <Route
+          path="plans/approvals"
+          element={
+            <Page>
+              <ApprovalsPage />
             </Page>
           }
         />

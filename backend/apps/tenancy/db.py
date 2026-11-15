@@ -5,6 +5,8 @@ from django.db import connections
 
 # Tables where app_user may only INSERT and SELECT (MASTERPLAN 6.5). Filled in by later phases.
 APPEND_ONLY_TABLES: tuple[str, ...] = ("audit_log",)
+# Tables app_user may not touch at all; only app_owner (platform-owner operations) reads them.
+OWNER_ONLY_TABLES: tuple[str, ...] = ("platform_admin",)
 
 
 def apply_grants(using: str) -> None:
@@ -25,6 +27,10 @@ def apply_grants(using: str) -> None:
         cur.execute(f"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {q_role}")
         cur.execute(f"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO {q_role}")
         cur.execute(f"GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO {q_role}")
+        for table in OWNER_ONLY_TABLES:
+            cur.execute("SELECT to_regclass(%s)", [f"public.{table}"])
+            if cur.fetchone()[0] is not None:
+                cur.execute(f"REVOKE ALL ON {connection.ops.quote_name(table)} FROM {q_role}")
         for table in APPEND_ONLY_TABLES:
             cur.execute("SELECT to_regclass(%s)", [f"public.{table}"])
             if cur.fetchone()[0] is not None:

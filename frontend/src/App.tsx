@@ -7,6 +7,8 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import GroupsPage from './pages/GroupsPage';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
+import FiscalYearsPage from './pages/planning/FiscalYearsPage';
+import ScoringProfilePage from './pages/planning/ScoringProfilePage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SecurityPage from './pages/SecurityPage';
 import SetupWizardPage from './pages/SetupWizardPage';
@@ -44,6 +46,8 @@ export default function App() {
         <Route path="users" element={<UsersPage />} />
         <Route path="setup" element={<SetupWizardPage />} />
         <Route path="audit" element={<AuditPage />} />
+        <Route path="fiscal-years" element={<FiscalYearsPage />} />
+        <Route path="fiscal-years/:fyId/scoring" element={<ScoringProfilePage />} />
       </Route>
       <Route path="/platform/sign-in" element={<PlatformSignInPage />} />
       <Route path="/platform" element={<PlatformAgenciesPage />} />

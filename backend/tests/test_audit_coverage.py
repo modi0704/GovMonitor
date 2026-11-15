@@ -68,6 +68,9 @@ class World:
     def new_group(self):
         return self.admin.post("/api/v1/groups", {"name": "G"}).json()["id"]
 
+    def fiscal_year(self):
+        return self.admin.post("/api/v1/fiscal-years", {"label": "FY", "start_year": 2026}).json()
+
     def new_level(self):
         self.admin.put("/api/v1/levels", {"names": ["Agency", "Level 1", "Spare"]})
         return [lv for lv in self.admin.get("/api/v1/levels").json() if lv["name"] == "Spare"][0]["id"]
@@ -187,6 +190,15 @@ SCENARIOS = {
     ("group", "DELETE"): lambda w: w.admin.delete(f"/api/v1/groups/{w.new_group()}"),
     ("group-members", "PUT"): lambda w: w.admin.put(
         f"/api/v1/groups/{w.new_group()}/members", {"office_ids": [str(w.a.id)]}
+    ),
+    ("fiscal-years", "POST"): lambda w: w.admin.post(
+        "/api/v1/fiscal-years", {"label": "FY1", "start_year": 2026}
+    ),
+    ("fiscal-year", "PATCH"): lambda w: w.admin.patch(
+        f"/api/v1/fiscal-years/{w.fiscal_year()['id']}", {"status": "open"}
+    ),
+    ("scoring-profile", "PATCH"): lambda w: w.admin.patch(
+        f"/api/v1/scoring-profiles/{w.fiscal_year()['profile_id']}", {"cap_at_100": True}
     ),
     ("platform-login", "POST"): lambda w: (
         w.platform(),

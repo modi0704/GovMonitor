@@ -116,3 +116,52 @@ export interface AuditPage {
   actions: string[];
   entity_types: string[];
 }
+
+export interface Period {
+  id: string;
+  month_index: number;
+  start_date: string;
+  end_date: string;
+  cutoff_at: string;
+  status: 'open' | 'locked';
+  locked_at: string | null;
+}
+
+export interface FiscalYear {
+  id: string;
+  label: string;
+  start_date: string;
+  end_date: string;
+  status: 'draft' | 'open' | 'closed';
+  preset: string;
+  profile_id: string;
+  periods?: Period[];
+}
+
+export interface ScoringProfile {
+  id: string;
+  fiscal_year_id: string;
+  version: number;
+  locked_months: number;
+  preset: string;
+  weighting: 'cost_share' | 'equal' | 'manual';
+  cap_at_100: boolean;
+  on_time_tolerance: string;
+  label_ahead: string;
+  label_on_time: string;
+  label_delayed: string;
+  rollup: 'budget_weighted' | 'simple_average';
+  indicator_weighting: 'equal' | 'manual';
+  indicator_rollup: 'all_indicators' | 'office_scores';
+  ranking_metric: 'cumulative_actual' | 'variance' | 'actual_over_plan';
+  mov_required: boolean;
+  auto_lock: boolean;
+  cutoff_day: number;
+  show_actual_amounts: boolean;
+}
+
+export interface Preset {
+  name: string;
+  description: string;
+  settings: Record<string, unknown>;
+}

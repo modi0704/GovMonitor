@@ -8,4 +8,5 @@ urlpatterns = [
     path("", include("apps.tenancy.urls")),
     path("", include("apps.structure.urls")),
     path("", include("apps.audit.urls")),
+    path("", include("apps.planning.urls")),
 ]

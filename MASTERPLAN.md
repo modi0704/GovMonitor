@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 9
-LAST COMPLETED TASK: P9.1
-NEXT TASK          : P9.2
+LAST COMPLETED TASK: P9.2
+NEXT TASK          : P9.3
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -979,7 +979,7 @@ read-only user scoped to one division sees only that division.
 
 - [x] **P9.1** Jobs API on top of the queue built in P7.7 (create, poll status, download
   result) and a "My exports" list.
-- [ ] **P9.2** `exports/xlsx_writer.py`: office sheet exactly as 9.1, driven by a layout
+- [x] **P9.2** `exports/xlsx_writer.py`: office sheet exactly as 9.1, driven by a layout
   constants module (column letters and header texts in one place so a paid custom template can
   override them).
 - [ ] **P9.3** SUMMARY sheet (9.2).

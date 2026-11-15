@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 4
-LAST COMPLETED TASK: P4.4
-NEXT TASK          : P4.5
+LAST COMPLETED TASK: P4.5
+NEXT TASK          : P4.7 (P4.6 blocked)
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 BLOCKED (marked in place); working from the 8.1 worked example. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -814,7 +814,7 @@ agency with no code changes.
   three measure types, office result (7.4) including status rounding and funds.
 - [x] **P4.4** Indicators (7.5), roll-up (7.6) for both rules, implementing view (7.7), ranking
   (7.8) with ties.
-- [ ] **P4.5** Presets (7.10) as data, with a test that each preset loads into a valid profile.
+- [x] **P4.5** Presets (7.10) as data, with a test that each preset loads into a valid profile.
 - [ ] **P4.6** Golden tests for 8.2: six sheet results, the RDS roll-up, the ranking vector.
   > BLOCKED: reference files missing (`reference/` is not in this environment, 2026-11-15).
 - [ ] **P4.7** Property tests: weights sum to 1; cumulative values are non-decreasing when

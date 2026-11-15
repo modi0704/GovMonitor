@@ -36,8 +36,25 @@ def worked_example_world(months=3, profile=None):
     return w
 
 
-def rdi_world():
-    """One office RDI with the MOST FY2023 RDI plan and its twelve months of accomplishments."""
+OUTLINE_KINDS = ("outcome", "outcome_indicator", "output", "output_indicator", "program", "project")
+
+
+def with_outline(rows):
+    """The plan rows under one generic outline chain (outcome → … → project), for layout tests."""
+    outline, parent = [], None
+    for depth, kind in enumerate(OUTLINE_KINDS):
+        key = f"outline-{kind}"
+        outline.append(
+            {"client_key": key, "parent": parent, "row_kind": kind, "code": f"X{depth + 1}.",
+             "title": kind.replace("_", " ").title(), "sort_order": -100 + depth}
+        )  # fmt: skip
+        parent = key
+    return outline + [{**r, "parent": parent} for r in rows]
+
+
+def rdi_world(outline=False):
+    """One office RDI with the MOST FY2023 RDI plan and its twelve months of accomplishments
+    (``outline``: placed under a generic outcome → project chain)."""
     agency = make_agency("most")
     root = make_root(agency)
     rds = make_office(root, "RDS")
@@ -48,6 +65,8 @@ def rdi_world():
     api.patch(f"/api/v1/fiscal-years/{fy['id']}", {"status": "open"})
     periods = {p["month_index"]: p for p in api.get(f"/api/v1/fiscal-years/{fy['id']}").json()["periods"]}
     rows = fixture_plans()["RDI"]
+    if outline:
+        rows = with_outline(rows)
     plan = api.post("/api/v1/plans", {"office_id": str(rdi.id), "fiscal_year_id": fy["id"]}).json()
     saved = api.post(f"/api/v1/plans/{plan['id']}/save", {"rows": rows}).json()["plan"]
     lineage = {r["code"]: r["lineage_id"] for r in saved["rows"]}

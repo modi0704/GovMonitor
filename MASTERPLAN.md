@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 9
-LAST COMPLETED TASK: P9.5
-NEXT TASK          : P9.6
+LAST COMPLETED TASK: P9.6
+NEXT TASK          : P9.7
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -987,7 +987,7 @@ read-only user scoped to one division sees only that division.
   month, view. Export is audited.
 - [x] **P9.5** Acceptance test of 9.3 (recalculate and compare with the engine) for the worked
   example of 8.1 and for the RDI fixture.
-- [ ] **P9.6** Layout test: for the RDI fixture, assert the header cells of rows 5–7, the column
+- [x] **P9.6** Layout test: for the RDI fixture, assert the header cells of rows 5–7, the column
   of each field, the PLAN/ACTUAL pairing and the formulas of the first activity and of the total
   rows, cell by cell, against 9.1.
 - [ ] **P9.7** Import template download (headers only) and `import_plan` job (9.4) with a

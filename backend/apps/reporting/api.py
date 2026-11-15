@@ -23,6 +23,7 @@ from apps.planning.models import ReportingPeriod
 from apps.planning.numbers import plain
 from apps.reporting import rules
 from apps.reporting.models import ActivityActual, Attachment, IndicatorActual, OfficeSubmission
+from apps.results import read
 from apps.results import services as results
 from apps.scoring import engine
 from apps.structure.models import Office
@@ -156,11 +157,16 @@ def month_view(request, office: Office, period: ReportingPeriod, view: str) -> d
                     "attachments": ind_files.get(this.pk, 0) if this else 0,
                 }
             )
-    result = (
-        results.live_implementing_result(office, period.fiscal_year)
-        if view == "implementing"
-        else (results.live_plan_result(plan) if plan else None)
-    )
+    if period.status == ReportingPeriod.Status.LOCKED:
+        # A locked month shows the figures it was locked with (P7.8), never a recomputation.
+        frozen = read.headline_of(read.get_result(period, office, view)) if rows else None
+    else:
+        frozen = None
+        result = (
+            results.live_implementing_result(office, period.fiscal_year)
+            if view == "implementing"
+            else (results.live_plan_result(plan) if plan else None)
+        )
     own_sub = subs.get(office.id)
     return {
         "office": {"id": str(office.id), "code": office.code, "name": office.name},
@@ -188,7 +194,9 @@ def month_view(request, office: Office, period: ReportingPeriod, view: str) -> d
         "show_amounts": profile.show_actual_amounts,
         "activities": activities,
         "indicators": indicators,
-        "result": results.headline(result, m, eng),
+        "result": frozen
+        if period.status == ReportingPeriod.Status.LOCKED
+        else results.headline(result, m, eng),
     }
 
 

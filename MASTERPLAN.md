@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 7
-LAST COMPLETED TASK: P7.7
-NEXT TASK          : P7.8
+CURRENT PHASE      : 8
+LAST COMPLETED TASK: P7.8
+NEXT TASK          : P8.1
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -158,7 +158,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 4** — Scoring engine (pure module, test vectors)
 - [x] **Phase 5** — Fiscal years, scoring profiles, plans, activities, indicators
 - [x] **Phase 6** — Monthly reporting and MOV uploads
-- [ ] **Phase 7** — Cutoff, locking, frozen results
+- [x] **Phase 7** — Cutoff, locking, frozen results
 - [ ] **Phase 8** — Dashboards and ranking
 - [ ] **Phase 9** — Excel export and plan import
 - [ ] **Phase 10** — PowerPoint export
@@ -929,7 +929,7 @@ read-only user gets 403 on save; files are stored under the agency's folder.
 - [x] **P7.7** `job` model (RLS, audit), the worker loop of section 6.7 replacing the stub from
   P0.5, and the `lock_period` job that locks automatically when `auto_lock` is on and `cutoff_at`
   has passed.
-- [ ] **P7.8** Results read path: one function `get_result(period, office, view)` that returns
+- [x] **P7.8** Results read path: one function `get_result(period, office, view)` that returns
   the frozen row for locked periods and the live computation for open ones, flagged
   `final`/`provisional`. Everything in Phases 8–11 uses only this function.
 
@@ -1207,3 +1207,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 5 | Complete. Fiscal years and profiles, plan API with validation, spreadsheet plan editor with engine preview, versions/compare, approvals, copy-forward. Demo plan (8.1 worked example, P4.2 blocked) loaded through the API. |
 | 2026-11-15 | Phase 6 | Complete. Monthly entry with live engine results, MOV uploads (sniffed types, agency folders, authorised download), submit/return, implementing view. Exit e2e passes. |
 | 2026-11-15 | Phase 4 | Complete. Golden 8.2 vectors pass from the real workbook (PME 95.83, HRM 83.68, RDI 99.07, AST 58.76, ILD 90.23, GAS 80.16, RDS 86.19, ranking); also reproduced through the API. |
+| 2026-11-15 | Phase 7 | Complete. Frozen period_result per office and view, ordered lock/unlock with audited copies, DB trigger on locked months, job queue and worker with auto-lock, submission board, single read path (FINAL/PROVISIONAL). |

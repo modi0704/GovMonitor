@@ -23,6 +23,8 @@ SESSION_IDLE_MINUTES = env_int("SESSION_IDLE_MINUTES", 60)
 MAX_UPLOAD_MB = env_int("MAX_UPLOAD_MB", 25)
 LICENCE_FILE = env("LICENCE_FILE", "")
 WORKER_HEARTBEAT_STALE_SECONDS = env_int("WORKER_HEARTBEAT_STALE_SECONDS", 120)
+# Set when a trusted reverse proxy (Caddy) sets X-Forwarded-For; the audit log then records it.
+TRUST_X_FORWARDED_FOR = env_bool("TRUST_X_FORWARDED_FOR", False)
 
 # --- Applications ----------------------------------------------------------------------------
 INSTALLED_APPS = [
@@ -47,6 +49,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "apps.audit.middleware.AuditContextMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

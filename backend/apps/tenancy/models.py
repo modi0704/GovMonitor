@@ -4,6 +4,7 @@ import uuid
 
 from django.db import models
 
+from apps.audit.services import AuditedModel
 from apps.tenancy import context
 
 
@@ -17,11 +18,11 @@ class TenantQuerySet(models.QuerySet):
         return super().bulk_create(objs, *args, **kwargs)
 
 
-class TenantModel(models.Model):
+class TenantModel(AuditedModel):
     """Base for every tenant table: UUID key and ``agency_id`` filled from the current context.
 
     Each concrete subclass's migration must apply ``EnableTenantRLS`` (P1.2); the meta-test in
-    P1.9 fails otherwise.
+    P1.9 fails otherwise. Every change is audited (``AuditedModel``, P3.2).
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -38,7 +39,7 @@ class TenantModel(models.Model):
         super().save(*args, **kwargs)
 
 
-class Agency(models.Model):
+class Agency(AuditedModel):
     class Status(models.TextChoices):
         ACTIVE = "active"
         SUSPENDED = "suspended"
@@ -70,8 +71,10 @@ class Agency(models.Model):
         return self.status == self.Status.ACTIVE
 
 
-class PlatformAdmin(models.Model):
+class PlatformAdmin(AuditedModel):
     """The vendor's accounts. No ``agency_id``, no RLS; app_user has no privileges on this table."""
+
+    audit_exclude = frozenset({"failed_attempts", "locked_until"})
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
@@ -102,6 +105,8 @@ class PlatformAdmin(models.Model):
 
 class SupportGrant(TenantModel):
     """Time-limited read access for one platform admin to one agency (P1.7)."""
+
+    audit_actions = {"create": "support_grant", "update": "support_grant_change"}
 
     platform_admin = models.ForeignKey(PlatformAdmin, on_delete=models.PROTECT, related_name="+")
     granted_by = models.ForeignKey("accounts.User", on_delete=models.PROTECT, related_name="+")

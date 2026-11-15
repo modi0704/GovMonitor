@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 3
-LAST COMPLETED TASK: P3.1
-NEXT TASK          : P3.2
+LAST COMPLETED TASK: P3.2
+NEXT TASK          : P3.3
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -783,7 +783,7 @@ agency with no code changes.
 
 - [x] **P3.1** `audit_log` model; revoke `UPDATE`/`DELETE` from `app_user` in a migration; RLS
   allowing an agency to read only its own rows.
-- [ ] **P3.2** `audit.record(action, entity, before, after)` service plus a model mixin / DRF
+- [x] **P3.2** `audit.record(action, entity, before, after)` service plus a model mixin / DRF
   mixin that records create, update and delete with field-level before/after (exclude password
   and secret fields). Request id, IP and user agent captured by middleware.
 - [ ] **P3.3** Wire auditing into everything built in Phases 1–2 (sign-in success and failure,

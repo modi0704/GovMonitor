@@ -33,6 +33,8 @@ def test_agency_reads_only_its_own_audit_rows():
         with context.agency_context(agency.id):
             AuditLog.objects.create(agency=agency, actor_type="system", action=f"for-{agency.code}")
     with context.agency_context(a.id):
-        assert list(AuditLog.objects.values_list("action", flat=True)) == ["for-a"]
+        assert list(AuditLog.objects.filter(action__startswith="for-").values_list("action", flat=True)) == [
+            "for-a"
+        ]
         with pytest.raises(DatabaseError, match="row-level security"), transaction.atomic():
             AuditLog.objects.create(agency=b, actor_type="system", action="forged")

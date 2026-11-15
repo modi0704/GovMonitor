@@ -30,6 +30,8 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(TenantModel, AbstractBaseUser):
     """A person who signs in to one agency. Email is unique across all agencies."""
 
+    audit_exclude = frozenset({"last_login", "failed_attempts", "locked_until"})
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=200, blank=True)
@@ -66,6 +68,8 @@ class User(TenantModel, AbstractBaseUser):
 
 class RoleAssignment(TenantModel):
     """A user's access level at one office, covering that office and everything beneath it (D1)."""
+
+    audit_actions = {"create": "role_change", "update": "role_change", "delete": "role_change"}
 
     class Level(models.TextChoices):
         ADMIN = "admin"

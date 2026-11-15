@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts import permissions as perm
+from apps.accounts import ratelimit
 from apps.audit import services as audit
 from apps.exports import xlsx_writer
 from apps.jobs import storage, worker
@@ -54,6 +55,12 @@ class PlanImportView(APIView):
         upload = request.FILES.get("file")
         if upload is None:
             return Response({"file": ["Choose the Excel file to import."]}, status=400)
+        try:
+            ratelimit.check_jobs(
+                request.user, [Job.Kind.EXPORT_XLSX, Job.Kind.EXPORT_PPTX, Job.Kind.IMPORT_PLAN]
+            )
+        except ratelimit.RateLimited as err:
+            return ratelimit.too_many(err)
         office = perm.get_office_or_404(request.user, request.data.get("office_id"), edit=True)
         fy = _fiscal_year(request.data.get("fiscal_year_id"))
         if fy.status == FiscalYear.Status.CLOSED:

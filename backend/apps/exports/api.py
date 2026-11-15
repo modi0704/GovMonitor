@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.accounts import ratelimit
 from apps.audit import services as audit
 from apps.exports.pptx_layout import SLIDE_GROUPS
 from apps.exports.scope import ScopeError, check_request
@@ -17,6 +18,10 @@ def queue_export(request, kind: str, extra: dict | None = None) -> Response:
         params = check_request(request.user, request.data) | (extra or {})
     except ScopeError as err:
         return Response({err.field: [err.message]}, status=400)
+    try:
+        ratelimit.check_jobs(request.user, [Job.Kind.EXPORT_XLSX, Job.Kind.EXPORT_PPTX, Job.Kind.IMPORT_PLAN])
+    except ratelimit.RateLimited as err:
+        return ratelimit.too_many(err)
     with audit.suppressed():  # one meaningful "export" row instead of a generic job "create"
         job = worker.enqueue(kind, params, user=request.user)
     audit.record("export", job, after={"kind": kind, **params}, office_id=params["office_id"])

@@ -3,9 +3,10 @@ from django.db.models.signals import post_migrate
 
 
 def _grant_after_migrate(sender, using, **kwargs):
-    from apps.tenancy.db import apply_grants
+    from apps.tenancy.db import apply_grants, apply_tenant_foreign_keys
 
     apply_grants(using)
+    apply_tenant_foreign_keys(using)
 
 
 class TenancyConfig(AppConfig):

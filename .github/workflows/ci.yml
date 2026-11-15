@@ -52,6 +52,9 @@ jobs:
       - name: make check
         run: make check
 
+      - name: Dependency audit (docs/SECURITY.md)
+        run: make audit
+
   smoke:
     # P12.7: the five user flows (desktop and phone) and the accessibility checks in a browser,
     # against a freshly migrated and seeded database with the web server and a worker running.

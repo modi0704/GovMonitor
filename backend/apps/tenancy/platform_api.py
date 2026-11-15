@@ -105,6 +105,12 @@ class PlatformLoginView(PlatformView):
 
     def post(self, request):
         SessionAuthentication().enforce_csrf(request)
+        from apps.accounts import ratelimit
+
+        try:
+            ratelimit.check_signin(audit.client_ip(request))
+        except ratelimit.RateLimited as err:
+            return ratelimit.too_many(err)
         email = str(request.data.get("email", "")).strip().lower()
         password = str(request.data.get("password", ""))
         code = str(request.data.get("code", ""))

@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 14
-LAST COMPLETED TASK: P13.7
-NEXT TASK          : P14.1
-BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). P14.1: add composite (agency_id, id) foreign keys. Release: replace the placeholder licence public key (D41)
+LAST COMPLETED TASK: P14.1
+NEXT TASK          : P14.2
+BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). Release: replace the placeholder licence public key (D41)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -1109,13 +1109,14 @@ wipe → restore reproduces the dashboard numbers; P13.7 passes.
 
 **Verify start state:** Phase 13 ticked.
 
-- [ ] **P14.1** Security review against `docs/SECURITY.md` (write it): authentication, session,
+- [x] **P14.1** Security review against `docs/SECURITY.md` (write it): authentication, session,
   CSRF, RLS, object-level permission on every endpoint, upload handling, rate limits on sign-in
   and exports, dependency audit (`pip-audit`, `npm audit`), secrets handling.
   > NOTE (added during P2.1): PostgreSQL foreign-key checks bypass RLS, so a row of agency A
   > could reference a row id of agency B if code wrote a raw foreign id. Every API resolves
   > referenced ids through RLS-scoped querysets (foreign ids 404); P14.1 should add composite
   > `(agency_id, id)` foreign keys between tenant tables so the database itself forbids it.
+  > DONE in P14.1: 39 composite same-agency constraints, added after every migrate (apps/tenancy/db.py).
 - [ ] **P14.2** Automated cross-tenant test: for every API route, call it as agency A with ids
   belonging to agency B; every response must be 404 or 403.
 - [ ] **P14.3** Load test at the D13 sizing ceiling: dashboard, monthly grid save, lock of a

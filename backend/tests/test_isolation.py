@@ -9,7 +9,7 @@
 
 import pytest
 from django.apps import apps
-from django.db import DatabaseError, connection, connections, transaction
+from django.db import DatabaseError, IntegrityError, connection, connections, transaction
 
 from apps.tenancy import context
 from tests.isolation_seed import BUILDERS, seed_two_agencies
@@ -212,3 +212,38 @@ def test_api_returns_404_for_other_agencys_ids(two_agencies):
     assert client.delete(f"/api/v1/support-grants/{b_grant.id}").status_code == 404
     assert [g["id"] for g in client.get("/api/v1/support-grants").json()] != [str(b_grant.id)]
     assert client.get("/api/v1/me").json()["agency"]["id"] == str(a["agency"].id)
+
+
+@pytest.mark.django_db(databases=DBS)
+def test_every_foreign_key_between_tenant_tables_is_tied_to_the_same_agency():
+    """P14.1: foreign-key checks bypass RLS, so each tenant-to-tenant key is a composite
+    (agency_id, id) constraint as well (apps/tenancy/db.py, added after every migrate)."""
+    from apps.tenancy.db import _short, tenant_foreign_keys
+
+    with connections["owner"].cursor() as cur:
+        cur.execute("SELECT conname FROM pg_constraint WHERE contype = 'f'")
+        names = {r[0] for r in cur.fetchall()}
+    fks = tenant_foreign_keys()
+    assert len(fks) > 30
+    missing = [fk for fk in fks if _short(f"{fk[0]}_{fk[1]}_same_agency") not in names]
+    assert not missing, f"tenant foreign keys without a same-agency constraint: {missing}"
+
+
+@pytest.mark.django_db(databases=DBS, transaction=True)
+def test_the_database_refuses_a_row_pointing_at_another_agency(two_agencies):
+    """Even the owner role (no RLS) cannot file agency A's plan under agency B's office."""
+    a, b = two_agencies
+    with connections["owner"].cursor() as cur:
+        cur.execute("SELECT id FROM fiscal_year WHERE agency_id = %s LIMIT 1", [a["agency"].id])
+        (fy_a,) = cur.fetchone()
+    with (
+        pytest.raises(IntegrityError),
+        transaction.atomic(using="owner"),
+        connections["owner"].cursor() as cur,
+    ):
+        cur.execute("SET CONSTRAINTS ALL IMMEDIATE")
+        cur.execute(
+            "INSERT INTO plan (id, agency_id, office_id, fiscal_year_id, version, status, notes, created_at, "
+            "updated_at) VALUES (gen_random_uuid(), %s, %s, %s, 99, 'draft', '', now(), now())",
+            [a["agency"].id, b["child"].id, fy_a],
+        )

@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts import services
+from apps.accounts import ratelimit, services
 from apps.accounts.models import RoleAssignment, User
 from apps.accounts.permissions import is_agency_admin
 from apps.audit import services as audit
@@ -92,6 +92,10 @@ class LoginView(CsrfEnforcedMixin, APIView):
     def post(self, request):
         s = LoginSerializer(data=request.data)
         s.is_valid(raise_exception=True)
+        try:
+            ratelimit.check_signin(audit.client_ip(request))
+        except ratelimit.RateLimited as err:
+            return ratelimit.too_many(err)
         try:
             result = services.check_credentials(s.validated_data["email"], s.validated_data["password"])
         except services.AuthError as err:

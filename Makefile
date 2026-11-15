@@ -14,7 +14,7 @@ BUILD_FLAGS := $(if $(EXTRA_CA_FILE),--secret id=extra_ca$(comma)src=$(EXTRA_CA_
 WEB_PORT ?= 8000
 
 .PHONY: help up down logs build migrate migrate-local test test-backend test-frontend lint \
-        lint-backend lint-frontend build-frontend check seed-demo seed-demo-local install lock smoke offline-bundle
+        lint-backend lint-frontend build-frontend check seed-demo seed-demo-local install lock smoke offline-bundle audit
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -87,6 +87,10 @@ build-frontend:
 # a worker and a platform owner (see .github/workflows/ci.yml, job "smoke"). SMOKE_BASE_URL sets it.
 smoke: ## Browser smoke tests of the five user flows, desktop and phone
 	cd frontend && SMOKE_BASE_URL=$(or $(SMOKE_BASE_URL),http://127.0.0.1:$(WEB_PORT)) npm run smoke
+
+audit: ## Known-vulnerability audit of dependencies (runtime must be clean; docs/SECURITY.md)
+	uvx --quiet pip-audit@2.9.0 --disable-pip --no-deps -r backend/requirements.txt -r backend/requirements-dev.txt
+	cd frontend && npm audit --omit=dev
 
 check: lint test build-frontend ## lint + backend tests + frontend tests + frontend build
 	@echo "check: all green"

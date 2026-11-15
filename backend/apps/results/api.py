@@ -8,8 +8,10 @@ from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.accounts.permissions import IsAgencyAdmin
 from apps.audit.services import jsonable
 from apps.planning.models import FiscalYear
+from apps.results import locking
 from apps.scoring import engine
 from apps.scoring.types import ActivityInput
 
@@ -66,3 +68,40 @@ class PreviewView(APIView):
                 "funds_total": jsonable(result.funds_total),
             }
         )
+
+
+def _period_or_404(period_id):
+    from apps.planning.models import ReportingPeriod
+
+    period = ReportingPeriod.objects.select_related("fiscal_year__profile").filter(pk=period_id).first()
+    if period is None:
+        raise Http404()
+    return period
+
+
+class PeriodLockView(APIView):
+    """POST — lock a month: freeze every office's results (P7.3). Agency administrator."""
+
+    permission_classes = [IsAgencyAdmin]
+
+    def post(self, request, period_id):
+        period = _period_or_404(period_id)
+        try:
+            count = locking.lock_period(period, request.user)
+        except locking.LockError as err:
+            return Response({"detail": err.message, "code": err.code}, status=err.http)
+        return Response({"status": "locked", "results": count})
+
+
+class PeriodUnlockView(APIView):
+    """POST ``{"reason"}`` — unlock the latest locked month (P7.4). Agency administrator."""
+
+    permission_classes = [IsAgencyAdmin]
+
+    def post(self, request, period_id):
+        period = _period_or_404(period_id)
+        try:
+            count = locking.unlock_period(period, request.user, str(request.data.get("reason", "")))
+        except locking.LockError as err:
+            return Response({"detail": err.message, "code": err.code}, status=err.http)
+        return Response({"status": "open", "results_removed": count})

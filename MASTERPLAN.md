@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 7
-LAST COMPLETED TASK: P7.2
-NEXT TASK          : P7.3
+LAST COMPLETED TASK: P7.3
+NEXT TASK          : P7.4
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -915,7 +915,7 @@ read-only user gets 403 on save; files are stored under the agency's folder.
   every office in both views with ranks).
 - [x] **P7.2** Cutoff calendar: `cutoff_at` for each period derived from `cutoff_day`, editable
   per period by the agency administrator.
-- [ ] **P7.3** Lock: sets the period `locked`, sets all submissions `locked`, writes
+- [x] **P7.3** Lock: sets the period `locked`, sets all submissions `locked`, writes
   `period_result` rows for every office and view with the profile snapshot, in one transaction.
   A period can be locked only if all earlier periods of the year are locked.
 - [ ] **P7.4** Unlock: agency administrator only, reason required; allowed only for the latest

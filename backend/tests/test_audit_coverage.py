@@ -120,6 +120,12 @@ class World:
         assert self.admin.post("/api/v1/reports/submit", base).status_code == 200
         return base
 
+    def locked_period(self, lock=True):
+        base, _ = self.month()
+        if lock:
+            assert self.admin.post(f"/api/v1/periods/{base['period']}/lock").status_code == 200
+        return base["period"]
+
     def new_level(self):
         self.admin.put("/api/v1/levels", {"names": ["Agency", "Level 1", "Spare"]})
         return [lv for lv in self.admin.get("/api/v1/levels").json() if lv["name"] == "Spare"][0]["id"]
@@ -291,6 +297,10 @@ SCENARIOS = {
     ("period", "PATCH"): lambda w: w.admin.patch(
         f"/api/v1/periods/{w.fiscal_year()['periods'][0]['id']}",
         {"cutoff_at": "2026-02-20T17:00:00+08:00"},
+    ),
+    ("period-lock", "POST"): lambda w: w.admin.post(f"/api/v1/periods/{w.locked_period(lock=False)}/lock"),
+    ("period-unlock", "POST"): lambda w: w.admin.post(
+        f"/api/v1/periods/{w.locked_period()}/unlock", {"reason": "Late correction"}
     ),
     ("platform-login", "POST"): lambda w: (
         w.platform(),

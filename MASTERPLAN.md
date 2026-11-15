@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 9
-LAST COMPLETED TASK: P9.7
-NEXT TASK          : P9.8
+CURRENT PHASE      : 10
+LAST COMPLETED TASK: P9.8
+NEXT TASK          : P10.1
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -160,7 +160,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 6** — Monthly reporting and MOV uploads
 - [x] **Phase 7** — Cutoff, locking, frozen results
 - [x] **Phase 8** — Dashboards and ranking
-- [ ] **Phase 9** — Excel export and plan import
+- [x] **Phase 9** — Excel export and plan import
 - [ ] **Phase 10** — PowerPoint export
 - [ ] **Phase 11** — Alerts and notifications
 - [ ] **Phase 12** — Phone layouts and UX polish
@@ -992,7 +992,7 @@ read-only user scoped to one division sees only that division.
   rows, cell by cell, against 9.1.
 - [x] **P9.7** Import template download (headers only) and `import_plan` job (9.4) with a
   row-by-row error report shown in the UI; imported plans arrive as drafts.
-- [ ] **P9.8** Round-trip test: export a plan, import the file into a new fiscal year, compare
+- [x] **P9.8** Round-trip test: export a plan, import the file into a new fiscal year, compare
   activities and targets.
 
 **Phase exit checks:** P9.5, P9.6 and P9.8 pass; a 500-activity office exports in under 30 seconds.
@@ -1212,3 +1212,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 4 | Complete. Golden 8.2 vectors pass from the real workbook (PME 95.83, HRM 83.68, RDI 99.07, AST 58.76, ILD 90.23, GAS 80.16, RDS 86.19, ranking); also reproduced through the API. |
 | 2026-11-15 | Phase 7 | Complete. Frozen period_result per office and view, ordered lock/unlock with audited copies, DB trigger on locked months, job queue and worker with auto-lock, submission board, single read path (FINAL/PROVISIONAL). |
 | 2026-11-15 | Phase 8 | Complete. One-call dashboards with drill-down to activity history, rankings with month-on-month change, quarters/YTD from the engine, FINAL/PROVISIONAL. Ceiling agency (501 offices, 5,000 activities) answers in ~1.4 s uncached; results cached by data stamp. MOST Dec 2023 figures shown through the dashboard API. |
+| 2026-11-15 | Phase 9 | Complete. Jobs API and My exports; Excel export (SUMMARY + office sheets exactly per 9.1, layout constants in exports/layout.py, cached values on every formula); export dialog on the dashboard (audited); acceptance (own evaluator and LibreOffice with poisoned caches match the dashboard ±0.005 pts for 8.1 and RDI), cell-by-cell RDI layout test; import template and import_plan job with row-by-row errors (drafts only, all-or-nothing); export→import round trip exact; 500-activity office exports in ~1 s. |

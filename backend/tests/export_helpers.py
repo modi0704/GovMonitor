@@ -52,7 +52,7 @@ def with_outline(rows):
     return outline + [{**r, "parent": parent} for r in rows]
 
 
-def rdi_world(outline=False):
+def rdi_world(outline=False, indicators=None):
     """One office RDI with the MOST FY2023 RDI plan and its twelve months of accomplishments
     (``outline``: placed under a generic outcome → project chain)."""
     agency = make_agency("most")
@@ -68,7 +68,9 @@ def rdi_world(outline=False):
     if outline:
         rows = with_outline(rows)
     plan = api.post("/api/v1/plans", {"office_id": str(rdi.id), "fiscal_year_id": fy["id"]}).json()
-    saved = api.post(f"/api/v1/plans/{plan['id']}/save", {"rows": rows}).json()["plan"]
+    saved = api.post(
+        f"/api/v1/plans/{plan['id']}/save", {"rows": rows, "indicators": indicators or []}
+    ).json()["plan"]
     lineage = {r["code"]: r["lineage_id"] for r in saved["rows"]}
     api.post(f"/api/v1/plans/{plan['id']}/submit")
     api.post(f"/api/v1/plans/{plan['id']}/approve")

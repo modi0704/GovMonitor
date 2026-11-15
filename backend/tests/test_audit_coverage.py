@@ -71,6 +71,22 @@ class World:
     def fiscal_year(self):
         return self.admin.post("/api/v1/fiscal-years", {"label": "FY", "start_year": 2026}).json()
 
+    def plan(self, state="draft"):
+        """A plan of office A in a new fiscal year, driven to ``state`` through the API."""
+        from tests.plan_helpers import worked_example_rows
+
+        fy = self.fiscal_year()
+        plan = self.admin.post(
+            "/api/v1/plans", {"office_id": str(self.a.id), "fiscal_year_id": fy["id"]}
+        ).json()
+        self.admin.post(f"/api/v1/plans/{plan['id']}/save", {"rows": worked_example_rows()})
+        if state in ("submitted", "approved"):
+            self.admin.post(f"/api/v1/plans/{plan['id']}/submit")
+        if state == "approved":
+            self.admin.post(f"/api/v1/plans/{plan['id']}/approve")
+        plan["fy"] = fy
+        return plan
+
     def new_level(self):
         self.admin.put("/api/v1/levels", {"names": ["Agency", "Level 1", "Spare"]})
         return [lv for lv in self.admin.get("/api/v1/levels").json() if lv["name"] == "Spare"][0]["id"]
@@ -200,6 +216,25 @@ SCENARIOS = {
     ("scoring-profile", "PATCH"): lambda w: w.admin.patch(
         f"/api/v1/scoring-profiles/{w.fiscal_year()['profile_id']}", {"cap_at_100": True}
     ),
+    ("plans", "POST"): lambda w: w.admin.post(
+        "/api/v1/plans", {"office_id": str(w.a.id), "fiscal_year_id": w.fiscal_year()["id"]}
+    ),
+    ("plan", "PATCH"): lambda w: w.admin.patch(f"/api/v1/plans/{w.plan()['id']}", {"approved_budget": "5"}),
+    ("plan-save", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan()['id']}/save", {"notes": "n"}),
+    ("plan-submit", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan()['id']}/submit"),
+    ("plan-approve", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan('submitted')['id']}/approve"),
+    ("plan-return", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan('submitted')['id']}/return"),
+    ("plan-revise", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan('approved')['id']}/revise"),
+    ("plan-copy", "POST"): lambda w: (
+        lambda plan: w.admin.post(
+            f"/api/v1/plans/{plan['id']}/copy",
+            {
+                "fiscal_year_id": w.admin.post(
+                    "/api/v1/fiscal-years", {"label": "FY2", "start_year": 2027}
+                ).json()["id"]
+            },
+        )
+    )(w.plan()),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

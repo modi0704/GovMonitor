@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 5
-LAST COMPLETED TASK: P5.2
-NEXT TASK          : P5.3
+LAST COMPLETED TASK: P5.3
+NEXT TASK          : P5.4
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing; extractor and golden tests ready). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -842,7 +842,7 @@ agency with no code changes.
   month and a profile from the default preset), open, close. Scoring-profile page with every
   setting of 6.4 explained in plain language and a preset picker. Changing a profile after any
   period of that year is locked requires confirmation and never changes locked results.
-- [ ] **P5.3** Plan API: create draft for (office, fiscal year); read with outline, activities,
+- [x] **P5.3** Plan API: create draft for (office, fiscal year); read with outline, activities,
   targets and indicators in one call; bulk save (the grid posts all changed rows at once);
   submit; approve; return to draft.
 - [ ] **P5.4** Plan validation service (run on save as warnings, on submit as errors):

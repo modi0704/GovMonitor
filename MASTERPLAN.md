@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 10
-LAST COMPLETED TASK: P9.8
-NEXT TASK          : P10.1
+LAST COMPLETED TASK: P10.1
+NEXT TASK          : P10.2
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1005,7 +1005,7 @@ read-only user scoped to one division sees only that division.
 
 **Verify start state:** Phase 9 ticked.
 
-- [ ] **P10.1** `exports/pptx_writer.py` following section 10, with native line, doughnut and bar
+- [x] **P10.1** `exports/pptx_writer.py` following section 10, with native line, doughnut and bar
   charts and tables; layout constants in one module.
 - [ ] **P10.2** `export_template` model and settings page: logo upload, primary colour, report
   title, footer text; system default template.

@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 1
-LAST COMPLETED TASK: P1.7
-NEXT TASK          : P1.9
-BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. Phase 1 order P1.8 → P1.6 → P1.7 → P1.9 → P1.10 (D23); platform UI pages are built in P1.10
+LAST COMPLETED TASK: P1.9
+NEXT TASK          : P1.10
+BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. Platform UI pages are built in P1.10 (D23)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -736,7 +736,7 @@ deliberately wrong query.
 - [x] **P1.7** Support grants: an agency administrator can grant a platform admin time-limited
   read access; without a grant the platform area shows no agency data.
 - [x] **P1.8** `accounts/permissions.py` with the functions of 6.6 and DRF permission classes.
-- [ ] **P1.9** Isolation tests: (a) with agency A set, raw SQL `SELECT` on every tenant table
+- [x] **P1.9** Isolation tests: (a) with agency A set, raw SQL `SELECT` on every tenant table
   returns no rows of agency B; (b) inserting a row with another agency's id fails; (c) with no
   agency set, every tenant table returns zero rows; (d) a meta-test lists all models and fails if
   any model with an `agency_id` field lacks an RLS policy, or any model lacks `agency_id` without

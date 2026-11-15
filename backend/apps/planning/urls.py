@@ -5,6 +5,7 @@ from apps.planning import api, plan_api
 urlpatterns = [
     path("fiscal-years", api.FiscalYearListView.as_view(), name="fiscal-years"),
     path("fiscal-years/<uuid:fy_id>", api.FiscalYearDetailView.as_view(), name="fiscal-year"),
+    path("periods/<uuid:period_id>", api.PeriodDetailView.as_view(), name="period"),
     path("scoring-presets", api.PresetListView.as_view(), name="scoring-presets"),
     path("scoring-profiles/<uuid:profile_id>", api.ScoringProfileView.as_view(), name="scoring-profile"),
     path("plans", plan_api.PlanListView.as_view(), name="plans"),

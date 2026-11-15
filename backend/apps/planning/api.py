@@ -1,5 +1,7 @@
 """Fiscal years and scoring profiles API (MASTERPLAN 13: fiscal-years, scoring-profiles; P5.2)."""
 
+import datetime
+
 from django.http import Http404
 from rest_framework import serializers, status
 from rest_framework.response import Response
@@ -132,3 +134,37 @@ class ScoringProfileView(APIView):
             return planning_error(err, http=409 if err.code == "confirm_required" else 400)
         profile.refresh_from_db()
         return Response(profile_payload(profile))
+
+
+class PeriodDetailView(APIView):
+    """PATCH ``{"cutoff_at": ISO datetime}`` — move one month's cutoff (P7.2). Open months only."""
+
+    permission_classes = [ReadOrAgencyAdmin]
+
+    def _get(self, period_id):
+        from apps.planning.models import ReportingPeriod
+
+        period = ReportingPeriod.objects.select_related("fiscal_year").filter(pk=period_id).first()
+        if period is None:
+            raise Http404()
+        return period
+
+    def get(self, request, period_id):
+        return Response(period_payload(self._get(period_id)))
+
+    def patch(self, request, period_id):
+        from django.utils.dateparse import parse_datetime
+
+        period = self._get(period_id)
+        if period.status == "locked":
+            return Response(
+                {"detail": "A locked month keeps its cutoff.", "code": "period_locked"}, status=409
+            )
+        value = parse_datetime(str(request.data.get("cutoff_at", "")))
+        if value is None or value.tzinfo is None:
+            return Response({"cutoff_at": ["Give a date and time with a time zone."]}, status=400)
+        if value.date() < period.end_date:
+            return Response({"cutoff_at": ["The cutoff cannot be before the month ends."]}, status=400)
+        period.cutoff_at = value.astimezone(datetime.UTC)  # stored in UTC (5.4 conventions)
+        period.save(update_fields=["cutoff_at"])
+        return Response(period_payload(period))

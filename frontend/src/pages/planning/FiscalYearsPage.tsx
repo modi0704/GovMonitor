@@ -67,7 +67,9 @@ export default function FiscalYearsPage() {
             {years.data.map((fy) => (
               <tr key={fy.id}>
                 <td>
-                  <strong>{fy.label}</strong>
+                  <Link to={`/fiscal-years/${fy.id}`}>
+                    <strong>{fy.label}</strong>
+                  </Link>
                 </td>
                 <td>
                   {monthYear(fy.start_date)} – {monthYear(fy.end_date)}

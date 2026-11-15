@@ -19,6 +19,7 @@ const StructurePage = lazy(() => import('./pages/structure/StructurePage'));
 const UsersPage = lazy(() => import('./pages/UsersPage'));
 const FiscalYearsPage = lazy(() => import('./pages/planning/FiscalYearsPage'));
 const ScoringProfilePage = lazy(() => import('./pages/planning/ScoringProfilePage'));
+const FiscalYearPage = lazy(() => import('./pages/planning/FiscalYearPage'));
 const PlansPage = lazy(() => import('./pages/planning/PlansPage'));
 const PlanEditorPage = lazy(() => import('./pages/planning/PlanEditorPage'));
 const PlanVersionsPage = lazy(() => import('./pages/planning/PlanVersionsPage'));
@@ -106,6 +107,14 @@ export default function App() {
           element={
             <Page>
               <FiscalYearsPage />
+            </Page>
+          }
+        />
+        <Route
+          path="fiscal-years/:fyId"
+          element={
+            <Page>
+              <FiscalYearPage />
             </Page>
           }
         />

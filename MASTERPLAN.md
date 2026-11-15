@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 7
-LAST COMPLETED TASK: P7.1
-NEXT TASK          : P7.2
+LAST COMPLETED TASK: P7.2
+NEXT TASK          : P7.3
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -913,7 +913,7 @@ read-only user gets 403 on save; files are stored under the agency's folder.
 - [x] **P7.1** `period_result` model; `results/services.py` with `compute_live(period, office,
   view)` and `compute_agency(period)` (loads data once, calls the engine, returns results for
   every office in both views with ranks).
-- [ ] **P7.2** Cutoff calendar: `cutoff_at` for each period derived from `cutoff_day`, editable
+- [x] **P7.2** Cutoff calendar: `cutoff_at` for each period derived from `cutoff_day`, editable
   per period by the agency administrator.
 - [ ] **P7.3** Lock: sets the period `locked`, sets all submissions `locked`, writes
   `period_result` rows for every office and view with the profile snapshot, in one transaction.

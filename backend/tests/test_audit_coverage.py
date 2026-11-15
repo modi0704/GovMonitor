@@ -288,6 +288,10 @@ SCENARIOS = {
     ("reports-return", "POST"): lambda w: w.admin.post(
         "/api/v1/reports/return", {**w.submitted_month(), "note": "Fix"}
     ),
+    ("period", "PATCH"): lambda w: w.admin.patch(
+        f"/api/v1/periods/{w.fiscal_year()['periods'][0]['id']}",
+        {"cutoff_at": "2026-02-20T17:00:00+08:00"},
+    ),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

@@ -1079,3 +1079,93 @@ label.inline {
   padding: 0.5rem;
   background: var(--surface);
 }
+
+/* ---- Notifications (P11.3) ---- */
+.bell {
+  position: relative;
+}
+.bell-button {
+  position: relative;
+  color: var(--primary-contrast);
+  padding: 0.25rem 0.4rem;
+}
+.bell-count {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.3rem;
+  min-width: 1.15rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--delayed);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.15rem;
+  text-align: center;
+}
+.bell-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  z-index: 50;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 0.75rem;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.bell-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bell-list,
+.notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bell-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+.bell-item:hover,
+.bell-item:focus-visible {
+  background: var(--surface-2);
+}
+.bell-item.unread .bell-title,
+.notification-list li.unread strong {
+  font-weight: 700;
+}
+.bell-item.unread {
+  border-left: 3px solid var(--primary);
+}
+.notification-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.notification-list li.unread {
+  border-left: 3px solid var(--primary);
+  padding-left: 0.75rem;
+}
+.notification-list p {
+  margin: 0.25rem 0;
+}

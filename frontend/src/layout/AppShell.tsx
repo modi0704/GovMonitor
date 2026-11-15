@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
+import NotificationBell from './NotificationBell';
 import { NAV_ITEMS } from './nav';
 
 export default function AppShell() {
@@ -14,6 +15,7 @@ export default function AppShell() {
         </NavLink>
         <span className="agency-name">{me?.agency.name}</span>
         <nav className="topnav" aria-label="Account">
+          <NotificationBell />
           <NavLink to="/account/security">{me?.full_name || me?.email}</NavLink>
           <button
             type="button"

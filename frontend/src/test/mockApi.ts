@@ -3,7 +3,17 @@ import { vi } from 'vitest';
 type Handler = (body: unknown) => { status?: number; body?: unknown };
 
 /** Route-table fetch mock: keys are "METHOD /path". Records every call. */
-export function mockApi(routes: Record<string, Handler | { status?: number; body?: unknown }>) {
+// Answered for every page (the notification bell in the app shell); tests may override them.
+const DEFAULT_ROUTES = {
+  'GET /api/v1/notifications/unread-count': { body: { unread: 0 } },
+  'GET /api/v1/notifications': { body: { results: [], unread: 0 } },
+};
+
+export function mockApi(given: Record<string, Handler | { status?: number; body?: unknown }>) {
+  const routes: Record<string, Handler | { status?: number; body?: unknown }> = {
+    ...DEFAULT_ROUTES,
+    ...given,
+  };
   const calls: { method: string; path: string; body: unknown }[] = [];
   const fn = vi.fn(async (url: string, init: RequestInit = {}) => {
     const method = (init.method ?? 'GET').toUpperCase();

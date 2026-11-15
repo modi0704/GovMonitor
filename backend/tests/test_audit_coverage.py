@@ -23,9 +23,15 @@ from tests.factories import (
     make_user,
 )
 
-# Only sign-out (and, from Phase 11, notification-read) may succeed without an audit row.
+# Only sign-out and notification-read may succeed without an audit row.
 # results/preview is a POST only because of its payload size; it computes and stores nothing (D29).
-ALLOW_WITHOUT_AUDIT = {("platform-logout", "POST"), ("results-preview", "POST"), ("reports-preview", "POST")}
+ALLOW_WITHOUT_AUDIT = {
+    ("platform-logout", "POST"),
+    ("results-preview", "POST"),
+    ("reports-preview", "POST"),
+    ("notification-read", "POST"),  # marking one's own notifications read (P3.4 allow-list)
+    ("notifications-read-all", "POST"),
+}
 UNSAFE = ("post", "put", "patch", "delete")
 PLATFORM_PW = "platform-owner-passphrase"
 
@@ -167,6 +173,14 @@ def _reset_confirm(w):
             "new_password": "a-new-long-passphrase",
         },
     )
+
+
+def _notification(w):
+    from apps.alerts.models import Notification
+    from apps.tenancy import context
+
+    with context.agency_context(w.agency.id):
+        return Notification.objects.create(user=w.boss, type="cutoff_reminder", title="T", dedupe_key="t").id
 
 
 def _logo(w):
@@ -351,6 +365,8 @@ SCENARIOS = {
         w.admin.delete("/api/v1/export-templates/pptx/logo"),
     )[1],
     ("alert-rules", "PATCH"): lambda w: w.admin.patch("/api/v1/alert-rules", {"remind_days_before": [7, 2]}),
+    ("notification-read", "POST"): lambda w: w.admin.post(f"/api/v1/notifications/{_notification(w)}/read"),
+    ("notifications-read-all", "POST"): lambda w: w.admin.post("/api/v1/notifications/read-all"),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

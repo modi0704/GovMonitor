@@ -32,6 +32,14 @@ def _support_grant(objs, platform_admin):
         )
 
 
+def _group(objs, shared):
+    from apps.structure.models import OfficeGroup, OfficeGroupMember
+
+    with context.agency_context(objs["agency"].id):
+        group = OfficeGroup.objects.create(name="Group")
+        OfficeGroupMember.objects.create(group=group, office=objs["child"])
+
+
 # table name -> builder(objs, shared). Tables filled by _base are listed with None.
 BUILDERS = {
     "agency": None,
@@ -40,6 +48,8 @@ BUILDERS = {
     "org_level": None,
     "office": None,
     "support_grant": lambda objs, shared: _support_grant(objs, shared["platform_admin"]),
+    "office_group": _group,
+    "office_group_member": None,  # filled by _group
 }
 
 

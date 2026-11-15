@@ -74,3 +74,29 @@ class Office(TenantModel):
         if not self.path:
             self.path = self.compute_path()
         super().save(*args, **kwargs)
+
+
+class OfficeGroup(TenantModel):
+    """A named set of offices compared together, e.g. "Mainland centers" (ranking sets, 7.8)."""
+
+    name = models.CharField(max_length=120)
+    description = models.TextField(blank=True)
+    sort_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "office_group"
+        ordering = ["sort_order", "name"]
+        constraints = [models.UniqueConstraint("agency", Upper("name"), name="office_group_agency_name_ci")]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class OfficeGroupMember(TenantModel):
+    group = models.ForeignKey(OfficeGroup, on_delete=models.CASCADE, related_name="members")
+    office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name="group_memberships")
+
+    class Meta:
+        db_table = "office_group_member"
+        constraints = [models.UniqueConstraint(fields=["group", "office"], name="office_group_member_unique")]

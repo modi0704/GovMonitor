@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 2
-LAST COMPLETED TASK: P1.10
-NEXT TASK          : P2.1
-BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. git push currently refused (no GitHub access for this session)
+LAST COMPLETED TASK: P2.1
+NEXT TASK          : P2.2
+BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -754,7 +754,7 @@ of one cannot fetch any object id of the other (API returns 404).
 
 **Verify start state:** Phase 1 ticked; `make check` passes.
 
-- [ ] **P2.1** Models: `org_level`, `office`, `office_group`, `office_group_member`; path
+- [x] **P2.1** Models: `org_level`, `office`, `office_group`, `office_group_member`; path
   maintenance; constraints of 6.3; RLS applied.
 - [ ] **P2.2** API: levels CRUD; office tree read (whole tree in one call), create, rename, move,
   reorder, deactivate; groups CRUD and membership.
@@ -1106,6 +1106,10 @@ wipe → restore reproduces the dashboard numbers; P13.7 passes.
 - [ ] **P14.1** Security review against `docs/SECURITY.md` (write it): authentication, session,
   CSRF, RLS, object-level permission on every endpoint, upload handling, rate limits on sign-in
   and exports, dependency audit (`pip-audit`, `npm audit`), secrets handling.
+  > NOTE (added during P2.1): PostgreSQL foreign-key checks bypass RLS, so a row of agency A
+  > could reference a row id of agency B if code wrote a raw foreign id. Every API resolves
+  > referenced ids through RLS-scoped querysets (foreign ids 404); P14.1 should add composite
+  > `(agency_id, id)` foreign keys between tenant tables so the database itself forbids it.
 - [ ] **P14.2** Automated cross-tenant test: for every API route, call it as agency A with ids
   belonging to agency B; every response must be 404 or 403.
 - [ ] **P14.3** Load test at the D13 sizing ceiling: dashboard, monthly grid save, lock of a

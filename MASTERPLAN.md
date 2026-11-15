@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 6
-LAST COMPLETED TASK: Phase 5 exit checks
-NEXT TASK          : P6.1
-BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing; extractor and golden tests ready). See the P14.1 note on cross-agency foreign keys
+LAST COMPLETED TASK: P6.1
+NEXT TASK          : P6.2
+BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -879,7 +879,7 @@ approves, revises and re-approves a plan; every action appears in the audit log.
 
 **Verify start state:** Phase 5 ticked.
 
-- [ ] **P6.1** Models: `office_submission`, `activity_actual`, `indicator_actual`, `attachment`;
+- [x] **P6.1** Models: `office_submission`, `activity_actual`, `indicator_actual`, `attachment`;
   RLS; audit.
 - [ ] **P6.2** Storage layer: `FILE_STORAGE=local|s3`, upload rules of 6.6, authorised download
   endpoint, soft delete. Tests for wrong type, oversize, and cross-agency download (404).
@@ -1190,6 +1190,7 @@ changed, why. Start ids at D19.
 | D27 | 2026-11-15 | Engine details not fixed by section 7: a `budget_weighted` roll-up whose components all have funds_total 0 uses the simple average; a roll-up's funds_used_actual is the sum of its components' actual amounts when any component has one; offices tied in a ranking are listed in the order given (tree order). (Claude Code) | Avoid division by zero and keep results defined; ordering ties by tree order is stable and predictable for exports. |
 | D28 | 2026-11-15 | `reporting_period` lives in the `planning` app (5.3 listed it under reporting). `plan` also has `updated_at` and a partial unique constraint allowing at most one draft-or-submitted version per office and fiscal year. `scoring_profile` adds `show_actual_amounts` (the P6.7 switch) and defaults `cutoff_day` to 10. (Claude Code) | Creating a fiscal year creates its periods, and activity/indicator targets reference periods; one app avoids a cross-app cycle. One open version at a time keeps revision (P5.7) unambiguous. The actual-amount column is per agency per year like the other profile switches. |
 | D29 | 2026-11-15 | `POST results/preview` is read-only (POST for payload size) and is allow-listed in the P3.4 audit test; `GET offices/directory` returns code and name of every active office to any signed-in user of the agency. (Claude Code) | The plan editor must get weights and curves from the engine (rule 0.2). Choosing an implementing office (D6) needs offices outside the user's own scope; only names are exposed. |
+| D30 | 2026-11-15 | `activity_actual`, `indicator_actual` and `attachment` also store the owning `office_id`; `attachment` stores its `period_id`. (Claude Code) | Actuals are keyed by lineage, so the office would otherwise need a join through plan versions for every scope check, audit filter and submission-status check; the period on attachments lets the P7.5 trigger refuse changes in locked months directly. |
 
 ---
 

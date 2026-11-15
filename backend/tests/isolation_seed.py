@@ -69,6 +69,24 @@ def _planning(objs, shared):
         objs.update(fy=fy, plan=plan, activity=act, indicator=ind, period=period)
 
 
+def _reporting(objs, shared):
+    from apps.reporting.models import ActivityActual, Attachment, IndicatorActual, OfficeSubmission
+
+    with context.agency_context(objs["agency"].id):
+        office, period = objs["child"], objs["period"]
+        OfficeSubmission.objects.create(office=office, period=period)
+        actual = ActivityActual.objects.create(
+            activity_lineage_id=objs["activity"].lineage_id, period=period, office=office, actual_qty=1
+        )
+        IndicatorActual.objects.create(
+            indicator_lineage_id=objs["indicator"].lineage_id, period=period, office=office, actual_value=1
+        )
+        Attachment.objects.create(
+            target_type="activity_actual", target_id=actual.id, office=office, period=period, file_name="a.pdf",
+            content_type="application/pdf", size_bytes=1, sha256="0" * 64, storage_key="k",
+        )
+
+
 # table name -> builder(objs, shared). Tables filled by _base are listed with None.
 BUILDERS = {
     "agency": None,
@@ -88,6 +106,10 @@ BUILDERS = {
     "activity_target": None,
     "indicator": None,
     "indicator_target": None,
+    "office_submission": _reporting,
+    "activity_actual": None,  # filled by _reporting
+    "indicator_actual": None,
+    "attachment": None,
 }
 
 

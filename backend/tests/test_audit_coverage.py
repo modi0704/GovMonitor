@@ -25,7 +25,7 @@ from tests.factories import (
 
 # Only sign-out (and, from Phase 11, notification-read) may succeed without an audit row.
 # results/preview is a POST only because of its payload size; it computes and stores nothing (D29).
-ALLOW_WITHOUT_AUDIT = {("platform-logout", "POST"), ("results-preview", "POST")}
+ALLOW_WITHOUT_AUDIT = {("platform-logout", "POST"), ("results-preview", "POST"), ("reports-preview", "POST")}
 UNSAFE = ("post", "put", "patch", "delete")
 PLATFORM_PW = "platform-owner-passphrase"
 
@@ -99,6 +99,26 @@ class World:
             "/api/v1/attachments",
             {"target_type": "activity_actual", "lineage_id": lineage, "period_id": period, "file": pdf()},
         )
+
+    def month(self):
+        """(payload base, lineage of the first activity) for office A, month 1 of an approved plan."""
+        plan = self.plan("approved")
+        detail = self.admin.get(f"/api/v1/plans/{plan['id']}").json()
+        lineage = next(r["lineage_id"] for r in detail["rows"] if r["row_kind"] == "activity")
+        period = self.admin.get(f"/api/v1/fiscal-years/{plan['fy']['id']}").json()["periods"][0]["id"]
+        return {"office": str(self.a.id), "period": period}, lineage
+
+    def submittable_month(self):
+        """Month 1 with every activity on plan (so submission has nothing to complain about)."""
+        base, lineage = self.month()
+        acts = [{"lineage_id": lineage, "actual": "2", "delay_reason": ""}]
+        self.admin.post("/api/v1/reports/save", {**base, "activities": acts})
+        return base
+
+    def submitted_month(self):
+        base = self.submittable_month()
+        assert self.admin.post("/api/v1/reports/submit", base).status_code == 200
+        return base
 
     def new_level(self):
         self.admin.put("/api/v1/levels", {"names": ["Agency", "Level 1", "Spare"]})
@@ -257,6 +277,17 @@ SCENARIOS = {
     ),
     ("attachments", "POST"): lambda w: w.upload(),
     ("attachment", "DELETE"): lambda w: w.admin.delete(f"/api/v1/attachments/{w.upload().json()['id']}"),
+    ("reports-save", "POST"): lambda w: (
+        lambda base_lineage: w.admin.post(
+            "/api/v1/reports/save",
+            {**base_lineage[0], "activities": [{"lineage_id": base_lineage[1], "actual": "1"}]},
+        )
+    )(w.month()),
+    ("reports-preview", "POST"): lambda w: w.admin.post("/api/v1/reports/preview", w.month()[0]),
+    ("reports-submit", "POST"): lambda w: w.admin.post("/api/v1/reports/submit", w.submittable_month()),
+    ("reports-return", "POST"): lambda w: w.admin.post(
+        "/api/v1/reports/return", {**w.submitted_month(), "note": "Fix"}
+    ),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

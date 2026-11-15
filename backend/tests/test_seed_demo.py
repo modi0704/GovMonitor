@@ -99,3 +99,49 @@ def test_seed_demo_is_idempotent_and_builds_three_and_five_level_agencies():
     for office in Office.objects.using("owner").select_related("parent"):
         expected = f"/{office.pk}/" if office.parent_id is None else f"{office.parent.path}{office.pk}/"
         assert office.path == expected
+
+
+@pytest.mark.django_db(databases=["default", "owner"], transaction=True)
+def test_sample_bureau_is_a_different_shape_entered_through_the_api():
+    """P14.4: the second demo agency proves nothing is hard-coded — five levels, the capped preset
+    with equal weighting, plans at the lowest level, two locked months and an open one."""
+    from django.test import Client
+
+    from apps.planning.models import Plan, ReportingPeriod, ScoringProfile
+    from apps.results.models import PeriodResult
+
+    call_command("seed_demo")
+    call_command("seed_demo")  # idempotent
+    bureau = Agency.objects.using("owner").get(code="sample-bureau")
+    profile = ScoringProfile.objects.using("owner").get(fiscal_year__agency=bureau, fiscal_year__label="2026")
+    assert (profile.weighting, profile.cap_at_100) == ("equal", True)
+    plans = Plan.objects.using("owner").filter(agency=bureau, status="approved")
+    assert sorted(p.office.code for p in plans) == [
+        "R1-P1-D1-U1",
+        "R1-P1-D1-U2",
+        "R1-P1-D2-U1",
+        "R2-P1-D1-U1",
+    ]
+    assert all(p.office.depth == 4 for p in plans)  # plans live at the fifth level
+    statuses = dict(
+        ReportingPeriod.objects.using("owner")
+        .filter(fiscal_year__agency=bureau, month_index__lte=3)
+        .values_list("month_index", "status")
+    )
+    assert statuses == {1: "locked", 2: "locked", 3: "open"}
+    feb_root = PeriodResult.objects.using("owner").get(
+        agency=bureau, period__month_index=2, office__code="BUR", view="owner"
+    )
+    assert feb_root.profile_snapshot["weighting"] == "equal"
+
+    web = Client()
+    web.post("/api/v1/auth/login", {"email": "admin@sample-bureau.demo", "password": "demo-password-2026"},
+             content_type="application/json")  # fmt: skip
+    root = next(o for o in web.get("/api/v1/offices").json() if o["code"] == "BUR")
+    march = ReportingPeriod.objects.using("owner").get(fiscal_year__agency=bureau, month_index=3)
+    d = web.get("/api/v1/dashboard", {"office": root["id"], "period": str(march.pk)}).json()
+    assert d["label"] == "PROVISIONAL" and d["has_result"]
+    # Equal weighting: every activity of a unit weighs a quarter, whatever it costs.
+    unit = next(o for o in web.get("/api/v1/offices").json() if o["code"] == "R1-P1-D1-U1")
+    acts = web.get("/api/v1/dashboard/activities", {"office": unit["id"], "period": str(march.pk)}).json()
+    assert {a["weight"] for a in acts["activities"]} == {"0.25"}

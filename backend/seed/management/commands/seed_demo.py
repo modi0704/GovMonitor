@@ -84,6 +84,8 @@ class Command(BaseCommand):
                 self.stdout.write(f"{agency.code}: {created} offices created")
             if spec["code"] == "sample-ministry":
                 self._ministry_plans(email, password)
+            else:
+                self._bureau_plans(email, password)
         self.stdout.write(f"seed_demo: done (demo administrators use DEMO_PASSWORD, default {password!r})")
 
     def _ministry_plans(self, email: str, password: str) -> None:
@@ -147,3 +149,63 @@ class Command(BaseCommand):
             locked += 1
         if locked:
             self.stdout.write(f"sample-ministry: {locked} month(s) of {label} reported and locked")
+
+    def _bureau_plans(self, email: str, password: str) -> None:
+        """Sample Bureau (P14.4): five levels, the capped preset with equal weighting, plans at the
+        unit level, three months reported, the first two locked — all through the public API."""
+        api = ApiSession(email, password)
+        years = {y["label"]: y for y in api.get("/api/v1/fiscal-years")}
+        fy = (
+            years.get("2026")
+            or api.post(
+                "/api/v1/fiscal-years",
+                {"label": "2026", "start_year": 2026, "preset": "capped_with_tolerance"},
+            ).json()
+        )
+        api.patch(f"/api/v1/scoring-profiles/{fy['profile_id']}", {"weighting": "equal", "confirm": True})
+        if fy["status"] == "draft":
+            api.patch(f"/api/v1/fiscal-years/{fy['id']}", {"status": "open"})
+        offices = {o["code"]: o for o in api.get("/api/v1/offices")}
+        existing = {p["office"]["code"] for p in api.get("/api/v1/plans", fiscal_year=fy["id"])}
+        for code in demo_plans.BUREAU_UNITS:
+            if code in existing:
+                continue
+            plan = api.post(
+                "/api/v1/plans", {"office_id": offices[code]["id"], "fiscal_year_id": fy["id"]}
+            ).json()
+            api.post(f"/api/v1/plans/{plan['id']}/save", {"rows": demo_plans.bureau_plan_rows(code)})
+            api.post(f"/api/v1/plans/{plan['id']}/submit")
+            api.post(f"/api/v1/plans/{plan['id']}/approve")
+            self.stdout.write(f"sample-bureau: plan for {code} approved")
+        periods = api.get(f"/api/v1/fiscal-years/{fy['id']}")["periods"]
+        plans = {
+            p["office"]["code"]: p for p in api.get("/api/v1/plans", fiscal_year=fy["id"], status="approved")
+        }
+        reported = 0
+        for period in periods[:3]:
+            if period["status"] == "locked":
+                continue
+            m = period["month_index"]
+            for u, code in enumerate(demo_plans.BUREAU_UNITS):
+                rows = api.get(f"/api/v1/plans/{plans[code]['id']}")["rows"]
+                acts = []
+                for a in (r for r in rows if r["row_kind"] == "activity"):
+                    index = int(a["code"].rsplit("-", 1)[1])
+                    planned = int(float(a["targets"][m - 1]))
+                    acts.append(
+                        {
+                            "lineage_id": a["lineage_id"],
+                            "actual": demo_plans.bureau_actual(u, index, m, planned),
+                        }
+                    )
+                api.post(
+                    "/api/v1/reports/save",
+                    {"office": offices[code]["id"], "period": period["id"], "activities": acts},
+                )
+            if m <= 2:
+                api.post(f"/api/v1/periods/{period['id']}/lock")
+            reported += 1
+        if reported:
+            self.stdout.write(
+                f"sample-bureau: {reported} month(s) of 2026 reported (January and February locked)"
+            )

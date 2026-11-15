@@ -90,3 +90,53 @@ def fixture_actuals() -> dict[str, dict[str, list]]:
             f"{data['sheet']}-{i}": a["actual"] for i, a in enumerate(data["activities"], start=1)
         }
     return out
+
+
+# ---- Sample Bureau (P14.4): generic, generated plans for a differently shaped agency ------------
+
+BUREAU_UNITS = ("R1-P1-D1-U1", "R1-P1-D1-U2", "R1-P1-D2-U1", "R2-P1-D1-U1")
+BUREAU_ACTIVITIES = (
+    # title, unit, target, monthly pattern, cost per unit, measure
+    ("Community consultations", "session", 12, "even", 15000, "quantity"),
+    ("Farmer field schools", "school", 6, "front", 120000, "quantity"),
+    ("Monitoring visits", "visit", 1, "monthly", 2000, "recurring"),
+    ("Technology demonstration plots", "plot", 4, "back", 80000, "quantity"),
+)
+
+
+def _spread(total: int, pattern: str) -> list[int]:
+    if pattern == "monthly":
+        return [1] * 12
+    weights = {"even": [1] * 12, "front": [3] * 4 + [1] * 8, "back": [1] * 8 + [3] * 4}[pattern]
+    raw = [total * w / sum(weights) for w in weights]
+    out = [int(v) for v in raw]
+    for i in sorted(range(12), key=lambda k: raw[k] - out[k], reverse=True)[: total - sum(out)]:
+        out[i] += 1
+    return out
+
+
+def bureau_plan_rows(unit_code: str) -> list[dict]:
+    """One output with four activities per unit; equal weighting ignores the costs on purpose."""
+    rows = [{"client_key": "o", "row_kind": "output", "code": f"{unit_code}-O1",
+             "title": "Rural services delivered", "sort_order": 0}]  # fmt: skip
+    for i, (title, unit, target, pattern, unit_cost, measure) in enumerate(BUREAU_ACTIVITIES, start=1):
+        rows.append(
+            {
+                "client_key": f"a{i}", "parent": "o", "row_kind": "activity", "code": f"{unit_code}-{i}",
+                "title": title, "sort_order": i * 10, "measure_type": measure, "unit": unit,
+                "annual_target": str(target), "unit_cost": str(unit_cost),
+                "total_cost": str(unit_cost * target), "targets": [str(v) for v in _spread(target, pattern)],
+            }
+        )  # fmt: skip
+    return rows
+
+
+def bureau_actual(unit_index: int, activity_index: int, month: int, planned: int) -> str:
+    """Deterministic accomplishments: most units close to plan, one over-delivering (so the 100%
+    ceiling of the capped preset matters) and one behind."""
+    if planned == 0:
+        return "0"
+    factor = {0: 1.0, 1: 1.5, 2: 0.5, 3: 1.0}[unit_index]
+    if activity_index == 4 and month == 1:
+        factor = 0  # a slow start somewhere
+    return str(max(0, round(planned * factor)))

@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 13
-LAST COMPLETED TASK: P13.2
-NEXT TASK          : P13.3
+LAST COMPLETED TASK: P13.3
+NEXT TASK          : P13.4
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1085,7 +1085,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 - [x] **P13.2** `deploy/docker-compose.yml` (single machine: db, web, worker, Caddy with internal
   or supplied certificates) and `deploy/docker-compose.cloud.yml` (external managed PostgreSQL
   and S3-compatible storage). `.env.example` for each.
-- [ ] **P13.3** `deploy/backup.sh` and `restore.sh`: database dump plus file directory, dated,
+- [x] **P13.3** `deploy/backup.sh` and `restore.sh`: database dump plus file directory, dated,
   with a retention count; restore tested from a fresh machine state in CI.
 - [ ] **P13.4** `deploy/make-offline-bundle.sh`: saves images and compose files into one archive
   that installs on a machine with no internet; `install.sh` and `update.sh` inside it (update =

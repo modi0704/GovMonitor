@@ -41,3 +41,6 @@ deploy/certs/*
 deploy/licence/*
 !deploy/licence/.gitkeep
 deploy/cloud.env
+
+# Local backups made by deploy/backup.sh
+backups/

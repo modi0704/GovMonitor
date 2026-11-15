@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 0
-LAST COMPLETED TASK: P0.6
-NEXT TASK          : P0.7
+CURRENT PHASE      : 1
+LAST COMPLETED TASK: P0.7
+NEXT TASK          : P1.1
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -151,7 +151,7 @@ answer explicitly; build as written and keep them easy to change.
 
 Tick a phase only when all its tasks and exit checks pass.
 
-- [ ] **Phase 0** — Repository, tooling, containers, pinned versions
+- [x] **Phase 0** — Repository, tooling, containers, pinned versions
 - [ ] **Phase 1** — Agencies, sign-in, roles, row-level security
 - [ ] **Phase 2** — Office structure and user management
 - [ ] **Phase 3** — Audit log
@@ -702,7 +702,7 @@ passes.
   `manage.py run_worker` is a stub loop that only records a heartbeat.
 - [x] **P0.6** `Makefile` targets: `up`, `down`, `migrate`, `test`, `lint`, `check` (= lint +
   backend tests + frontend tests + build), `seed-demo`, `build`.
-- [ ] **P0.7** Health endpoint `/api/v1/health` (database reachable, storage writable, worker
+- [x] **P0.7** Health endpoint `/api/v1/health` (database reachable, storage writable, worker
   heartbeat age) and a CI workflow file that runs `make check`.
 
 **Phase exit checks:** `make up` then `curl /api/v1/health` returns ok; `make check` passes;
@@ -1178,3 +1178,4 @@ changed, why. Start ids at D19.
 | Date | Phase / task | Note |
 |---|---|---|
 | 2026-11-15 | — | Plan written. No code yet. |
+| 2026-11-15 | Phase 0 | Complete. make up → /api/v1/health ok (db, storage, worker); make check green. Docker builds behind a TLS proxy need EXTRA_CA_FILE. |

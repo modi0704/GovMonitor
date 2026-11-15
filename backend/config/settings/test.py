@@ -6,3 +6,6 @@ STORAGES = {  # noqa: F405
     **STORAGES,  # noqa: F405
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
+# Tests never serve static files; WhiteNoise would warn about the missing STATIC_ROOT.
+MIDDLEWARE = [m for m in MIDDLEWARE if m != "whitenoise.middleware.WhiteNoiseMiddleware"]  # noqa: F405
+WHITENOISE_ROOT = None

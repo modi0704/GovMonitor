@@ -77,8 +77,9 @@ DATABASES = {
     "default": dj_database_url.parse(env("DATABASE_URL", _DEFAULT_DB), conn_max_age=0),
     "owner": dj_database_url.parse(env("DATABASE_ADMIN_URL", _DEFAULT_ADMIN_DB), conn_max_age=0),
 }
-for _db in DATABASES.values():
-    _db["ATOMIC_REQUESTS"] = True
+# Every request runs in one transaction on `default`. Platform-owner code opens its own
+# transactions on `owner` explicitly.
+DATABASES["default"]["ATOMIC_REQUESTS"] = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- Authentication --------------------------------------------------------------------------

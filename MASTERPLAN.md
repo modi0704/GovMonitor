@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 5
-LAST COMPLETED TASK: P5.8
-NEXT TASK          : P5.9
+LAST COMPLETED TASK: P5.9
+NEXT TASK          : Phase 5 exit checks
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -863,7 +863,7 @@ agency with no code changes.
   a version comparison view lists added, removed and changed rows.
 - [x] **P5.8** Plan approval queue for the agency administrator; approved budget entry and a
   "budget vs planned cost" line per office.
-- [ ] **P5.9** Copy last year's plan into a new fiscal year as a draft (targets kept, actuals
+- [x] **P5.9** Copy last year's plan into a new fiscal year as a draft (targets kept, actuals
   not).
 
 **Phase exit checks:** the demo seed loads the six MOST fixtures (or, if P4.2 is blocked, the

@@ -25,6 +25,12 @@ export default function PlansPage() {
     years.data?.[0]?.id ??
     null;
   const plans = useResource<PlanSummary[]>(fyId ? `plans?fiscal_year=${fyId}` : null);
+  // The fiscal year before the selected one: its plans can be copied as a starting point (P5.9).
+  const yearList = years.data ?? [];
+  const previous = yearList[yearList.findIndex((y) => y.id === fyId) + 1] ?? null;
+  const previousPlans = useResource<PlanSummary[]>(
+    previous ? `plans?fiscal_year=${previous.id}&status=approved` : null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   const byOffice = useMemo(() => {
@@ -32,6 +38,24 @@ export default function PlansPage() {
     plans.data?.forEach((p) => map.set(p.office.id, [...(map.get(p.office.id) ?? []), p]));
     return map;
   }, [plans.data]);
+
+  async function copyFrom(source: PlanSummary) {
+    if (!fyId) return;
+    if (
+      !window.confirm(
+        `Copy the ${source.fiscal_year.label} plan of ${source.office.code} into this year as a draft? Targets are copied; accomplishments are not.`,
+      )
+    )
+      return;
+    try {
+      const plan = await api.post<{ id: string }>(`plans/${source.id}/copy`, {
+        fiscal_year_id: fyId,
+      });
+      navigate(`/plans/${plan.id}`);
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  }
 
   async function start(office: OfficeRow) {
     if (!fyId) return;
@@ -110,9 +134,22 @@ export default function PlansPage() {
                       </Link>
                     ) : (
                       o.can_edit && (
-                        <button type="button" className="btn btn-small" onClick={() => start(o)}>
-                          Start plan
-                        </button>
+                        <>
+                          {previousPlans.data?.find((p) => p.office.id === o.id) && (
+                            <button
+                              type="button"
+                              className="btn btn-small"
+                              onClick={() =>
+                                copyFrom(previousPlans.data!.find((p) => p.office.id === o.id)!)
+                              }
+                            >
+                              Copy from {previous?.label}
+                            </button>
+                          )}
+                          <button type="button" className="btn btn-small" onClick={() => start(o)}>
+                            Start empty plan
+                          </button>
+                        </>
                       )
                     )}
                   </td>

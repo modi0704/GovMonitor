@@ -15,6 +15,7 @@ from apps.planning.models import (
     IndicatorTarget,
     Plan,
 )
+from apps.planning.numbers import plain
 from apps.planning.services import PlanningError
 from apps.planning.validation import validate_plan
 from apps.structure.models import Office
@@ -351,14 +352,12 @@ def compare(old: Plan, new: Plan) -> dict:
     def rows(plan):
         out = {}
         for r in plan.rows.prefetch_related("targets__period"):
-            targets = {
-                t.period.month_index: str(t.planned_qty.normalize()) for t in r.targets.all() if t.planned_qty
-            }
+            targets = {t.period.month_index: plain(t.planned_qty) for t in r.targets.all() if t.planned_qty}
             out[r.lineage_id] = {
                 "code": r.code,
                 "title": r.title,
                 "row_kind": r.row_kind,
-                "annual_target": str(r.annual_target.normalize()) if r.annual_target is not None else None,
+                "annual_target": plain(r.annual_target) if r.annual_target is not None else None,
                 "total_cost": str(r.total_cost) if r.total_cost is not None else None,
                 "unit": r.unit,
                 "implementing_office_id": str(r.implementing_office_id) if r.implementing_office_id else None,

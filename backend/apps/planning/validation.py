@@ -8,6 +8,7 @@ from collections import Counter
 from decimal import Decimal
 
 from apps.planning.models import Activity, Plan
+from apps.planning.numbers import plain
 from apps.scoring import engine
 from apps.scoring.types import ActivityInput
 
@@ -62,8 +63,8 @@ def validate_plan(plan: Plan, *, for_submit: bool) -> list[dict]:
                 issues.append(
                     _issue(
                         "targets_sum",
-                        f"{label}: monthly targets add up to {total.normalize():f}, not the annual target "
-                        f"{target.normalize():f}.",
+                        f"{label}: monthly targets add up to {plain(total)}, not the annual target "
+                        f"{plain(target)}.",
                         row=a.id,
                         field="targets",
                     )
@@ -159,8 +160,8 @@ def validate_plan(plan: Plan, *, for_submit: bool) -> list[dict]:
             issues.append(
                 _issue(
                     "indicator_targets_sum",
-                    f"{ind.name[:40]}: monthly targets add up to {monthly.normalize():f}, not "
-                    f"{ind.annual_target.normalize():f}.",
+                    f"{ind.name[:40]}: monthly targets add up to {plain(monthly)}, not "
+                    f"{plain(ind.annual_target)}.",
                     indicator=ind.id,
                     field="targets",
                 )

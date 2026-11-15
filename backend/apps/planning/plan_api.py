@@ -18,6 +18,7 @@ from apps.audit.services import jsonable
 from apps.planning import plans as svc
 from apps.planning.api import planning_error
 from apps.planning.models import FiscalYear, Plan
+from apps.planning.numbers import plain
 from apps.planning.services import PlanningError
 from apps.planning.validation import validate_plan
 
@@ -45,7 +46,7 @@ def plan_summary(plan: Plan, user=None) -> dict:
 def _targets(row) -> tuple[list, list]:
     qty, amounts = ["0"] * 12, [None] * 12
     for t in row.targets.all():
-        qty[t.period.month_index - 1] = jsonable(t.planned_qty.normalize())
+        qty[t.period.month_index - 1] = plain(t.planned_qty)
         amounts[t.period.month_index - 1] = jsonable(t.planned_amount)
     return qty, amounts
 
@@ -90,7 +91,7 @@ def plan_detail(plan: Plan, user) -> dict:
     for ind in plan.indicators.prefetch_related("targets__period").order_by("sort_order"):
         values = ["0"] * 12
         for t in ind.targets.all():
-            values[t.period.month_index - 1] = jsonable(t.planned_value.normalize())
+            values[t.period.month_index - 1] = plain(t.planned_value)
         data["indicators"].append(
             {
                 "id": str(ind.id),

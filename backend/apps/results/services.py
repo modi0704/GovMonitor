@@ -7,8 +7,9 @@ version are simply not loaded, so they stop being scored.
 
 from collections import defaultdict
 from decimal import Decimal
+from typing import NamedTuple
 
-from apps.planning.models import Activity, FiscalYear, Indicator, Plan
+from apps.planning.models import Activity, ActivityTarget, FiscalYear, Indicator, Plan
 from apps.reporting.models import ActivityActual, IndicatorActual
 from apps.scoring import engine
 from apps.scoring.types import ActivityInput, IndicatorInput, OfficeResult
@@ -20,30 +21,73 @@ def _series(values: dict, default=Decimal(0)) -> tuple:
     return tuple(values.get(m, default) for m in range(1, MONTHS + 1))
 
 
-def load_activity_actuals(fiscal_year: FiscalYear, lineages) -> dict:
-    """lineage -> {month_index: ActivityActual}"""
+class ActualRow(NamedTuple):
+    """One month's accomplishment, loaded as a plain row (P8.8: no model instances on read paths)."""
+
+    pk: object
+    actual_qty: Decimal
+    actual_amount: Decimal | None
+    remarks: str
+    delay_reason: str
+
+
+class IndicatorActualRow(NamedTuple):
+    pk: object
+    actual_value: Decimal | None
+    remarks: str
+
+
+def load_activity_actuals(fiscal_year: FiscalYear, lineages=None) -> dict:
+    """lineage -> {month_index: ActualRow}. ``lineages=None`` loads the whole year."""
     out: dict = defaultdict(dict)
-    rows = ActivityActual.objects.select_related("period").filter(
-        period__fiscal_year=fiscal_year, activity_lineage_id__in=list(lineages)
-    )
-    for a in rows:
-        out[a.activity_lineage_id][a.period.month_index] = a
+    rows = ActivityActual.objects.filter(period__fiscal_year=fiscal_year)
+    if lineages is not None:
+        rows = rows.filter(activity_lineage_id__in=list(lineages))
+    for pk, lineage, month, qty, amount, remarks, reason in rows.values_list(
+        "pk",
+        "activity_lineage_id",
+        "period__month_index",
+        "actual_qty",
+        "actual_amount",
+        "remarks",
+        "delay_reason",
+    ):
+        out[lineage][month] = ActualRow(pk, qty, amount, remarks, reason)
     return out
 
 
-def load_indicator_actuals(fiscal_year: FiscalYear, lineages) -> dict:
+def load_indicator_actuals(fiscal_year: FiscalYear, lineages=None) -> dict:
     out: dict = defaultdict(dict)
-    rows = IndicatorActual.objects.select_related("period").filter(
-        period__fiscal_year=fiscal_year, indicator_lineage_id__in=list(lineages)
-    )
-    for a in rows:
-        out[a.indicator_lineage_id][a.period.month_index] = a
+    rows = IndicatorActual.objects.filter(period__fiscal_year=fiscal_year)
+    if lineages is not None:
+        rows = rows.filter(indicator_lineage_id__in=list(lineages))
+    for pk, lineage, month, value, remarks in rows.values_list(
+        "pk", "indicator_lineage_id", "period__month_index", "actual_value", "remarks"
+    ):
+        out[lineage][month] = IndicatorActualRow(pk, value, remarks)
     return out
 
 
-def activity_input(row: Activity, actuals: dict, overrides: dict | None = None) -> ActivityInput:
-    """``overrides``: {(lineage, month): (qty, amount)} for unsaved values typed in the browser."""
-    planned = {t.period.month_index: t.planned_qty for t in row.targets.all()}
+def load_planned(activities) -> dict:
+    """activity id -> {month_index: planned quantity}, for many activities in one query."""
+    out: dict = defaultdict(dict)
+    rows = ActivityTarget.objects.filter(activity__in=list(activities)).values_list(
+        "activity_id", "period__month_index", "planned_qty"
+    )
+    for activity_id, month, qty in rows:
+        out[activity_id][month] = qty
+    return out
+
+
+def activity_input(
+    row: Activity, actuals: dict, overrides: dict | None = None, planned_map: dict | None = None
+) -> ActivityInput:
+    """``overrides``: {(lineage, month): (qty, amount)} for unsaved values typed in the browser.
+    ``planned_map``: activity id -> {month: qty} from ``load_planned`` (else the row's targets)."""
+    if planned_map is not None:
+        planned = planned_map.get(row.id, {})
+    else:
+        planned = {t.period.month_index: t.planned_qty for t in row.targets.all()}
     reported = actuals.get(row.lineage_id, {})
     qty, amount = {}, {}
     for month, a in reported.items():

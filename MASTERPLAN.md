@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 8
-LAST COMPLETED TASK: P8.7
-NEXT TASK          : P8.8
+CURRENT PHASE      : 9
+LAST COMPLETED TASK: P8.8
+NEXT TASK          : P9.1
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -159,7 +159,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 5** — Fiscal years, scoring profiles, plans, activities, indicators
 - [x] **Phase 6** — Monthly reporting and MOV uploads
 - [x] **Phase 7** — Cutoff, locking, frozen results
-- [ ] **Phase 8** — Dashboards and ranking
+- [x] **Phase 8** — Dashboards and ranking
 - [ ] **Phase 9** — Excel export and plan import
 - [ ] **Phase 10** — PowerPoint export
 - [ ] **Phase 11** — Alerts and notifications
@@ -961,7 +961,7 @@ database trigger; changing the scoring profile or the plan after locking does no
 - [x] **P8.7** Chart rules: one shared chart theme; status colours always paired with the status
   word; every chart has a "view as table" toggle; numbers formatted to two decimals with the
   percent sign; peso amounts with thousands separators.
-- [ ] **P8.8** Performance: the agency dashboard for the D13 sizing ceiling returns in under
+- [x] **P8.8** Performance: the agency dashboard for the D13 sizing ceiling returns in under
   2 seconds for an open period (add query-count tests; cache live results per (period, profile
   version, latest data timestamp)).
 
@@ -1191,6 +1191,7 @@ changed, why. Start ids at D19.
 | D30 | 2026-11-15 | `activity_actual`, `indicator_actual` and `attachment` also store the owning `office_id`; `attachment` stores its `period_id`. (Claude Code) | Actuals are keyed by lineage, so the office would otherwise need a join through plan versions for every scope check, audit filter and submission-status check; the period on attachments lets the P7.5 trigger refuse changes in locked months directly. |
 | D31 | 2026-11-15 | Fixture extraction (P4.2) reads Excel's saved result for a formula inside an activity's data cells (e.g. a total cost written as =K20*14), instead of treating it as empty. GAS is extracted from row 311 (GRAND TOTAL PLAN, budget K311) and row 312 (ACTUAL MONTHLY DISBURSMENT) as one money-measure line; the 4-decimal rounding residue of its monthly plan (Excel itself sums to 107678521.99999993) goes into the last planned month. (Claude Code) | Several sheets compute total cost by formula; reading them as 0 distorted cost-share weights (PME came out 100%). With these rules all six December 2023 figures and the RDS roll-up match 8.2 exactly. |
 | D32 | 2026-11-15 | The worker (app_user) claims jobs through SECURITY DEFINER functions `claim_next_job()`, `requeue_stale_jobs(minutes)` and `active_agency_ids()`; `job` gains `result` (jsonb, a small summary for the UI). (Claude Code) | Without an agency set, app_user cannot see any job row, so the cross-agency claim must run with the owner's rights; the worker still needs no owner credentials. The summary lets 'My exports' and the board show outcomes without opening files. |
+| D33 | 2026-11-15 | Live results are cached per (agency, period, profile version, latest audit-log id). The latest audit id is the 'latest data timestamp' of P8.8; an index on (agency_id, id) keeps it cheap. Read paths load monthly targets and actuals as plain rows, and the audit mixin builds its before-snapshot only when an object is saved. (Claude Code) | Every change writes an audit row (Phase 3, enforced by the route-walking test), so the id moves with anything results depend on — including moves, group edits and approvals that no single table timestamp covers. The plain-row loading cut the ceiling dashboard from 5.5 s to 1.4 s uncached. |
 
 ---
 
@@ -1208,3 +1209,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 6 | Complete. Monthly entry with live engine results, MOV uploads (sniffed types, agency folders, authorised download), submit/return, implementing view. Exit e2e passes. |
 | 2026-11-15 | Phase 4 | Complete. Golden 8.2 vectors pass from the real workbook (PME 95.83, HRM 83.68, RDI 99.07, AST 58.76, ILD 90.23, GAS 80.16, RDS 86.19, ranking); also reproduced through the API. |
 | 2026-11-15 | Phase 7 | Complete. Frozen period_result per office and view, ordered lock/unlock with audited copies, DB trigger on locked months, job queue and worker with auto-lock, submission board, single read path (FINAL/PROVISIONAL). |
+| 2026-11-15 | Phase 8 | Complete. One-call dashboards with drill-down to activity history, rankings with month-on-month change, quarters/YTD from the engine, FINAL/PROVISIONAL. Ceiling agency (501 offices, 5,000 activities) answers in ~1.4 s uncached; results cached by data stamp. MOST Dec 2023 figures shown through the dashboard API. |

@@ -35,6 +35,7 @@ class AuditLog(models.Model):
             models.Index(fields=["agency", "actor_id", "at"], name="audit_agency_actor"),
             models.Index(fields=["agency", "entity_type", "entity_id"], name="audit_agency_entity"),
             models.Index(fields=["agency", "office_id", "at"], name="audit_agency_office"),
+            models.Index(fields=["agency", "id"], name="audit_agency_id"),  # latest row per agency (D33)
         ]
 
     def save(self, *args, **kwargs):

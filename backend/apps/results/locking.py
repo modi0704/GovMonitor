@@ -48,7 +48,9 @@ def _detail(entry, month: int, profile=None) -> dict:
     i = month - 1
     activities = []
     for row, res in entry.activity_rows:
-        planned = {t.period.month_index: t.planned_qty for t in row.targets.all()}
+        planned = entry.planned.get(row.id) if entry.planned else None
+        if planned is None:
+            planned = {t.period.month_index: t.planned_qty for t in row.targets.all()}
         reported = entry.actuals.get(row.lineage_id, {})
         this = reported.get(month)
         variance = res.actual_ratio[i] - res.planned_ratio[i]

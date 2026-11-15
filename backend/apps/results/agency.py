@@ -16,6 +16,7 @@ from apps.results.services import (
     indicator_input,
     load_activity_actuals,
     load_indicator_actuals,
+    load_planned,
 )
 from apps.scoring import engine
 from apps.scoring.types import OfficeResult
@@ -38,6 +39,7 @@ class OfficeEntry:
     indicator_rows: list = field(default_factory=list)  # (Indicator, IndicatorResult)
     actuals: dict = field(default_factory=dict)  # lineage -> {month: ActivityActual} (shared)
     indicator_actuals: dict = field(default_factory=dict)  # lineage -> {month: IndicatorActual} (shared)
+    planned: dict = field(default_factory=dict)  # activity id -> {month: planned qty} (shared)
 
 
 @dataclass
@@ -63,8 +65,7 @@ def compute_agency(period: ReportingPeriod) -> AgencyResults:
     plans = {p.office_id: p for p in Plan.objects.filter(fiscal_year=fy, status=Plan.Status.APPROVED)}
     rows = list(
         Activity.objects.filter(plan__in=plans.values(), row_kind=Activity.RowKind.ACTIVITY)
-        .select_related("plan", "implementing_office")
-        .prefetch_related("targets__period")
+        .select_related("plan")
         .order_by("plan_id", "sort_order")
     )
     inds = list(
@@ -72,9 +73,10 @@ def compute_agency(period: ReportingPeriod) -> AgencyResults:
         .prefetch_related("targets__period")
         .order_by("sort_order")
     )
-    actuals = load_activity_actuals(fy, [r.lineage_id for r in rows])
-    ind_actuals = load_indicator_actuals(fy, [i.lineage_id for i in inds])
-    inputs = {r.id: activity_input(r, actuals) for r in rows}
+    actuals = load_activity_actuals(fy)  # the whole year, as plain rows (P8.8)
+    ind_actuals = load_indicator_actuals(fy)
+    planned = load_planned(rows)
+    inputs = {r.id: activity_input(r, actuals, planned_map=planned) for r in rows}
 
     rows_by_plan, inds_by_plan, rows_by_impl = defaultdict(list), defaultdict(list), defaultdict(list)
     for r in rows:
@@ -122,7 +124,7 @@ def compute_agency(period: ReportingPeriod) -> AgencyResults:
         if plan_info:
             entry.activity_rows = list(zip(plan_info[2], plan_info[1].activities, strict=True))
             entry.indicator_rows = list(zip(plan_info[3], plan_info[1].indicators, strict=True))
-        entry.actuals, entry.indicator_actuals = actuals, ind_actuals
+        entry.actuals, entry.indicator_actuals, entry.planned = actuals, ind_actuals, planned
         entries[(office_id, OWNER)] = entry
 
     # Implementing view (7.7): display and ranking only.
@@ -134,6 +136,7 @@ def compute_agency(period: ReportingPeriod) -> AgencyResults:
             result=res,
             activity_rows=list(zip(impl_rows, res.activities, strict=True)),
             actuals=actuals,
+            planned=planned,
         )
 
     agency = AgencyResults(

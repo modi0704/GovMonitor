@@ -61,7 +61,7 @@ def test_seed_demo_is_idempotent_and_builds_three_and_five_level_agencies():
             .select_related("office")
             .filter(period=dec, view="owner")
         }
-        assert {k: frozen[k] for k in ("PME", "HRM", "RDI", "AST", "ILD", "GAS", "RDS")} == {
+        frozen_expected = {
             "PME": 95.83,
             "HRM": 83.68,
             "RDI": 99.07,
@@ -70,7 +70,25 @@ def test_seed_demo_is_idempotent_and_builds_three_and_five_level_agencies():
             "GAS": 80.16,
             "RDS": 86.19,
         }
+        assert {k: frozen[k] for k in frozen_expected} == frozen_expected
         assert Office.objects.using("owner").filter(agency=agencies["sample-ministry"], code="RDS").exists()
+    if "RDI" in counts:
+        # ...and the dashboard API shows them (Phase 8 exit check).
+        from django.test import Client
+
+        web = Client()
+        web.post(
+            "/api/v1/auth/login",
+            {"email": "admin@sample-ministry.demo", "password": "demo-password-2026"},
+            content_type="application/json",
+        )
+        codes = {o["code"]: o["id"] for o in web.get("/api/v1/offices").json()}
+        shown = {}
+        for code in ("PME", "HRM", "RDI", "AST", "ILD", "GAS", "RDS"):
+            d = web.get("/api/v1/dashboard", {"office": codes[code], "period": str(dec.pk)}).json()
+            assert d["label"] == "FINAL"
+            shown[code] = round(float(d["headline"]["cum_actual"]) * 100, 2)
+        assert shown == frozen_expected
     actions = set(
         AuditLog.objects.using("owner")
         .filter(agency=agencies["sample-ministry"])

@@ -186,8 +186,27 @@ class AuditedModel(models.Model):
     @classmethod
     def from_db(cls, db, field_names, values):
         instance = super().from_db(db, field_names, values)
-        instance._audit_loaded = snapshot(instance)
+        # Keep the raw loaded values only; the snapshot is built if and when the object is saved
+        # (P8.8: read paths load hundreds of thousands of rows and must not pay for auditing).
+        instance._audit_raw = (field_names, values)
         return instance
+
+    def _audit_before(self) -> dict:
+        loaded = getattr(self, "_audit_loaded", None)
+        if loaded is not None:
+            return loaded
+        raw = getattr(self, "_audit_raw", None)
+        if raw is None:
+            return {}
+        names, values = raw
+        attnames = {f.name: f.attname for f in self._meta.concrete_fields}
+        out = {}
+        for name, value in zip(names, values, strict=True):
+            att = attnames.get(name, name)
+            if att == "agency_id" or is_sensitive(att) or value is models.DEFERRED:
+                continue
+            out[att] = jsonable(value)
+        return out
 
     def save(self, *args, **kwargs):
         creating = self._state.adding
@@ -200,7 +219,7 @@ class AuditedModel(models.Model):
         if creating:
             record(_action_name(self, "create"), self, after=now, using=using)
         else:
-            old = getattr(self, "_audit_loaded", None) or {}
+            old = self._audit_before()
             changed = [k for k, v in now.items() if k in old and old[k] != v and k not in self.audit_exclude]
             if changed:
                 record(

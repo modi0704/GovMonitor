@@ -119,19 +119,42 @@ def _from_entry(entry, month: int, profile, snapshot: dict) -> ResultView:
     )
 
 
+def data_stamp() -> int:
+    """The agency's latest audit row id. Every change writes an audit row (Phase 3), so this moves
+    whenever anything a result depends on changes (D33)."""
+    from django.db.models import Max
+
+    from apps.audit.models import AuditLog
+
+    return AuditLog.objects.aggregate(m=Max("id"))["m"] or 0
+
+
 def get_agency_results(period: ReportingPeriod) -> dict:
-    """(office id as str, view) -> ResultView, for every office with a result in this month."""
+    """(office id as str, view) -> ResultView, for every office with a result in this month.
+
+    Locked months read their frozen rows. Open months are computed live and cached per (period,
+    profile version, latest data stamp) — P8.8.
+    """
+    from django.core.cache import cache
+
     month = period.month_index
     if period.status == ReportingPeriod.Status.LOCKED:
         rows = PeriodResult.objects.filter(period=period)
         return {(str(r.office_id), r.view): _from_row(r, month) for r in rows}
+    profile_row = period.fiscal_year.profile
+    key = f"gm:results:{period.agency_id}:{period.pk}:{profile_row.version}:{data_stamp()}"
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
     agency = compute_agency(period)
-    snapshot = period.fiscal_year.profile.snapshot()
-    return {
+    snapshot = profile_row.snapshot()
+    results = {
         (str(office_id), view): _from_entry(entry, month, agency.profile, snapshot)
         for (office_id, view), entry in agency.entries.items()
         if entry.result is not None
     }
+    cache.set(key, results, timeout=3600)
+    return results
 
 
 def get_result(period: ReportingPeriod, office, view: str = OWNER) -> ResultView | None:

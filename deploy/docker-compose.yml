@@ -1,0 +1,72 @@
+# Single-machine stack: db, web, worker. (Caddy and production hardening arrive in Phase 13.)
+# Usage from the repository root:  make up   (or: docker compose -f deploy/docker-compose.yml up -d --build)
+# Values come from deploy/.env if present; the defaults below are for local development only.
+name: govmonitor
+
+x-app-env: &app-env
+  DEPLOYMENT_MODE: ${DEPLOYMENT_MODE:-multi}
+  SECRET_KEY: ${SECRET_KEY:-dev-only-change-me-0123456789abcdef}
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,web}
+  CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8000}
+  DATABASE_URL: postgres://app_user:${APP_USER_PASSWORD:-app_user_dev}@db:5432/govmonitor
+  DATABASE_ADMIN_URL: postgres://app_owner:${APP_OWNER_PASSWORD:-app_owner_dev}@db:5432/govmonitor
+  FILE_STORAGE: local
+  FILE_ROOT: /data/files
+  EMAIL_URL: ${EMAIL_URL:-}
+  SESSION_IDLE_MINUTES: ${SESSION_IDLE_MINUTES:-60}
+  MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev}
+      APP_OWNER_PASSWORD: ${APP_OWNER_PASSWORD:-app_owner_dev}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD:-app_user_dev}
+      APP_DB: govmonitor
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./db/init-roles.sh:/docker-entrypoint-initdb.d/10-init-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d govmonitor"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: govmonitor:${GOVMONITOR_VERSION:-dev}
+    command: ["web"]
+    environment: *app-env
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      - files:/data/files
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=3).status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  worker:
+    image: govmonitor:${GOVMONITOR_VERSION:-dev}
+    command: ["worker"]
+    environment: *app-env
+    volumes:
+      - files:/data/files
+    depends_on:
+      web:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  files:

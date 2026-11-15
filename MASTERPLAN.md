@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 0
-LAST COMPLETED TASK: P0.4
-NEXT TASK          : P0.5
+LAST COMPLETED TASK: P0.5
+NEXT TASK          : P0.6
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -696,7 +696,7 @@ passes.
   custom user model declared from the first migration.
 - [x] **P0.4** Create the Vite + React + TypeScript app with routing, an API client using the
   session cookie and CSRF header, and a placeholder sign-in page. Bundle all assets locally.
-- [ ] **P0.5** `deploy/Dockerfile` (multi-stage: build frontend, install backend, collect static)
+- [x] **P0.5** `deploy/Dockerfile` (multi-stage: build frontend, install backend, collect static)
   and `deploy/docker-compose.yml` with services `db`, `web`, `worker`. Database init script
   creates roles `app_owner` and `app_user` (section 6.1). Until P7.7 the worker command
   `manage.py run_worker` is a stub loop that only records a heartbeat.

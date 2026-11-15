@@ -196,16 +196,18 @@ export default function ScoringProfilePage() {
 
   const toggle = (key: 'cap_at_100' | 'auto_lock' | 'mov_required' | 'show_actual_amounts') => (
     <div className="setting">
-      <label className="check">
-        <input
-          type="checkbox"
-          checked={draft[key]}
-          disabled={!isAdmin}
-          onChange={(e) => set(key, e.target.checked)}
-        />
-        <strong>{HELP[key].title}</strong>
-      </label>
-      <HelpTip label={HELP[key].title}>{SCORING_TIPS[key]}</HelpTip>
+      <div className="setting-head">
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={draft[key]}
+            disabled={!isAdmin}
+            onChange={(e) => set(key, e.target.checked)}
+          />
+          <strong>{HELP[key].title}</strong>
+        </label>
+        <HelpTip label={HELP[key].title}>{SCORING_TIPS[key]}</HelpTip>
+      </div>
       <p className="muted small">{HELP[key].text}</p>
     </div>
   );

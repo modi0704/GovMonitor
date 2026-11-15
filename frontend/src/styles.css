@@ -1324,3 +1324,8 @@ main.content:focus {
   color: var(--delayed);
   font-weight: 600;
 }
+.setting-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}

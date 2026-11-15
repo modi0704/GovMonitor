@@ -43,7 +43,23 @@ export function num(value: string | number | null | undefined, digits = 2): stri
     : n.toLocaleString('en-PH', { maximumFractionDigits: digits });
 }
 
+// Times are stored in UTC and shown in the agency's time zone (MASTERPLAN 6), whatever the
+// computer's own setting; set once the signed-in user's agency is known.
+let displayTimeZone: string | undefined;
+
+export function setDisplayTimeZone(zone: string | undefined) {
+  displayTimeZone = zone || undefined;
+}
+
 export function dateTime(iso: string | null | undefined): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' });
+  try {
+    return new Date(iso).toLocaleString('en-PH', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: displayTimeZone,
+    });
+  } catch {
+    return new Date(iso).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' });
+  }
 }

@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 14
-LAST COMPLETED TASK: P14.4
-NEXT TASK          : P14.5
+LAST COMPLETED TASK: P14.5
+NEXT TASK          : P14.6
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). Release: replace the placeholder licence public key (D41)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1124,7 +1124,7 @@ wipe → restore reproduces the dashboard numbers; P13.7 passes.
 - [x] **P14.4** Demo data: `make seed-demo` builds two sample agencies with different shapes —
   "Sample Ministry" (the MOST fixtures, three levels plus field units and two groups) and
   "Sample Bureau" (five levels, equal weighting, capped preset) — proving nothing is hard-coded.
-- [ ] **P14.5** `docs/USER_GUIDE.md` (per role, with screenshots) and `docs/API.md`.
+- [x] **P14.5** `docs/USER_GUIDE.md` (per role, with screenshots) and `docs/API.md`.
 - [ ] **P14.6** Release checklist, version number, changelog, tagged build of the images.
 - [ ] **P14.7** Final pass over this file: every box ticked or struck through with a reason;
   section 5.2 versions match the lockfiles; section 14 lists every deviation.

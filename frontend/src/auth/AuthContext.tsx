@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ApiError, SESSION_EXPIRED_EVENT, api } from '../api/client';
 import type { Me } from '../api/types';
+import { setDisplayTimeZone } from '../lib/format';
 
 import { AuthContext, type AuthState } from './context';
 
@@ -12,6 +13,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     try {
       const data = await api.get<Me>('me');
+      setDisplayTimeZone(data.agency?.timezone);
       setMe(data);
       return data;
     } catch (err) {

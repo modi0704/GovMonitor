@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 1
-LAST COMPLETED TASK: P1.6
-NEXT TASK          : P1.7
+LAST COMPLETED TASK: P1.7
+NEXT TASK          : P1.9
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. Phase 1 order P1.8 → P1.6 → P1.7 → P1.9 → P1.10 (D23); platform UI pages are built in P1.10
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -733,7 +733,7 @@ deliberately wrong query.
 - [x] **P1.6** Platform-owner area under `/platform/` (separate sign-in, uses `app_owner`): list,
   create, suspend agencies; create an agency's first administrator; hidden entirely when
   `DEPLOYMENT_MODE=single`. `manage.py bootstrap_single_agency` for single mode.
-- [ ] **P1.7** Support grants: an agency administrator can grant a platform admin time-limited
+- [x] **P1.7** Support grants: an agency administrator can grant a platform admin time-limited
   read access; without a grant the platform area shows no agency data.
 - [x] **P1.8** `accounts/permissions.py` with the functions of 6.6 and DRF permission classes.
 - [ ] **P1.9** Isolation tests: (a) with agency A set, raw SQL `SELECT` on every tenant table

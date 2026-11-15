@@ -191,3 +191,13 @@ it('opens the supporting files of a row', async () => {
     '.pdf,.jpg,.jpeg,.png,.docx,.xlsx,.pptx',
   );
 });
+
+it('switches to the activities an office carries out for other offices', async () => {
+  const calls = renderPage();
+  const user = userEvent.setup();
+  await screen.findByLabelText('Done this month, A');
+  await user.selectOptions(screen.getByLabelText('Show'), 'implementing');
+  await screen.findByRole('columnheader', { name: 'For office' });
+  expect(calls.some((c) => c.path === '/api/v1/reports' && c.method === 'GET')).toBe(true);
+  expect(screen.queryByRole('tab', { name: /Indicators/ })).not.toBeInTheDocument();
+});

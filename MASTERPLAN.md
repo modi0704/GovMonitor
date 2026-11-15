@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 1
-LAST COMPLETED TASK: P1.2
-NEXT TASK          : P1.3
+LAST COMPLETED TASK: P1.3
+NEXT TASK          : P1.4
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -722,7 +722,7 @@ deliberately wrong query.
   plain uuid if needed).
 - [x] **P1.2** A reusable migration operation `EnableTenantRLS(table)` that enables and forces RLS
   and creates the policy of 6.1; apply it to every tenant table created so far.
-- [ ] **P1.3** Middleware that sets `app.agency_id` per request; worker helper that sets it per
+- [x] **P1.3** Middleware that sets `app.agency_id` per request; worker helper that sets it per
   job; `SECURITY DEFINER` lookup function for sign-in.
 - [ ] **P1.4** Sign-in, sign-out, session idle timeout, account lock after 5 failed attempts for
   15 minutes, password rules (minimum 12 characters, Django validators), forced password change

@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 1
-LAST COMPLETED TASK: P1.4
-NEXT TASK          : P1.5
+LAST COMPLETED TASK: P1.5
+NEXT TASK          : P1.8 (then P1.6, P1.7 — see D23)
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -729,7 +729,7 @@ deliberately wrong query.
   on first sign-in, password reset by an agency administrator (and by email when SMTP is set).
   > NOTE: the administrator reset is the service `accounts.services.admin_reset_password`; its
   > endpoint `users/{id}/reset-password` is added with the Users API in P2.5.
-- [ ] **P1.5** Optional TOTP two-factor: enrol with QR code, verify at sign-in, recovery codes.
+- [x] **P1.5** Optional TOTP two-factor: enrol with QR code, verify at sign-in, recovery codes.
 - [ ] **P1.6** Platform-owner area under `/platform/` (separate sign-in, uses `app_owner`): list,
   create, suspend agencies; create an agency's first administrator; hidden entirely when
   `DEPLOYMENT_MODE=single`. `manage.py bootstrap_single_agency` for single mode.

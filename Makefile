@@ -14,7 +14,7 @@ BUILD_FLAGS := $(if $(EXTRA_CA_FILE),--secret id=extra_ca$(comma)src=$(EXTRA_CA_
 WEB_PORT ?= 8000
 
 .PHONY: help up down logs build migrate migrate-local test test-backend test-frontend lint \
-        lint-backend lint-frontend build-frontend check seed-demo seed-demo-local install lock smoke
+        lint-backend lint-frontend build-frontend check seed-demo seed-demo-local install lock smoke offline-bundle
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -42,6 +42,9 @@ migrate: ## Apply migrations inside the running stack (as app_owner)
 
 seed-demo: ## Load the demo agencies inside the running stack
 	$(COMPOSE) exec web entrypoint.sh manage seed_demo
+
+offline-bundle: ## Archive for installs without internet: images + compose + scripts (dist/)
+	deploy/make-offline-bundle.sh $(or $(GOVMONITOR_VERSION),dev)
 
 # ---- Local development -----------------------------------------------------------------------
 install: ## Create backend/.venv and install backend + frontend dependencies

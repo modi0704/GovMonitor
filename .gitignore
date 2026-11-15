@@ -44,3 +44,6 @@ deploy/cloud.env
 
 # Local backups made by deploy/backup.sh
 backups/
+
+# Offline bundles (deploy/make-offline-bundle.sh)
+/dist/

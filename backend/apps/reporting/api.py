@@ -397,3 +397,66 @@ class ReportReturnView(APIView):
             "return", sub, after={"month": period.month_index, "note": sub.return_note}, office_id=office.id
         )
         return Response(month_view(request, office, period, "owner"))
+
+
+class SubmissionBoardView(APIView):
+    """GET ``?period=`` — every office with an approved plan × its submission status (P7.6)."""
+
+    permission_classes = [perm.IsAgencyAdmin]
+
+    def get(self, request):
+        from apps.planning.models import Plan
+
+        period = _period(request.query_params.get("period"))
+        fy = period.fiscal_year
+        plans = {
+            p.office_id: p
+            for p in Plan.objects.select_related("office").filter(fiscal_year=fy, status=Plan.Status.APPROVED)
+        }
+        subs = {
+            s.office_id: s
+            for s in OfficeSubmission.objects.select_related("submitted_by", "returned_by").filter(
+                period=period
+            )
+        }
+        now = timezone.now()
+        rows = []
+        for office in Office.objects.filter(pk__in=plans.keys()).order_by("path"):
+            sub = subs.get(office.id)
+            rows.append(
+                {
+                    "office": {
+                        "id": str(office.id),
+                        "code": office.code,
+                        "name": office.name,
+                        "depth": office.depth,
+                    },
+                    "plan_version": plans[office.id].version,
+                    **_submission_payload(sub),
+                }
+            )
+        periods = list(fy.periods.order_by("month_index"))
+        locked = [p for p in periods if p.status == ReportingPeriod.Status.LOCKED]
+        earlier_open = any(
+            p.status == ReportingPeriod.Status.OPEN for p in periods if p.month_index < period.month_index
+        )
+        return Response(
+            {
+                "period": {
+                    "id": str(period.id),
+                    "month_index": period.month_index,
+                    "start_date": period.start_date.isoformat(),
+                    "cutoff_at": period.cutoff_at.isoformat(),
+                    "status": period.status,
+                    "locked_at": period.locked_at.isoformat() if period.locked_at else None,
+                    "locked_by": period.locked_by.email if period.locked_by_id else None,
+                    "days_to_cutoff": (period.cutoff_at - now).days
+                    if period.cutoff_at > now
+                    else -((now - period.cutoff_at).days),
+                    "can_lock": period.status == ReportingPeriod.Status.OPEN and not earlier_open,
+                    "can_unlock": bool(locked) and locked[-1].pk == period.pk,
+                },
+                "offices": rows,
+                "not_submitted": [r["office"] for r in rows if r["status"] in ("draft", "returned")],
+            }
+        )

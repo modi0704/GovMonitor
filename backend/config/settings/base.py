@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.alerts",
     "apps.exports",
     "apps.jobs",
+    "seed",
 ]
 
 MIDDLEWARE = [

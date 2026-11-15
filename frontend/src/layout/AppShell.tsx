@@ -1,0 +1,34 @@
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
+
+export default function AppShell() {
+  const { me, signOut } = useAuth();
+  const navigate = useNavigate();
+  return (
+    <div className="shell">
+      <header className="topbar">
+        <NavLink to="/" className="brand brand-inverse">
+          <img src="/favicon.svg" alt="" width={24} height={24} />
+          <span>GovMonitor</span>
+        </NavLink>
+        <span className="agency-name">{me?.agency.name}</span>
+        <nav className="topnav" aria-label="Account">
+          <NavLink to="/account/security">{me?.full_name || me?.email}</NavLink>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={async () => {
+              await signOut();
+              navigate('/sign-in', { replace: true });
+            }}
+          >
+            Sign out
+          </button>
+        </nav>
+      </header>
+      <main className="content">
+        <Outlet />
+      </main>
+    </div>
+  );
+}

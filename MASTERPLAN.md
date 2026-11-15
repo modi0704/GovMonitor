@@ -10,10 +10,10 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 1
-LAST COMPLETED TASK: P1.9
-NEXT TASK          : P1.10
-BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. Platform UI pages are built in P1.10 (D23)
+CURRENT PHASE      : 2
+LAST COMPLETED TASK: P1.10
+NEXT TASK          : P2.1
+BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. git push currently refused (no GitHub access for this session)
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -152,7 +152,7 @@ answer explicitly; build as written and keep them easy to change.
 Tick a phase only when all its tasks and exit checks pass.
 
 - [x] **Phase 0** — Repository, tooling, containers, pinned versions
-- [ ] **Phase 1** — Agencies, sign-in, roles, row-level security
+- [x] **Phase 1** — Agencies, sign-in, roles, row-level security
 - [ ] **Phase 2** — Office structure and user management
 - [ ] **Phase 3** — Audit log
 - [ ] **Phase 4** — Scoring engine (pure module, test vectors)
@@ -741,7 +741,7 @@ deliberately wrong query.
   agency set, every tenant table returns zero rows; (d) a meta-test lists all models and fails if
   any model with an `agency_id` field lacks an RLS policy, or any model lacks `agency_id` without
   being on an explicit allow-list (`platform_admin`, Django internals).
-- [ ] **P1.10** Frontend: sign-in page, 2FA step, change-password page, session-expired handling.
+- [x] **P1.10** Frontend: sign-in page, 2FA step, change-password page, session-expired handling.
 
 **Phase exit checks:** P1.9 tests pass; two demo agencies exist in the seed and a browser session
 of one cannot fetch any object id of the other (API returns 404).
@@ -1184,3 +1184,4 @@ changed, why. Start ids at D19.
 |---|---|---|
 | 2026-11-15 | — | Plan written. No code yet. |
 | 2026-11-15 | Phase 0 | Complete. make up → /api/v1/health ok (db, storage, worker); make check green. Docker builds behind a TLS proxy need EXTRA_CA_FILE. |
+| 2026-11-15 | Phase 1 | Complete. RLS forced on every tenant table and proven by generic tests; sign-in with lockout, idle timeout, TOTP; platform area with support grants; two-agency demo seed. Task order changed per D23. |

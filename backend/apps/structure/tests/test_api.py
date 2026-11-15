@@ -101,3 +101,37 @@ def test_groups_api(world):
     assert [m["code"] for m in head.get("/api/v1/groups").json()[0]["members"]] == ["SVC1"]
     assert head.put(f"/api/v1/groups/{g['id']}/members", {"office_ids": []}).status_code == 403
     assert boss.delete(f"/api/v1/groups/{g['id']}").status_code == 204
+
+
+def test_paste_import_preview_then_create(world):
+    boss = Json(api_client("boss@alpha.gov"))
+    rows = [
+        {"code": "PC1", "name": "Center 1", "depth": 0},
+        {"code": "PC1-A", "name": "Unit A", "depth": 1},
+        {"code": "PC2", "name": "Center 2", "depth": 0},
+        {"code": "PC2-X", "name": "Unit X", "parent_code": "PC1"},
+    ]
+    base = str(world["svc2"].id)
+    preview = boss.post("/api/v1/offices/import", {"parent_id": base, "rows": rows, "dry_run": True}).json()
+    assert preview["errors"] == [] and preview["created"] == 0
+    assert [r["parent_code"] for r in preview["rows"]] == ["SVC2", "PC1", "SVC2", "PC1"]
+    r = boss.post("/api/v1/offices/import", {"parent_id": base, "rows": rows})
+    assert r.status_code == 201 and r.json()["created"] == 4
+    tree = {o["code"]: o for o in boss.get("/api/v1/offices").json()}
+    assert tree["PC1-A"]["parent_id"] == tree["PC1"]["id"] and tree["PC1-A"]["depth"] == 3
+    assert tree["PC2-X"]["parent_id"] == tree["PC1"]["id"]
+
+
+def test_paste_import_all_or_nothing(world):
+    boss = Json(api_client("boss@alpha.gov"))
+    rows = [
+        {"code": "NEW1", "name": "Fine", "depth": 0},
+        {"code": "SVC1", "name": "Duplicate of existing", "depth": 0},
+        {"code": "NEW1", "name": "Duplicate row", "depth": 0},
+        {"code": "DEEP", "name": "Too deep", "depth": 3},
+        {"code": "", "name": "", "depth": 0},
+    ]
+    r = boss.post("/api/v1/offices/import", {"parent_id": str(world["root"].id), "rows": rows})
+    assert r.status_code == 400
+    assert {e["row"] for e in r.json()["errors"]} == {2, 3, 4, 5}
+    assert "NEW1" not in {o["code"] for o in boss.get("/api/v1/offices").json()}

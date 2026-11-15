@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
+import { NAV_ITEMS } from './nav';
 
 export default function AppShell() {
   const { me, signOut } = useAuth();
@@ -26,6 +27,14 @@ export default function AppShell() {
           </button>
         </nav>
       </header>
+      <nav className="mainnav" aria-label="Main">
+        {me &&
+          NAV_ITEMS.filter((item) => item.show(me)).map((item) => (
+            <NavLink key={item.to} to={item.to} end={item.to === '/'}>
+              {item.label}
+            </NavLink>
+          ))}
+      </nav>
       <main className="content">
         <Outlet />
       </main>

@@ -1,0 +1,18 @@
+import type { Me } from '../api/types';
+
+export interface NavItem {
+  to: string;
+  label: string;
+  show: (me: Me) => boolean;
+}
+
+const always = () => true;
+const agencyAdmin = (me: Me) => me.is_agency_admin;
+
+/** Main navigation. Later phases add dashboard, plans, reports, exports. */
+export const NAV_ITEMS: NavItem[] = [
+  { to: '/', label: 'Home', show: always },
+  { to: '/structure', label: 'Structure', show: always },
+  { to: '/groups', label: 'Groups', show: always },
+  { to: '/users', label: 'Users', show: agencyAdmin },
+];

@@ -44,7 +44,10 @@ def office_payload(office: Office, user=None, levels: dict | None = None) -> dic
 
 
 def group_payload(group: OfficeGroup, visible_ids: set | None = None) -> dict:
-    members = [m.office for m in group.members.select_related("office").order_by("office__sort_order", "office__name")]
+    members = [
+        m.office
+        for m in group.members.select_related("office").order_by("office__sort_order", "office__name")
+    ]
     if visible_ids is not None:
         members = [o for o in members if o.id in visible_ids]
     return {
@@ -304,3 +307,30 @@ class GroupMembersView(APIView):
         except Exception:  # noqa: BLE001 — malformed ids
             return Response({"office_ids": ["One or more ids are not valid."]}, status=400)
         return Response(group_payload(group))
+
+
+class OfficeImportView(APIView):
+    """Paste-a-list import. ``{"parent_id", "rows": [{code, name, depth, parent_code}], "dry_run"}``.
+
+    A dry run returns the resolved preview and every problem; a real run creates all rows or none.
+    """
+
+    permission_classes = [IsAgencyAdmin]
+
+    def post(self, request):
+        parent = scoped_office(request, request.data.get("parent_id"), edit=True)
+        rows = request.data.get("rows")
+        if not isinstance(rows, list) or not rows:
+            return Response({"rows": ["Paste at least one office."]}, status=400)
+        if len(rows) > 2000:
+            return Response({"rows": ["At most 2,000 offices per import."]}, status=400)
+        resolved, errors = svc.plan_import(parent, rows)
+        if request.data.get("dry_run") or errors:
+            return Response(
+                {"rows": resolved, "errors": errors, "created": 0},
+                status=status.HTTP_200_OK if not errors or request.data.get("dry_run") else 400,
+            )
+        created = svc.run_import(parent, rows)
+        return Response(
+            {"rows": resolved, "errors": [], "created": len(created)}, status=status.HTTP_201_CREATED
+        )

@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 
 from apps.accounts import services
 from apps.accounts.models import RoleAssignment, User
+from apps.accounts.permissions import is_agency_admin
 
 
 class CsrfEnforcedMixin:
@@ -45,6 +46,7 @@ def me_payload(user: User) -> dict:
         "full_name": user.full_name,
         "must_change_password": user.must_change_password,
         "has_2fa": user.has_2fa,
+        "is_agency_admin": is_agency_admin(user),
         "agency": {
             "id": str(agency.id),
             "name": agency.name,

@@ -27,6 +27,7 @@ export const ME = {
   full_name: 'Ana',
   must_change_password: false,
   has_2fa: false,
+  is_agency_admin: false,
   agency: {
     id: 'a1',
     name: 'Alpha Agency',

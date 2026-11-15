@@ -203,3 +203,68 @@ def set_group_members(group: OfficeGroup, office_ids: list) -> None:
         OfficeGroupMember.objects.bulk_create(
             [OfficeGroupMember(group=group, office=o) for o in offices if o.pk not in existing]
         )
+
+
+# ---- Paste-a-list import (P2.3) ----------------------------------------------------------------
+
+
+def plan_import(base_parent: Office, rows: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Validate rows ``{code, name, depth?, parent_code?}`` for creation under ``base_parent``.
+
+    ``parent_code`` (an existing office or an earlier row) wins over ``depth``; otherwise a row of
+    depth d hangs under the last row of depth d-1, and depth 0 hangs under ``base_parent``.
+    Returns (resolved rows with ``parent_code`` filled, errors ``{row, message}``). Nothing is
+    created here.
+    """
+    existing = {o.code.upper(): o for o in Office.objects.all()}
+    seen: dict[str, int] = {}
+    last_at_depth: dict[int, str] = {}
+    resolved, errors = [], []
+    for i, raw in enumerate(rows, start=1):
+        code = str(raw.get("code") or "").strip()
+        name = str(raw.get("name") or "").strip()
+        depth = int(raw.get("depth") or 0)
+        parent_code = str(raw.get("parent_code") or "").strip()
+        problems = []
+        if not code:
+            problems.append("code is missing")
+        elif len(code) > 40:
+            problems.append("code is longer than 40 characters")
+        elif code.upper() in existing:
+            problems.append(f"code {code} is already used by an office")
+        elif code.upper() in seen:
+            problems.append(f"code {code} also appears on row {seen[code.upper()]}")
+        if not name:
+            problems.append("name is missing")
+        if parent_code:
+            if parent_code.upper() not in existing and parent_code.upper() not in seen:
+                problems.append(f"parent {parent_code} is not an existing office or an earlier row")
+        elif depth == 0:
+            parent_code = base_parent.code
+        elif depth - 1 in last_at_depth:
+            parent_code = last_at_depth[depth - 1]
+        else:
+            problems.append("indented further than the row above")
+        for message in problems:
+            errors.append({"row": i, "message": message})
+        if code:
+            seen.setdefault(code.upper(), i)
+            last_at_depth[depth] = code
+            for deeper in [d for d in last_at_depth if d > depth]:
+                del last_at_depth[deeper]
+        resolved.append({"row": i, "code": code, "name": name, "parent_code": parent_code})
+    return resolved, errors
+
+
+@transaction.atomic
+def run_import(base_parent: Office, rows: list[dict]) -> list[Office]:
+    resolved, errors = plan_import(base_parent, rows)
+    if errors:
+        raise StructureError("import_invalid", f"{len(errors)} problem(s) found; nothing was imported.")
+    by_code = {o.code.upper(): o for o in Office.objects.all()}
+    created = []
+    for row in resolved:
+        office = create_office(by_code[row["parent_code"].upper()], row["name"], row["code"])
+        by_code[office.code.upper()] = office
+        created.append(office)
+    return created

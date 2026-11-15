@@ -324,3 +324,148 @@ a.btn {
   background: var(--delayed-bg);
   color: var(--delayed);
 }
+
+/* ---- Modal ----------------------------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(16 24 40 / 45%);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 50;
+}
+.modal {
+  background: var(--surface);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 25%);
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+}
+.modal-wide {
+  max-width: 900px;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-header h2 {
+  margin: 0;
+}
+
+/* ---- Tree ------------------------------------------------------------------------------------ */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
+.tree,
+.tree ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tree {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+.tree ul {
+  padding-left: 1.25rem;
+  border-left: 1px dashed var(--border);
+  margin-left: 0.6rem;
+}
+.tree-row {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius);
+}
+.tree-row.selected {
+  background: var(--ontime-bg);
+}
+.tree-row.inactive .tree-label {
+  color: var(--text-muted);
+}
+.tree-toggle {
+  width: 1.5rem;
+  flex: 0 0 1.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.tree-label {
+  flex: 1;
+  text-align: left;
+  border: none;
+  background: none;
+  font: inherit;
+  padding: 0.35rem 0.25rem;
+  cursor: pointer;
+  color: inherit;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.code {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--primary);
+  font-weight: 600;
+}
+.level-tag {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 0.3rem;
+}
+.side-panel {
+  position: sticky;
+  top: 1rem;
+  margin: 0;
+}
+.btn-danger {
+  color: var(--delayed);
+  border-color: #e3b4ab;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+.row-error td {
+  background: var(--delayed-bg);
+}
+
+.mainnav {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.mainnav a {
+  padding: 0.65rem 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+.mainnav a.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}

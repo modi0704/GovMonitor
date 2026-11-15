@@ -350,6 +350,7 @@ SCENARIOS = {
         _logo(w),
         w.admin.delete("/api/v1/export-templates/pptx/logo"),
     )[1],
+    ("alert-rules", "PATCH"): lambda w: w.admin.patch("/api/v1/alert-rules", {"remind_days_before": [7, 2]}),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

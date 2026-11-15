@@ -129,6 +129,19 @@ def _export_template(objs, shared):
         )
 
 
+def _alerts(objs, shared):
+    from apps.alerts.models import AlertRule, Notification
+
+    with context.agency_context(objs["agency"].id):
+        AlertRule.objects.create()
+        Notification.objects.create(
+            user=objs["user"],
+            type="cutoff_reminder",
+            title="Reminder",
+            dedupe_key=f"seed:{objs['agency'].code}",
+        )
+
+
 # table name -> builder(objs, shared). Tables filled by _base are listed with None.
 BUILDERS = {
     "agency": None,
@@ -155,6 +168,8 @@ BUILDERS = {
     "period_result": _results,
     "job": _jobs,
     "export_template": _export_template,
+    "alert_rule": _alerts,
+    "notification": None,  # filled by _alerts
 }
 
 

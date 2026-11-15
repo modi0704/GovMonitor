@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 11
-LAST COMPLETED TASK: P10.4
-NEXT TASK          : P11.1
+LAST COMPLETED TASK: P11.1
+NEXT TASK          : P11.2
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1025,7 +1025,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 
 **Verify start state:** Phase 10 ticked.
 
-- [ ] **P11.1** Models `alert_rule`, `notification`; settings page for the agency administrator.
+- [x] **P11.1** Models `alert_rule`, `notification`; settings page for the agency administrator.
 - [ ] **P11.2** Daily `alert_scan` job producing notifications with dedupe keys:
 
   | Trigger | Recipients |

@@ -212,6 +212,9 @@ def submit(plan: Plan, user) -> list[dict]:
     with audit.suppressed():
         plan.save()
     audit.record("submit", plan, after={"version": plan.version}, office_id=plan.office_id)
+    from apps.alerts import services as alerts
+
+    alerts.plan_submitted(plan)
     return issues
 
 

@@ -404,6 +404,9 @@ class ReportReturnView(APIView):
         audit.record(
             "return", sub, after={"month": period.month_index, "note": sub.return_note}, office_id=office.id
         )
+        from apps.alerts import services as alerts
+
+        alerts.submission_returned(sub)
         return Response(month_view(request, office, period, "owner"))
 
 

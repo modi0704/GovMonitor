@@ -9,7 +9,7 @@ export interface NavItem {
 const always = () => true;
 const agencyAdmin = (me: Me) => me.is_agency_admin;
 
-/** Main navigation.  */
+/** Main navigation. */
 export const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Dashboard', show: always },
   { to: '/rankings', label: 'Rankings', show: always },

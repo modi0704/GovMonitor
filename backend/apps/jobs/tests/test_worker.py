@@ -26,9 +26,12 @@ def tmp_storage(tmp_path, settings):
     }
 
 
-def jobs(agency):
+def jobs(agency, kind=None):
     with context.agency_context(agency.id):
-        return list(Job.objects.order_by("created_at").values("kind", "status", "attempts", "result"))
+        qs = Job.objects.order_by("created_at")
+        if kind:
+            qs = qs.filter(kind=kind)
+        return list(qs.values("kind", "status", "attempts", "result"))
 
 
 def test_auto_lock_queues_and_runs_once_cutoff_has_passed():
@@ -39,7 +42,7 @@ def test_auto_lock_queues_and_runs_once_cutoff_has_passed():
         ReportingPeriod.objects.update(cutoff_at=timezone.now() + datetime.timedelta(days=7))
     # No cutoff has passed: nothing to do.
     call_command("run_worker", "--once")
-    assert jobs(w["agency"]) == []
+    assert jobs(w["agency"], "lock_period") == []
     with context.agency_context(w["agency"].id):
         ReportingPeriod.objects.filter(pk=w["periods"][1]["id"]).update(
             cutoff_at=timezone.now() - datetime.timedelta(hours=1)
@@ -47,7 +50,7 @@ def test_auto_lock_queues_and_runs_once_cutoff_has_passed():
     assert worker.schedule_pass() == 1
     assert worker.schedule_pass() == 0  # no duplicate while one is queued
     assert worker.run_pending() == 1
-    [job] = jobs(w["agency"])
+    [job] = jobs(w["agency"], "lock_period")
     assert job["status"] == "done" and job["result"]["results"] > 0
     with context.agency_context(w["agency"].id):
         assert ReportingPeriod.objects.get(pk=w["periods"][1]["id"]).status == "locked"

@@ -22,6 +22,8 @@ if DEPLOYMENT_MODE not in {"single", "multi"}:
 SESSION_IDLE_MINUTES = env_int("SESSION_IDLE_MINUTES", 60)
 MAX_UPLOAD_MB = env_int("MAX_UPLOAD_MB", 25)
 LICENCE_FILE = env("LICENCE_FILE", "")
+# Public address of the site (e.g. https://monitor.example.gov), used for links in emails.
+PUBLIC_URL = env("PUBLIC_URL", "")
 WORKER_HEARTBEAT_STALE_SECONDS = env_int("WORKER_HEARTBEAT_STALE_SECONDS", 120)
 # Set when a trusted reverse proxy (Caddy) sets X-Forwarded-For; the audit log then records it.
 TRUST_X_FORWARDED_FOR = env_bool("TRUST_X_FORWARDED_FOR", False)

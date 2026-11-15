@@ -181,6 +181,9 @@ def lock_period(period: ReportingPeriod, user) -> int:
         period,
         after={"month": month, "results": len(rows), "profile_version": snapshot["version"]},
     )
+    from apps.alerts import services as alerts
+
+    alerts.period_locked(period)
     return len(rows)
 
 
@@ -235,4 +238,7 @@ def unlock_period(period: ReportingPeriod, user, reason: str) -> int:
     audit.record(
         "unlock", period, before={"results": copy}, after={"month": period.month_index, "reason": reason}
     )
+    from apps.alerts import services as alerts
+
+    alerts.period_locked(period, unlocked=True, reason=reason)
     return len(copy)

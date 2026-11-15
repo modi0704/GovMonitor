@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 11
-LAST COMPLETED TASK: P11.1
-NEXT TASK          : P11.2
+LAST COMPLETED TASK: P11.2
+NEXT TASK          : P11.3
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -268,6 +268,7 @@ frontend/
 | `FILE_ROOT` | path | For `local`. |
 | `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` | | For `s3` (any S3-compatible service). |
 | `EMAIL_URL` | SMTP URL or empty | Empty = email disabled; in-app notifications still work. |
+| `PUBLIC_URL` | e.g. `https://monitor.example.gov` | Public address used for links in alert emails (added in P11.4). |
 | `SECRET_KEY`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` | | Standard Django. |
 | `SESSION_IDLE_MINUTES` | default 60 | Idle sign-out. |
 | `MAX_UPLOAD_MB` | default 25 | Upload limit. |
@@ -1026,7 +1027,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 **Verify start state:** Phase 10 ticked.
 
 - [x] **P11.1** Models `alert_rule`, `notification`; settings page for the agency administrator.
-- [ ] **P11.2** Daily `alert_scan` job producing notifications with dedupe keys:
+- [x] **P11.2** Daily `alert_scan` job producing notifications with dedupe keys:
 
   | Trigger | Recipients |
   |---|---|
@@ -1196,6 +1197,7 @@ changed, why. Start ids at D19.
 | D35 | 2026-11-15 | Plan import: a leading token is read as the row code only if it contains a digit or a dot; measure type is quantity unless the PLAN row carries the export's 'Recurring measure' comment; indicators below an OUTPUT INDICATORS header are imported too (annual target = sum of the monthly targets); import is refused (409) when the office already has a plan for that year. A rejected import fails at once without retries (worker JobRejected) and its whole transaction is rolled back (Claude Code) | The sheet has no code or measure columns, so these keep a round trip of an exported plan faithful without adding columns to the fixed 9.1 layout; refusing over an existing plan avoids overwriting work (use revise instead) |
 | D36 | 2026-11-15 | export_template rows with agency_id NULL are the system defaults (created by migration; readable by every agency through the global_read policy, writable by none). Effective settings = built-in values < system row < the agency's own row, which is created on the first change. The isolation test 'no agency sees nothing' now counts only rows that belong to an agency, and a new test proves system rows cannot be changed or inserted by app_user (Claude Code) | 6.4 asks for system-wide rows; built-in values keep exports working even if a test flush or an operator removes the system rows |
 | D37 | 2026-11-15 | PowerPoint deck: offices in scope with no result for the month (no approved plan beneath them) get no dashboard slide; the notes slide lists them. The scope's root is the overall slide and is not repeated as an office slide. Office slide titles are the office name alone; a suffix such as '(continued)' is kept and the name cut instead. Text is fitted with Arial advance widths (no font file needed) (Claude Code) | A slide of empty charts says nothing; listing them keeps the deck honest about coverage. 'One slide per office' (Phase 10 exit) then means one per office that has figures |
+| D38 | 2026-11-15 | Alert recipients: 'admins of an office' are admin assignments at that office, or at its nearest ancestor that has any; 'agency administrators' are admins of the root; delay alerts go to every assignment (admin or read-only) at the office and above. Offices that must report are those owning an approved plan (as the submission board). Missing accomplishments are grouped into one notification per office (owner and implementing) rather than one per activity. Delay alerts use the most recent month locked within the last 14 days, and roll-up offices are included. Notifications are created in bulk and never audited (they derive from audited changes); the scan is queued once per local day after 06:00. PUBLIC_URL (new env var) makes email links absolute (Claude Code) | Agency administrators would otherwise get every office's reminders; per-activity alerts would flood inboxes; a 14-day window stops a first scan from alerting on months locked long ago |
 
 ---
 

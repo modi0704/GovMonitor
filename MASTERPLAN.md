@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 6
-LAST COMPLETED TASK: P6.1
-NEXT TASK          : P6.2
+LAST COMPLETED TASK: P6.2
+NEXT TASK          : P6.3
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -881,7 +881,7 @@ approves, revises and re-approves a plan; every action appears in the audit log.
 
 - [x] **P6.1** Models: `office_submission`, `activity_actual`, `indicator_actual`, `attachment`;
   RLS; audit.
-- [ ] **P6.2** Storage layer: `FILE_STORAGE=local|s3`, upload rules of 6.6, authorised download
+- [x] **P6.2** Storage layer: `FILE_STORAGE=local|s3`, upload rules of 6.6, authorised download
   endpoint, soft delete. Tests for wrong type, oversize, and cross-agency download (404).
 - [ ] **P6.3** Reporting API: read one office's month (activities with target for the month,
   cumulative target, previous cumulative actual, this month's actual, remarks, attachments);

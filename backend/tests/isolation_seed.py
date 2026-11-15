@@ -82,8 +82,15 @@ def _reporting(objs, shared):
             indicator_lineage_id=objs["indicator"].lineage_id, period=period, office=office, actual_value=1
         )
         Attachment.objects.create(
-            target_type="activity_actual", target_id=actual.id, office=office, period=period, file_name="a.pdf",
-            content_type="application/pdf", size_bytes=1, sha256="0" * 64, storage_key="k",
+            target_type="activity_actual",
+            target_id=actual.id,
+            office=office,
+            period=period,
+            file_name="a.pdf",
+            content_type="application/pdf",
+            size_bytes=1,
+            sha256="0" * 64,
+            storage_key="k",
         )
 
 

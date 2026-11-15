@@ -88,6 +88,18 @@ class World:
         plan["fy"] = fy
         return plan
 
+    def upload(self):
+        from tests.reporting_helpers import pdf
+
+        plan = self.plan("approved")
+        detail = self.admin.get(f"/api/v1/plans/{plan['id']}").json()
+        lineage = next(r["lineage_id"] for r in detail["rows"] if r["row_kind"] == "activity")
+        period = self.admin.get(f"/api/v1/fiscal-years/{plan['fy']['id']}").json()["periods"][0]["id"]
+        return self.admin.c.post(
+            "/api/v1/attachments",
+            {"target_type": "activity_actual", "lineage_id": lineage, "period_id": period, "file": pdf()},
+        )
+
     def new_level(self):
         self.admin.put("/api/v1/levels", {"names": ["Agency", "Level 1", "Spare"]})
         return [lv for lv in self.admin.get("/api/v1/levels").json() if lv["name"] == "Spare"][0]["id"]
@@ -243,6 +255,8 @@ SCENARIOS = {
             "activities": [{"key": "a", "annual_target": 1, "targets": [1]}],
         },
     ),
+    ("attachments", "POST"): lambda w: w.upload(),
+    ("attachment", "DELETE"): lambda w: w.admin.delete(f"/api/v1/attachments/{w.upload().json()['id']}"),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(
@@ -271,7 +285,7 @@ def test_every_unsafe_route_has_a_scenario():
 NEEDS_COMMIT = {("support-grants", "POST"), ("support-grant", "DELETE")}
 
 
-def _check(route):
+def _check(route, tmp_path=None):
     w = World()
     response = SCENARIOS[route](w)
     assert 200 <= response.status_code < 300, (
@@ -283,7 +297,14 @@ def _check(route):
 
 @pytest.mark.django_db(databases=["default", "owner"])
 @pytest.mark.parametrize("route", sorted(set(SCENARIOS) - NEEDS_COMMIT), ids=lambda r: f"{r[0]}:{r[1]}")
-def test_successful_unsafe_calls_write_audit_rows(route):
+def test_successful_unsafe_calls_write_audit_rows(route, tmp_path, settings):
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {"location": str(tmp_path)},
+        },
+    }
     _check(route)
 
 

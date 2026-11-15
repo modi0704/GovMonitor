@@ -18,11 +18,17 @@ class OfficeSubmission(TenantModel):
         LOCKED = "locked"
 
     office = models.ForeignKey("structure.Office", on_delete=models.PROTECT, related_name="submissions")
-    period = models.ForeignKey("planning.ReportingPeriod", on_delete=models.PROTECT, related_name="submissions")
+    period = models.ForeignKey(
+        "planning.ReportingPeriod", on_delete=models.PROTECT, related_name="submissions"
+    )
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
-    submitted_by = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    submitted_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     submitted_at = models.DateTimeField(null=True, blank=True)
-    returned_by = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    returned_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     returned_at = models.DateTimeField(null=True, blank=True)
     return_note = models.TextField(blank=True)
 
@@ -46,7 +52,9 @@ class ActivityActual(TenantModel):
     actual_amount = models.DecimalField(null=True, blank=True, **MONEY)
     remarks = models.TextField(blank=True)
     delay_reason = models.TextField(blank=True)
-    entered_by = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    entered_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     audit_exclude = frozenset({"updated_at", "entered_by_id"})
@@ -65,7 +73,9 @@ class IndicatorActual(TenantModel):
     office = models.ForeignKey("structure.Office", on_delete=models.PROTECT, related_name="+")
     actual_value = models.DecimalField(null=True, blank=True, **QTY)
     remarks = models.TextField(blank=True)
-    entered_by = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    entered_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     audit_exclude = frozenset({"updated_at", "entered_by_id"})
@@ -81,6 +91,8 @@ class IndicatorActual(TenantModel):
 class Attachment(TenantModel):
     """A supporting file (MOV). Soft-deleted: the stored file is kept."""
 
+    audit_actions = {"create": "upload"}
+
     class TargetType(models.TextChoices):
         ACTIVITY_ACTUAL = "activity_actual"
         INDICATOR_ACTUAL = "indicator_actual"
@@ -95,7 +107,9 @@ class Attachment(TenantModel):
     sha256 = models.CharField(max_length=64)
     storage_key = models.CharField(max_length=500)
     description = models.CharField(max_length=500, blank=True)
-    uploaded_by = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    uploaded_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     uploaded_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
 

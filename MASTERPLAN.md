@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 9
-LAST COMPLETED TASK: P9.4
-NEXT TASK          : P9.5
+LAST COMPLETED TASK: P9.5
+NEXT TASK          : P9.6
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -985,7 +985,7 @@ read-only user scoped to one division sees only that division.
 - [x] **P9.3** SUMMARY sheet (9.2).
 - [x] **P9.4** Export dialog: scope (one office / office and everything beneath / whole agency),
   month, view. Export is audited.
-- [ ] **P9.5** Acceptance test of 9.3 (recalculate and compare with the engine) for the worked
+- [x] **P9.5** Acceptance test of 9.3 (recalculate and compare with the engine) for the worked
   example of 8.1 and for the RDI fixture.
 - [ ] **P9.6** Layout test: for the RDI fixture, assert the header cells of rows 5–7, the column
   of each field, the PLAN/ACTUAL pairing and the formulas of the first activity and of the total

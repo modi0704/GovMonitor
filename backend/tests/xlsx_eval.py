@@ -71,11 +71,15 @@ class Evaluator:
             kind = m.lastgroup
             tokens.append((kind, m.group(kind)))
             pos = m.end()
-        self._tokens, self._i, self._sheet = tokens, 0, sheet
-        result = self._expr()
-        if self._i != len(tokens):
-            raise FormulaError(f"trailing tokens in {text!r}")
-        return result
+        saved = getattr(self, "_tokens", None), getattr(self, "_i", 0), getattr(self, "_sheet", None)
+        self._tokens, self._i, self._sheet = tokens, 0, sheet  # references re-enter _eval: save state
+        try:
+            result = self._expr()
+            if self._i != len(tokens):
+                raise FormulaError(f"trailing tokens in {text!r}")
+            return result
+        finally:
+            self._tokens, self._i, self._sheet = saved
 
     def _peek(self):
         return self._tokens[self._i] if self._i < len(self._tokens) else (None, None)

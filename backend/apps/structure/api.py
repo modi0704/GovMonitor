@@ -334,3 +334,14 @@ class OfficeImportView(APIView):
         return Response(
             {"rows": resolved, "errors": [], "created": len(created)}, status=status.HTTP_201_CREATED
         )
+
+
+class OfficeDirectoryView(APIView):
+    """Code and name of every active office in the agency — for pick-lists such as the implementing
+    office of an activity, which may lie outside the user's own scope (D29). No other data."""
+
+    def get(self, request):
+        offices = Office.objects.filter(is_active=True).order_by("path")
+        return Response(
+            [{"id": str(o.id), "code": o.code, "name": o.name, "depth": o.depth} for o in offices]
+        )

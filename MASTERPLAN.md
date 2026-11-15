@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 5
-LAST COMPLETED TASK: P5.4
-NEXT TASK          : P5.5
-BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing; extractor and golden tests ready). See the P14.1 note on cross-agency foreign keys
+LAST COMPLETED TASK: P5.5
+NEXT TASK          : P5.6
+BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -850,7 +850,7 @@ agency with no code changes.
   equal `annual_target × unit_cost` when both are present (warning only, cost may be typed);
   zero cost under `cost_share` (warning); `manual` weights sum to 1; duplicate codes; activity
   with no target; implementing office must be in the same agency.
-- [ ] **P5.5** Plan editor page: outline panel (add / indent / reorder rows by kind) and a
+- [x] **P5.5** Plan editor page: outline panel (add / indent / reorder rows by kind) and a
   spreadsheet-style grid: columns code, title, unit, target, unit cost, total cost, weight
   (computed, read-only unless `manual`), implementing office, twelve monthly cells, row total.
   Paste from Excel into a cell range; keyboard navigation; undo; validation messages on the row;
@@ -1189,6 +1189,7 @@ changed, why. Start ids at D19.
 | D26 | 2026-11-15 | `audit_log` gains `office_id` (uuid, the office the entity belongs to) and `actor_label` (the actor's email at the time). (Claude Code) | P3.5 filters by office, and the audit page must name actors even after a user is renamed or a platform admin (invisible to app_user) acted. |
 | D27 | 2026-11-15 | Engine details not fixed by section 7: a `budget_weighted` roll-up whose components all have funds_total 0 uses the simple average; a roll-up's funds_used_actual is the sum of its components' actual amounts when any component has one; offices tied in a ranking are listed in the order given (tree order). (Claude Code) | Avoid division by zero and keep results defined; ordering ties by tree order is stable and predictable for exports. |
 | D28 | 2026-11-15 | `reporting_period` lives in the `planning` app (5.3 listed it under reporting). `plan` also has `updated_at` and a partial unique constraint allowing at most one draft-or-submitted version per office and fiscal year. `scoring_profile` adds `show_actual_amounts` (the P6.7 switch) and defaults `cutoff_day` to 10. (Claude Code) | Creating a fiscal year creates its periods, and activity/indicator targets reference periods; one app avoids a cross-app cycle. One open version at a time keeps revision (P5.7) unambiguous. The actual-amount column is per agency per year like the other profile switches. |
+| D29 | 2026-11-15 | `POST results/preview` is read-only (POST for payload size) and is allow-listed in the P3.4 audit test; `GET offices/directory` returns code and name of every active office to any signed-in user of the agency. (Claude Code) | The plan editor must get weights and curves from the engine (rule 0.2). Choosing an implementing office (D6) needs offices outside the user's own scope; only names are exposed. |
 
 ---
 

@@ -38,6 +38,7 @@ def plan_summary(plan: Plan, user=None) -> dict:
         "approved_by": plan.approved_by.email if plan.approved_by_id else None,
         "updated_at": plan.updated_at.isoformat(),
         "can_edit": bool(user) and perm.can_edit(user, plan.office) and plan.status == Plan.Status.DRAFT,
+        "office_editable": bool(user) and perm.can_edit(user, plan.office),
     }
 
 

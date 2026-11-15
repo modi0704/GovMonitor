@@ -650,3 +650,230 @@ label.check input {
   background: var(--surface-2);
   color: var(--text-muted);
 }
+
+/* ---- Charts ---------------------------------------------------------------------------------- */
+.chart {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+.chart-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.chart-toolbar figcaption {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+.table.compact th,
+.table.compact td {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* ---- Plan editor grid ------------------------------------------------------------------------ */
+.page-full {
+  max-width: none;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.75rem 0;
+}
+.toolbar.small {
+  gap: 0.35rem;
+}
+.toolbar-spacer {
+  flex: 1;
+}
+label.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+}
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+  margin: 0.75rem 0;
+}
+.tabs button {
+  font: inherit;
+  border: none;
+  background: none;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 3px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-weight: 600;
+}
+.tabs button[aria-selected='true'] {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+.editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .editor-layout {
+    grid-template-columns: 1fr;
+  }
+}
+.editor-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.grid-scroll {
+  overflow: auto;
+  max-height: 70vh;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+.grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+  min-width: 100%;
+}
+.grid th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 0.35rem 0.4rem;
+  text-align: left;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.grid td {
+  border-bottom: 1px solid #eef1f5;
+  border-right: 1px solid #eef1f5;
+  padding: 0;
+  vertical-align: middle;
+}
+.grid input,
+.grid select {
+  border: none;
+  border-radius: 0;
+  min-height: 1.9rem;
+  padding: 0.2rem 0.35rem;
+  width: 100%;
+  min-width: 4.5rem;
+  background: transparent;
+  font-size: 0.85rem;
+}
+.grid input:focus,
+.grid select:focus {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+  background: #fff;
+}
+.grid .title-cell input {
+  min-width: 18rem;
+}
+.grid .num input {
+  text-align: right;
+}
+.grid .month input {
+  min-width: 3.6rem;
+}
+.grid tr.outline td {
+  background: #f3f6fa;
+  font-weight: 600;
+}
+.grid tr.selected td {
+  background: var(--ontime-bg);
+}
+.grid tr.has-error td.kind {
+  box-shadow: inset 3px 0 0 var(--delayed);
+}
+.grid .sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: inherit;
+}
+.grid td.kind {
+  white-space: nowrap;
+  padding: 0 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  background: var(--surface);
+}
+.grid td.total {
+  padding: 0 0.4rem;
+  text-align: right;
+  font-weight: 600;
+}
+.grid td.total.off {
+  color: var(--delayed);
+}
+.computed {
+  display: block;
+  padding: 0 0.4rem;
+  text-align: right;
+  color: var(--text-muted);
+}
+.issue-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-left: 0.3rem;
+  border-radius: 50%;
+  background: var(--delayed);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: help;
+}
+.issues {
+  border: 1px solid #e3b4ab;
+  background: var(--delayed-bg);
+  border-radius: 6px;
+  padding: 0.5rem 0.9rem;
+  margin: 0.5rem 0;
+}
+.chip-plan-draft {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.chip-plan-submitted {
+  background: var(--ontime-bg);
+  color: var(--ontime);
+}
+.chip-plan-approved {
+  background: var(--ahead-bg);
+  color: var(--ahead);
+}
+.chip-plan-superseded {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}

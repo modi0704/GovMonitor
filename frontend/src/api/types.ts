@@ -165,3 +165,20 @@ export interface Preset {
   description: string;
   settings: Record<string, unknown>;
 }
+
+export interface PlanSummary {
+  id: string;
+  office: { id: string; code: string; name: string };
+  fiscal_year: { id: string; label: string };
+  version: number;
+  status: 'draft' | 'submitted' | 'approved' | 'superseded';
+  approved_budget: string | null;
+  planned_cost: string;
+  submitted_at: string | null;
+  submitted_by: string | null;
+  approved_at: string | null;
+  approved_by: string | null;
+  updated_at: string;
+  can_edit: boolean;
+  office_editable: boolean;
+}

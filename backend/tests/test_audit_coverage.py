@@ -24,7 +24,8 @@ from tests.factories import (
 )
 
 # Only sign-out (and, from Phase 11, notification-read) may succeed without an audit row.
-ALLOW_WITHOUT_AUDIT = {("platform-logout", "POST")}
+# results/preview is a POST only because of its payload size; it computes and stores nothing (D29).
+ALLOW_WITHOUT_AUDIT = {("platform-logout", "POST"), ("results-preview", "POST")}
 UNSAFE = ("post", "put", "patch", "delete")
 PLATFORM_PW = "platform-owner-passphrase"
 
@@ -235,6 +236,13 @@ SCENARIOS = {
             },
         )
     )(w.plan()),
+    ("results-preview", "POST"): lambda w: w.admin.post(
+        "/api/v1/results/preview",
+        {
+            "fiscal_year_id": w.fiscal_year()["id"],
+            "activities": [{"key": "a", "annual_target": 1, "targets": [1]}],
+        },
+    ),
     ("platform-login", "POST"): lambda w: (
         w.platform(),
         Json(Client()).post(

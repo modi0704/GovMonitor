@@ -6,6 +6,7 @@ urlpatterns = [
     path("levels", api.LevelListView.as_view(), name="levels"),
     path("levels/<uuid:level_id>", api.LevelDetailView.as_view(), name="level"),
     path("offices", api.OfficeTreeView.as_view(), name="offices"),
+    path("offices/directory", api.OfficeDirectoryView.as_view(), name="offices-directory"),
     path("offices/import", api.OfficeImportView.as_view(), name="offices-import"),
     path("offices/reorder", api.OfficeReorderView.as_view(), name="offices-reorder"),
     path("offices/<uuid:office_id>", api.OfficeDetailView.as_view(), name="office"),

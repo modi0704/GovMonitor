@@ -41,7 +41,8 @@ it('walks through levels, top office, offices and finishes', async () => {
   );
   const user = userEvent.setup();
   await user.click(await screen.findByRole('link', { name: 'Start the setup' }));
-  await user.clear(await screen.findByLabelText(/Level 1/));
+  await screen.findByDisplayValue('Agency'); // levels loaded
+  await user.clear(screen.getByLabelText(/Level 1/));
   await user.type(screen.getByLabelText(/Level 1/), 'Ministry');
   await user.type(screen.getByLabelText('Level 2'), 'Division');
   await user.click(screen.getByRole('button', { name: 'Next' }));

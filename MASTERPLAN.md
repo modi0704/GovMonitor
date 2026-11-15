@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 1
-LAST COMPLETED TASK: P1.3
-NEXT TASK          : P1.4
+LAST COMPLETED TASK: P1.4
+NEXT TASK          : P1.5
 BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -724,9 +724,11 @@ deliberately wrong query.
   and creates the policy of 6.1; apply it to every tenant table created so far.
 - [x] **P1.3** Middleware that sets `app.agency_id` per request; worker helper that sets it per
   job; `SECURITY DEFINER` lookup function for sign-in.
-- [ ] **P1.4** Sign-in, sign-out, session idle timeout, account lock after 5 failed attempts for
+- [x] **P1.4** Sign-in, sign-out, session idle timeout, account lock after 5 failed attempts for
   15 minutes, password rules (minimum 12 characters, Django validators), forced password change
   on first sign-in, password reset by an agency administrator (and by email when SMTP is set).
+  > NOTE: the administrator reset is the service `accounts.services.admin_reset_password`; its
+  > endpoint `users/{id}/reset-password` is added with the Users API in P2.5.
 - [ ] **P1.5** Optional TOTP two-factor: enrol with QR code, verify at sign-in, recovery codes.
 - [ ] **P1.6** Platform-owner area under `/platform/` (separate sign-in, uses `app_owner`): list,
   create, suspend agencies; create an agency's first administrator; hidden entirely when

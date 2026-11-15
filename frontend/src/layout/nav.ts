@@ -12,6 +12,7 @@ const agencyAdmin = (me: Me) => me.is_agency_admin;
 /** Main navigation. Later phases add dashboard, plans, reports, exports. */
 export const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Home', show: always },
+  { to: '/reports', label: 'Monthly report', show: always },
   { to: '/plans', label: 'Plans', show: always },
   { to: '/plans/approvals', label: 'Approvals', show: agencyAdmin },
   { to: '/fiscal-years', label: 'Fiscal years', show: always },

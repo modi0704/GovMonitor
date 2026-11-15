@@ -881,3 +881,122 @@ label.inline {
   color: var(--delayed);
   font-weight: 600;
 }
+
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.dropzone.over {
+  border-color: var(--primary);
+  background: var(--ontime-bg);
+}
+.dropzone p {
+  margin: 0;
+}
+
+/* ---- Monthly report -------------------------------------------------------------------------- */
+.report-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 0.5rem 0;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+}
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.tile-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.tile-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.tile-value.small-value {
+  font-size: 1.15rem;
+}
+.tiles-note {
+  grid-column: 1 / -1;
+}
+.status-ahead {
+  background: var(--ahead-bg);
+  color: var(--ahead);
+}
+.status-on_time {
+  background: var(--ontime-bg);
+  color: var(--ontime);
+}
+.status-delayed {
+  background: var(--delayed-bg);
+  color: var(--delayed);
+}
+.chip-sub-draft {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.chip-sub-submitted {
+  background: var(--ontime-bg);
+  color: var(--ontime);
+}
+.chip-sub-returned {
+  background: var(--delayed-bg);
+  color: var(--delayed);
+}
+.chip-sub-locked {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+.report-grid td.pad {
+  padding: 0.3rem 0.45rem;
+}
+.report-grid .title-cell {
+  min-width: 16rem;
+  padding: 0.3rem 0.45rem;
+}
+.progress {
+  position: relative;
+  height: 0.55rem;
+  min-width: 6rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+.progress-actual {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--primary);
+}
+.progress-plan {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--text);
+}
+.tile .chip {
+  align-self: flex-start;
+}

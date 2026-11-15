@@ -182,3 +182,97 @@ export interface PlanSummary {
   can_edit: boolean;
   office_editable: boolean;
 }
+
+export interface Attachment {
+  id: string;
+  target_type: 'activity_actual' | 'indicator_actual';
+  target_id: string;
+  file_name: string;
+  content_type: string;
+  size_bytes: number;
+  description: string;
+  uploaded_by: string | null;
+  uploaded_at: string;
+  download_url: string;
+}
+
+export interface Headline {
+  cum_plan: string;
+  cum_actual: string;
+  periodic_plan: string;
+  periodic_actual: string;
+  variance: string;
+  status: string;
+  funds_total: string;
+  funds_used_est: string;
+  funds_used_actual: string | null;
+  funds_remaining: string;
+  indicator_score: string | null;
+}
+
+export interface ReportActivity {
+  lineage_id: string;
+  code: string;
+  title: string;
+  unit: string;
+  measure_type: 'quantity' | 'money' | 'recurring';
+  annual_target: string;
+  owner_office: { id: string; code: string };
+  implementing_office: { id: string; code: string };
+  target_month: string;
+  cum_target: string;
+  prev_cum_actual: string;
+  actual: string | null;
+  actual_amount: string | null;
+  remarks: string;
+  delay_reason: string;
+  attachments: number;
+  planned_ratio: string;
+  actual_ratio: string;
+  behind: boolean;
+  no_target: boolean;
+  editable: boolean;
+}
+
+export interface ReportIndicator {
+  lineage_id: string;
+  code: string;
+  name: string;
+  unit: string;
+  annual_target: string;
+  aggregation: 'sum' | 'last';
+  target_month: string;
+  actual: string | null;
+  remarks: string;
+  attachments: number;
+}
+
+export interface MonthReport {
+  office: { id: string; code: string; name: string };
+  view: 'owner' | 'implementing';
+  has_plan: boolean;
+  plan_id: string | null;
+  period: {
+    id: string;
+    month_index: number;
+    start_date: string;
+    cutoff_at: string;
+    status: 'open' | 'locked';
+    fiscal_year: { id: string; label: string };
+  };
+  submission: {
+    status: 'draft' | 'submitted' | 'returned' | 'locked';
+    submitted_at?: string | null;
+    submitted_by?: string | null;
+    returned_at?: string | null;
+    returned_by?: string | null;
+    return_note?: string;
+  };
+  can_submit: boolean;
+  can_return: boolean;
+  mov_required: boolean;
+  show_amounts: boolean;
+  activities: ReportActivity[];
+  indicators: ReportIndicator[];
+  result: Headline | null;
+}

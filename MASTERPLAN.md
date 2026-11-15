@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 6
-LAST COMPLETED TASK: P6.4
-NEXT TASK          : P6.5
+LAST COMPLETED TASK: P6.5
+NEXT TASK          : P6.6
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -889,7 +889,7 @@ approves, revises and re-approves a plan; every action appears in the audit log.
 - [x] **P6.4** Edit rules: actuals can be saved only when the period is `open` and the submission
   is `draft` or `returned`; only by a user with `can_edit` on the plan's office **or** on the
   activity's implementing office (D6: field units report their own activities).
-- [ ] **P6.5** Monthly entry page: month picker; grid with one row per activity (target this
+- [x] **P6.5** Monthly entry page: month picker; grid with one row per activity (target this
   month, actual this month input, cumulative target vs actual, a small progress bar, status
   chip); a required "reason for delay" when the activity's cumulative actual is behind plan;
   attach / view MOVs per row (drag-and-drop, multiple files); indicators tab; a live result

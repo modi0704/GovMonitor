@@ -122,15 +122,21 @@ def activity_progress(activity: ActivityInput, cap: bool) -> tuple[Series, Serie
 # ---- 7.4 Status ----------------------------------------------------------------------------------
 
 
-def status(variance: Decimal, profile: Profile) -> str:
-    """Ahead / on-time / delayed label for a variance, after rounding it to 9 places (7.4)."""
+def status_kind(variance: Decimal, profile: Profile) -> str:
+    """``ahead`` / ``on_time`` / ``delayed`` for a variance, after rounding it to 9 places (7.4)."""
     v = _d(variance).quantize(STATUS_PLACES, rounding=ROUND_HALF_UP)
     t = _d(profile.on_time_tolerance)
     if v > t:
-        return profile.label_ahead
+        return "ahead"
     if v < -t:
-        return profile.label_delayed
-    return profile.label_on_time
+        return "delayed"
+    return "on_time"
+
+
+def status(variance: Decimal, profile: Profile) -> str:
+    """The profile's label (e.g. ADVANCED / ON-TIME / DELAYED) for a variance (7.4)."""
+    kind = status_kind(variance, profile)
+    return {"ahead": profile.label_ahead, "delayed": profile.label_delayed}.get(kind, profile.label_on_time)
 
 
 # ---- 7.5 Indicators ------------------------------------------------------------------------------

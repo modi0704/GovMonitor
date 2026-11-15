@@ -173,3 +173,9 @@ def test_funds_use_actual_amounts_when_entered():
     assert r.funds_used_actual[0] == D(300) and r.funds_used_actual[1] == D(300)
     assert r.funds_remaining[0] == D(1700)  # actual wins over the estimate
     assert r.funds_used_est[1] == D(2000) * r.cum_actual[1]
+
+
+def test_status_kind_matches_label():
+    p = Profile(on_time_tolerance=D("0.02"), label_ahead="AHEAD")
+    assert [engine.status_kind(D(v), p) for v in ("0.03", "0", "-0.03")] == ["ahead", "on_time", "delayed"]
+    assert engine.status(D("0.03"), p) == "AHEAD"

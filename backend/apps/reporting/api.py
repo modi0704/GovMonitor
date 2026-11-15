@@ -188,7 +188,7 @@ def month_view(request, office: Office, period: ReportingPeriod, view: str) -> d
         "show_amounts": profile.show_actual_amounts,
         "activities": activities,
         "indicators": indicators,
-        "result": results.headline(result, m),
+        "result": results.headline(result, m, eng),
     }
 
 
@@ -309,7 +309,7 @@ class ReportPreviewView(APIView):
         else:
             plan = rules.approved_plan(office, period.fiscal_year)
             result = results.live_plan_result(plan, overrides) if plan else None
-        return Response({"result": results.headline(result, m)})
+        return Response({"result": results.headline(result, m, period.fiscal_year.profile.to_engine())})
 
 
 def submission_problems(office, period) -> list[dict]:

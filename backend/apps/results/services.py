@@ -135,9 +135,13 @@ def live_implementing_result(
     )
 
 
-def headline(result: OfficeResult | None, month: int) -> dict | None:
+def headline(result: OfficeResult | None, month: int, profile=None) -> dict | None:
+    """One month's figures; with ``profile`` (engine Profile) also the status kind for colouring."""
     if result is None:
         return None
     from apps.audit.services import jsonable
 
-    return jsonable(result.at(month))
+    data = jsonable(result.at(month))
+    if profile is not None:
+        data["status_kind"] = engine.status_kind(result.variance[month - 1], profile)
+    return data

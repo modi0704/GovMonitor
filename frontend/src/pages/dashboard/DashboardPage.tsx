@@ -238,6 +238,51 @@ export default function DashboardPage() {
             used={h.funds_used_actual ?? h.funds_used_est}
             estimate={h.funds_used_actual === null}
           />
+          {data.quarters.length > 0 && (
+            <div className="card dash-wide">
+              <h2>By quarter</h2>
+              <table className="table compact">
+                <thead>
+                  <tr>
+                    <th>Period</th>
+                    <th>Plan</th>
+                    <th>Actual</th>
+                    <th>Variance</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.quarters.map((q) => (
+                    <tr key={q.quarter}>
+                      <td>
+                        Q{q.quarter} ({months[q.first - 1]}–{months[q.last - 1]})
+                        {q.partial ? ', so far' : ''}
+                      </td>
+                      <td>{percent(q.plan)}</td>
+                      <td>{percent(q.actual)}</td>
+                      <td>{percent(q.variance)}</td>
+                      <td>
+                        <StatusChip result={q} />
+                      </td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <td>
+                      <strong>Year to date</strong>
+                    </td>
+                    <td>{percent(h.cum_plan)}</td>
+                    <td>
+                      <strong>{percent(h.cum_actual)}</strong>
+                    </td>
+                    <td>{percent(h.variance)}</td>
+                    <td>
+                      <StatusChip result={h} />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
           {data.children.length > 0 && (
             <div className="card dash-wide">
               <h2>Offices under {data.office.code}</h2>

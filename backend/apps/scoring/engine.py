@@ -375,3 +375,40 @@ def rank(values: Sequence[tuple[str, Decimal | None]], labels: dict | None = Non
         if v is None
     )
     return rows
+
+
+# ---- Derived periods (D9): quarters and year to date from the monthly series ---------------------
+
+
+def window_summary(cum_plan: Sequence, cum_actual: Sequence, first: int, last: int, profile: Profile) -> dict:
+    """Plan, actual and variance over months ``first``..``last`` (1-based, inclusive), derived from
+    cumulative monthly series: value(last) − value(first − 1). Status uses the profile's rule."""
+    if not 1 <= first <= last <= MONTHS:
+        raise ValueError("months must satisfy 1 <= first <= last <= 12")
+    with localcontext() as ctx:
+        ctx.prec = PRECISION
+        before_plan = _d(cum_plan[first - 2]) if first > 1 else ZERO
+        before_actual = _d(cum_actual[first - 2]) if first > 1 else ZERO
+        plan = _d(cum_plan[last - 1]) - before_plan
+        actual = _d(cum_actual[last - 1]) - before_actual
+        variance = actual - plan
+    return {
+        "plan": plan,
+        "actual": actual,
+        "variance": variance,
+        "status": status(variance, profile),
+        "status_kind": status_kind(variance, profile),
+    }
+
+
+def quarter_summaries(cum_plan: Sequence, cum_actual: Sequence, month: int, profile: Profile) -> list[dict]:
+    """Fiscal quarters that have started by ``month``; the current one runs to ``month`` (partial)."""
+    out = []
+    for q in range(1, 5):
+        first = 3 * q - 2
+        if first > month:
+            break
+        last = min(3 * q, month)
+        out.append({"quarter": q, "first": first, "last": last, "partial": last < 3 * q,
+                    **window_summary(cum_plan, cum_actual, first, last, profile)})  # fmt: skip
+    return out

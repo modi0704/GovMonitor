@@ -69,6 +69,19 @@ function dashboard(officeId: string, views: string[] = ['owner']) {
     children:
       officeId === 'rds' ? [{ office: ref('ast', 'AST', 2), result: sum('0.5876', 3) }] : [],
     rankings: [],
+    quarters: [
+      {
+        quarter: 4,
+        first: 10,
+        last: 12,
+        partial: false,
+        plan: '0.34',
+        actual: '0.38',
+        variance: '0.04',
+        status: 'ADVANCED',
+        status_kind: 'ahead',
+      },
+    ],
   };
 }
 
@@ -168,7 +181,9 @@ it('shows the final figures and drills down to an office, its activities and the
   const user = userEvent.setup();
   expect(await screen.findByRole('heading', { name: 'RDS office' })).toBeInTheDocument();
   expect(screen.getByText('FINAL')).toBeInTheDocument();
-  expect(screen.getByText('86.19%')).toBeInTheDocument();
+  expect(screen.getAllByText('86.19%').length).toBeGreaterThan(0);
+  expect(screen.getByText(/Q4 \(OCT–DEC\)/)).toBeInTheDocument();
+  expect(screen.getByText('ADVANCED')).toHaveClass('status-ahead');
   await user.click(screen.getByRole('button', { name: /AST AST office/ }));
   expect(await screen.findByRole('heading', { name: 'AST office' })).toBeInTheDocument();
   expect(calls.filter((c) => c.path === '/api/v1/dashboard')).toHaveLength(2);

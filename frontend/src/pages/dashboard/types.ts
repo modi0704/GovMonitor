@@ -58,6 +58,17 @@ export interface Dashboard {
   }[];
   children: { office: OfficeRef; result: ResultSummary | null }[];
   rankings: RankingSet[];
+  quarters: {
+    quarter: number;
+    first: number;
+    last: number;
+    partial: boolean;
+    plan: string;
+    actual: string;
+    variance: string;
+    status: string;
+    status_kind: string;
+  }[];
 }
 
 export interface DashActivity {

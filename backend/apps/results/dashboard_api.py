@@ -61,6 +61,21 @@ def series(rv: read.ResultView, month: int) -> dict:
     return {"cum_plan": plan, "cum_actual": [v if i < month else None for i, v in enumerate(actual)]}
 
 
+def quarters(rv: read.ResultView, month: int, profile) -> list:
+    """Fiscal-quarter summaries derived from the monthly series by the engine (D9, P8.6)."""
+    from apps.scoring import engine
+
+    plan, actual = rv.series.get("cum_plan"), rv.series.get("cum_actual")
+    if not plan or not actual:
+        return []
+    return [
+        jsonable(q)
+        for q in engine.quarter_summaries(
+            [Decimal(v) for v in plan], [Decimal(v) for v in actual], month, profile
+        )
+    ]
+
+
 def ranking_rows(results: dict, offices: dict, rows: list[tuple[str, int | None, Decimal | None]]) -> list:
     out = []
     for office_id, rank, value in rows:
@@ -181,6 +196,7 @@ class DashboardView(APIView):
             "rank_sibling": rv.rank_sibling if rv else None,
             "plan_version": rv.plan_version if rv else None,
             "series": series(rv, month) if rv else None,
+            "quarters": quarters(rv, month, profile) if rv else [],
             "indicators": rv.indicators if rv else [],
             "children": [
                 {"office": office_ref(c), "result": summary(results.get((str(c.id), OWNER)))}

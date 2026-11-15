@@ -41,6 +41,8 @@ def test_root_dashboard_in_one_call(w):
     assert round(float(d["headline"]["cum_actual"]), 6) == 0.315 and d["headline"]["status"] == "DELAYED"
     assert len(d["months"]) == 12 and len(d["series"]["cum_plan"]) == 12
     assert d["series"]["cum_actual"][2:] == [None] * 10  # stops at February
+    assert [(q["quarter"], q["partial"]) for q in d["quarters"]] == [(1, True)]
+    assert round(float(d["quarters"][0]["actual"]), 6) == 0.315 and d["quarters"][0]["status"] == "DELAYED"
     assert [c["office"]["code"] for c in d["children"]] == ["DIV", "OTHER"]
     assert d["children"][1]["result"] is None  # OTHER has no approved plan
     kinds = [(r["set"]["kind"], r["set"]["name"]) for r in d["rankings"]]

@@ -156,3 +156,19 @@ def test_manual_weights_validation_helper():
     assert engine.manual_weights_valid(good) and not engine.manual_weights_valid(bad)
     with pytest.raises(ValueError):
         engine.weights(good, Profile(weighting="random"))
+
+
+def test_quarter_and_year_to_date_windows():
+    from apps.scoring.tests.test_worked_example import worked
+
+    r = engine.plan_result(worked(), [], WORKBOOK)
+    q = engine.quarter_summaries(r.cum_plan, r.cum_actual, 3, WORKBOOK)
+    assert len(q) == 1 and q[0]["first"] == 1 and q[0]["last"] == 3 and not q[0]["partial"]
+    assert (q[0]["plan"], q[0]["actual"], q[0]["status"]) == (D("1.00"), D("0.78"), "DELAYED")
+    feb_on = engine.window_summary(r.cum_plan, r.cum_actual, 2, 3, WORKBOOK)
+    assert (feb_on["plan"], feb_on["actual"]) == (D("0.88"), D("0.66"))
+    later = engine.quarter_summaries(r.cum_plan, r.cum_actual, 5, WORKBOOK)
+    assert [(x["quarter"], x["partial"]) for x in later] == [(1, False), (2, True)]
+    assert later[1]["plan"] == D(0) and later[1]["status_kind"] == "on_time"
+    with pytest.raises(ValueError):
+        engine.window_summary(r.cum_plan, r.cum_actual, 3, 2, WORKBOOK)

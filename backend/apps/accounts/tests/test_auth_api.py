@@ -128,6 +128,20 @@ def test_idle_timeout_ends_session(client, user, settings):
     assert r.status_code == 401 and r.json()["code"] == "session_expired"
 
 
+def test_background_polls_and_page_loads_do_not_keep_a_session_alive(client, user, settings):
+    settings.SESSION_IDLE_MINUTES = 1
+    login(client, "ana@alpha.gov")
+    session = client.session
+    started = int(timezone.now().timestamp()) - 50
+    session[services.SESSION_LAST_ACTIVITY_KEY] = started
+    session.save()
+    assert client.get("/api/v1/me", headers={"X-Background": "1"}).status_code == 200
+    assert client.get("/dashboard").status_code == 200  # the app's page
+    assert client.session[services.SESSION_LAST_ACTIVITY_KEY] == started  # not refreshed
+    assert client.get("/api/v1/me").status_code == 200  # real use refreshes it
+    assert client.session[services.SESSION_LAST_ACTIVITY_KEY] > started
+
+
 def test_admin_reset_password(client, user, settings):
     settings.EMAIL_ENABLED = True
     temporary = run_in_agency(user.agency_id, lambda: services.admin_reset_password(reload(user)))

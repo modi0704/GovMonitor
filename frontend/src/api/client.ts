@@ -83,6 +83,8 @@ export function requestsInFlight(): number {
 export async function apiRequest<T = unknown>(path: string, opts: RequestOptions = {}): Promise<T> {
   const method = (opts.method ?? 'GET').toUpperCase();
   const headers: Record<string, string> = { Accept: 'application/json' };
+  // Background polls do not count as activity for the idle sign-out (server side, P12.7 fix).
+  if (opts.background) headers['X-Background'] = '1';
   let body: BodyInit | undefined;
   if (opts.body instanceof FormData) {
     body = opts.body;

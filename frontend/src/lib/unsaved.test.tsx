@@ -98,3 +98,14 @@ it('shows a loading bar while a request takes longer than a moment, but not for 
     vi.useRealTimers();
   }
 });
+
+it('background polls tell the server they are not user activity', async () => {
+  const fetchMock = vi.fn(async () => new Response('{"unread":0}'));
+  vi.stubGlobal('fetch', fetchMock);
+  await api.get('notifications/unread-count', undefined, undefined, true);
+  await api.get('me');
+  const headers = (fetchMock.mock.calls as unknown as [string, RequestInit][]).map(
+    ([, init]) => (init.headers as Record<string, string>)['X-Background'],
+  );
+  expect(headers).toEqual(['1', undefined]);
+});

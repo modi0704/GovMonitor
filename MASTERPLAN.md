@@ -10,9 +10,9 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 12
-LAST COMPLETED TASK: P12.6
-NEXT TASK          : P12.7
+CURRENT PHASE      : 13
+LAST COMPLETED TASK: P12.7
+NEXT TASK          : P13.1
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -163,7 +163,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 9** — Excel export and plan import
 - [x] **Phase 10** — PowerPoint export
 - [x] **Phase 11** — Alerts and notifications
-- [ ] **Phase 12** — Phone layouts and UX polish
+- [x] **Phase 12** — Phone layouts and UX polish
 - [ ] **Phase 13** — Deployment packaging (office install and cloud)
 - [ ] **Phase 14** — Hardening, performance, documentation, release
 
@@ -1067,7 +1067,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
 - [x] **P12.5** Accessibility checks: colour contrast, focus order, labels on inputs, charts
   with table alternatives.
 - [x] **P12.6** In-app help: a one-page guide per role and tooltips on every scoring setting.
-- [ ] **P12.7** Playwright smoke tests for the five flows of section 12 at desktop and phone
+- [x] **P12.7** Playwright smoke tests for the five flows of section 12 at desktop and phone
   viewport sizes.
 
 **Phase exit checks:** P12.7 passes; no page scrolls horizontally at 360 px width.
@@ -1199,6 +1199,7 @@ changed, why. Start ids at D19.
 | D37 | 2026-11-15 | PowerPoint deck: offices in scope with no result for the month (no approved plan beneath them) get no dashboard slide; the notes slide lists them. The scope's root is the overall slide and is not repeated as an office slide. Office slide titles are the office name alone; a suffix such as '(continued)' is kept and the name cut instead. Text is fitted with Arial advance widths (no font file needed) (Claude Code) | A slide of empty charts says nothing; listing them keeps the deck honest about coverage. 'One slide per office' (Phase 10 exit) then means one per office that has figures |
 | D38 | 2026-11-15 | Alert recipients: 'admins of an office' are admin assignments at that office, or at its nearest ancestor that has any; 'agency administrators' are admins of the root; delay alerts go to every assignment (admin or read-only) at the office and above. Offices that must report are those owning an approved plan (as the submission board). Missing accomplishments are grouped into one notification per office (owner and implementing) rather than one per activity. Delay alerts use the most recent month locked within the last 14 days, and roll-up offices are included. Notifications are created in bulk and never audited (they derive from audited changes); the scan is queued once per local day after 06:00. PUBLIC_URL (new env var) makes email links absolute (Claude Code) | Agency administrators would otherwise get every office's reminders; per-activity alerts would flood inboxes; a 14-day window stops a first scan from alerting on months locked long ago |
 | D39 | 2026-11-15 | UX pass (P12.4): loading is shown by one shared bar under the navigation, driven by the API client's count of requests in flight (after 300 ms; background polls excluded), rather than per-page spinners; unsaved changes are guarded app-wide by a capture-phase link listener plus beforeunload, used by the plan editor and the monthly report; activity-level status words come from one module (Ahead of plan / On plan / Behind plan / No target) while office results keep the scoring profile's labels; confirmations for lock, unlock, approve and deactivate already stated their consequences and were kept (Claude Code) | One mechanism covers every page and every future page; the router in use (BrowserRouter) has no navigation blocker, so the guard intercepts link clicks before the router |
+| D40 | 2026-11-15 | Browser smoke tests (P12.7): desktop runs the five flows on a brand-new agency created through the platform screens each run; the phone project then uses that agency for phone work (results, photo upload, export) and checks editing screens and horizontal scroll; data-heavy plan entry uses the same API call the grid makes. They need a running server with a worker and a platform owner, so they run as 'make smoke' and a separate CI job, not inside 'make check'. Fixed on the way: page loads and background polls (X-Background: 1, the notification bell) no longer refresh the idle-sign-out timer — before, an open tab never signed out and a page load racing a sign-out returned SessionInterrupted (Claude Code) | Repeatable runs without collisions; the idle timeout (P1.4) must hold even with the bell polling |
 
 ---
 
@@ -1220,3 +1221,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 9 | Complete. Jobs API and My exports; Excel export (SUMMARY + office sheets exactly per 9.1, layout constants in exports/layout.py, cached values on every formula); export dialog on the dashboard (audited); acceptance (own evaluator and LibreOffice with poisoned caches match the dashboard ±0.005 pts for 8.1 and RDI), cell-by-cell RDI layout test; import template and import_plan job with row-by-row errors (drafts only, all-or-nothing); export→import round trip exact; 500-activity office exports in ~1 s. |
 | 2026-11-15 | Phase 10 | Complete. 16:9 deck (title, overall, one dashboard slide per office with native S-curve, funds doughnut and children bars, ranking tables per set with continuation, indicator tables, notes) from the results read path; export_template with system defaults (global_read RLS), settings page and logo; export dialog offers Excel or PowerPoint with slide groups. Tests: MOST December deck charts equal the dashboard API for every office slide, RDS ranking RDI/ILD/AST, the 8.2 provincial vector ranks 1-7, long names cut with an ellipsis, deck opens in python-pptx and LibreOffice. |
 | 2026-11-15 | Phase 11 | Complete. alert_rule and notification (RLS); settings page; daily alert_scan queued once per local day after 06:00 (reminders N days before cutoff, late reports, missing accomplishments 3 days before, delays after locking) and event alerts (returned, locked, unlocked, plan submitted), all with dedupe keys; bell with unread count, panel and notifications page; daily email digest only with SMTP + agency switch, per-user opt-out, one per day, failures isolated. Frozen-clock tests for every trigger; scan twice/next day/replayed event create no duplicates; no-SMTP case sends nothing and the job succeeds. |
+| 2026-11-15 | Phase 12 | Complete. Phone layouts (no horizontal scroll at 360/480 px; charts follow their container; wide tables scroll in place), phone photo upload from the activity history, 'Open on a computer to edit' on editing screens, UX pass (unsaved-changes guard on in-app navigation, loading bar, one set of status words, empty states with next steps), axe WCAG 2.1 A/AA clean at desktop and phone, skip link, help page per role and ? tips on every scoring setting, Playwright smoke tests of the five flows at desktop and phone (make smoke, CI job). Fixed: background polls kept sessions alive past the idle timeout. |

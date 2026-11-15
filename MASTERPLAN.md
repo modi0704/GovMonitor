@@ -10,10 +10,10 @@
 ## 0. STATUS — read this first, update it last
 
 ```
-CURRENT PHASE      : 14
-LAST COMPLETED TASK: P14.6
-NEXT TASK          : P14.7
-BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). Owner steps before publishing 1.0.0: replace the placeholder licence public key (D41), then push tag v1.0.0 (docs/RELEASE.md)
+CURRENT PHASE      : complete
+LAST COMPLETED TASK: P14.7
+NEXT TASK          : none — build complete
+BLOCKERS / NOTES   : All 14 phases complete. Owner steps before publishing 1.0.0: (1) generate the vendor licence key and replace backend/apps/tenancy/licence_public_key.txt (D41); (2) push tag v1.0.0 (docs/RELEASE.md). Reference files in reference/ (git-ignored).
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -165,7 +165,7 @@ Tick a phase only when all its tasks and exit checks pass.
 - [x] **Phase 11** — Alerts and notifications
 - [x] **Phase 12** — Phone layouts and UX polish
 - [x] **Phase 13** — Deployment packaging (office install and cloud)
-- [ ] **Phase 14** — Hardening, performance, documentation, release
+- [x] **Phase 14** — Hardening, performance, documentation, release
 
 Dependency order is linear (each phase needs the ones before it), except that Phase 4 depends only
 on Phase 0 and may be done at any point before Phase 5.
@@ -205,7 +205,7 @@ must be checked in task P0.2 and the exact versions written into this table.
 | DB driver | psycopg (binary) | 3.3.9 | LGPL-3.0 — licence exception D20. |
 | Database | PostgreSQL | 18.7 in the compose image (`postgres:18`); CI and dev tested on 16 (the minimum) | Minimum supported by the app: 16. Do not adopt 19 until Django 5.2 lists it. |
 | Frontend | React + TypeScript + Vite | React 19.3.1, react-router-dom 7.18.5, TypeScript 6.0.3, Vite 8.3.8, Node 22 | TypeScript 7 not used: typescript-eslint 8.72 supports <6.1 (D21). Built to `frontend/dist`, served by WhiteNoise. |
-| Data grid | TanStack Table | 9.3.1 (MIT) | Headless; the grid UI is our own component. |
+| Data grid | ~~TanStack Table~~ | — | Removed in P14.7: never imported, the grid is our own component (D45). |
 | Charts (web) | Apache ECharts | 6.1.0 (Apache-2.0) | Bundled, no CDN. |
 | Excel writing | XlsxWriter | 3.3.1 | Writes formulas and formats. |
 | Excel reading | openpyxl | 3.1.5 | Used by plan import and fixture extraction. |
@@ -216,7 +216,7 @@ must be checked in task P0.2 and the exact versions written into this table.
 | App server | Gunicorn + WhiteNoise | 27.0.1 / 6.12.0 | |
 | Reverse proxy / TLS | Caddy | 2.11.9 (image `caddy:2`) | Optional container. |
 | Packaging | Docker + Docker Compose | — | Same images for both deployment modes. |
-| Tests | pytest + pytest-django + pytest-cov; Vitest + jsdom + Testing Library; Playwright (smoke only) | 9.2.0 / 4.14.0 / 7.1.0; 5.1.0 / 31.0.1 / 16.3.3; 1.63.0 | Property tests use seeded random generators (no Hypothesis — MPL-2.0, D22). |
+| Tests | pytest + pytest-django + pytest-cov; Vitest + jsdom + Testing Library; Playwright (smoke, accessibility) + @axe-core/playwright | 9.2.0 / 4.14.0 / 7.1.0; 5.1.0 / 31.0.1 / 16.3.3; 1.63.0 / 4.14.0 (dev only, MPL-2.0) | Property tests use seeded random generators (no Hypothesis — MPL-2.0, D22). |
 | Lint/format | Ruff; ESLint + typescript-eslint + Prettier | 0.17.5; 10.15.0 / 8.72.2 / 3.10.1 | |
 
 **Licence rule:** every runtime dependency must be MIT, BSD, Apache-2.0, PSF, ISC or PostgreSQL
@@ -231,12 +231,19 @@ worker loop described in section 6.7.
 ```
 MASTERPLAN.md            this file
 README.md                how to run locally
-Makefile                 up, down, migrate, test, check, seed-demo, build
+VERSION, CHANGELOG.md    release version and history (P14.6)
+Makefile                 up, down, migrate, test, check, smoke, audit, seed-demo, build, release,
+                         offline-bundle
 reference/               original workbooks and deck (git-ignored, read-only)
-tools/                   one-off scripts (fixture extraction)
-deploy/                  Dockerfile, docker-compose.yml, docker-compose.cloud.yml, Caddyfile,
-                         backup.sh, restore.sh, make-offline-bundle.sh
-docs/                    THIRD_PARTY.md, ADMIN_GUIDE.md, USER_GUIDE.md, SECURITY.md, API.md
+tools/                   extract_fixtures.py, licence.py (vendor licence keys/signing),
+                         api_docs.py + api_summaries.json (docs/API.md)
+deploy/                  Dockerfile, entrypoint.sh, docker-compose.yml, docker-compose.cloud.yml,
+                         Caddyfile, .env.example, cloud.env.example, db/init-roles.sh,
+                         backup.sh, restore.sh, make-offline-bundle.sh, offline/ (install.sh,
+                         update.sh), test-*.sh (cloud compose, backup/restore, offline bundle and
+                         offline install checks run in CI)
+docs/                    THIRD_PARTY.md, ADMIN_GUIDE.md, USER_GUIDE.md (+ images/), SECURITY.md,
+                         API.md, RELEASE.md
 backend/
   config/                settings (base, dev, prod), urls, wsgi
   apps/
@@ -255,6 +262,7 @@ backend/
   seed/                  demo agency seed command
 frontend/
   src/                   app, routes, api client, components, pages
+  e2e/                   Playwright smoke, accessibility and offline-install checks
 ```
 
 ### 5.4 Configuration (environment variables)
@@ -273,6 +281,13 @@ frontend/
 | `SESSION_IDLE_MINUTES` | default 60 | Idle sign-out. |
 | `MAX_UPLOAD_MB` | default 25 | Upload limit. |
 | `LICENCE_FILE` | path or empty | Office installs only (Phase 13). |
+| `SECURE_SSL`, `SECURE_HSTS_SECONDS` | `1` behind TLS | Secure cookies and HSTS (only when served over HTTPS). |
+| `TRUST_X_FORWARDED_FOR` | `1` behind Caddy | Client addresses for the audit log and rate limits. |
+| `LOG_FORMAT`, `LOG_LEVEL` | `json` (production) / `plain`; `INFO` | Structured logs (P13.1). |
+| `WORKER_HEARTBEAT_STALE_SECONDS` | default 120 | Health check: when the worker counts as stopped. |
+| `LICENCE_PUBLIC_KEY` | base64 | Test override of the licence key shipped in the image; not passed by the compose files (D41, D42). |
+| `DEBUG`, `FRONTEND_DIST` | | Development only. |
+| Compose only: `SITE_ADDRESS`, `TLS_MODE`, `MAX_BODY_MB`, `HTTP_PORT`, `HTTPS_PORT`, `WEB_PORT`, `GOVMONITOR_VERSION`, `POSTGRES_PASSWORD`, `APP_OWNER_PASSWORD`, `APP_USER_PASSWORD`, `WEB_CONCURRENCY` | | Proxy address and certificates, ports, image version, database passwords (docs/ADMIN_GUIDE.md §14). |
 
 ---
 
@@ -1126,7 +1141,7 @@ wipe → restore reproduces the dashboard numbers; P13.7 passes.
   "Sample Bureau" (five levels, equal weighting, capped preset) — proving nothing is hard-coded.
 - [x] **P14.5** `docs/USER_GUIDE.md` (per role, with screenshots) and `docs/API.md`.
 - [x] **P14.6** Release checklist, version number, changelog, tagged build of the images.
-- [ ] **P14.7** Final pass over this file: every box ticked or struck through with a reason;
+- [x] **P14.7** Final pass over this file: every box ticked or struck through with a reason;
   section 5.2 versions match the lockfiles; section 14 lists every deviation.
 
 **Phase exit checks:** `make check` green; P14.2 green; a person who has never seen the system can
@@ -1204,6 +1219,7 @@ changed, why. Start ids at D19.
 | D41 | 2026-11-15 | Licence (P13.5): JSON {payload, signature}, Ed25519 over the payload with sorted keys; payload agency, expires, seats. Single mode only. Missing, damaged or expired → read-only enforced by middleware for every API write except sign-in/out, own password and two-step settings, notification reads and exports; seat limit blocks only new users. The committed public key is a PLACEHOLDER whose private key was not kept: the vendor generates the real pair with tools/licence.py keygen, keeps the private key offline and replaces backend/apps/tenancy/licence_public_key.txt before a release (release checklist, P14.6) (Claude Code) | Customers can always read and export their data; signing stays offline with the vendor; no real private key may sit in the repository or in a build session |
 | D42 | 2026-11-15 | P13.7 is verified by deploy/test-offline-install.sh instead of a hand-built VM: the offline bundle is installed into an empty folder in single mode, every Docker network is then cut off from the internet with a DOCKER-USER firewall rule (checked from inside the web container), and a browser test opens every page and exports Excel and PowerPoint, failing on any request outside the site. It runs in CI. The test trusts a throwaway licence key; the shipped compose file deliberately does not pass LICENCE_PUBLIC_KEY (Claude Code) | Repeatable on every build rather than once by hand; the firewall gives the same 'no internet after install' condition as disabling the VM's network |
 | D44 | 2026-11-15 | Release (P14.6): version 1.0.0 in VERSION (baked into the image, its label and /api/v1/health); CHANGELOG.md; docs/RELEASE.md; 'make release' and a tag-triggered release workflow build govmonitor:<version> and the offline bundle, and both refuse to run while the placeholder licence key is present. The build agent built and verified govmonitor:1.0.0 locally but did not create or push the git tag: publishing is the owner's step once the vendor licence key is in place (Claude Code) | A tag is an outward-facing release and the licence key must be the vendor's own; the checklist makes those two steps explicit |
+| D45 | 2026-11-15 | Final pass (P14.7): @tanstack/react-table, pinned in 5.2 since P0.2, was never imported (the plan editor and monthly grid are our own components) and is removed; 5.2 versions checked against the lockfiles and images (Python 3.13.18, PostgreSQL 18.7, Caddy 2.11.9 and every pinned package match); 5.3 and 5.4 updated for the files and settings added in Phases 11–14 (Claude Code) | An unused runtime dependency is licence and audit surface for nothing |
 
 ---
 
@@ -1227,3 +1243,4 @@ changed, why. Start ids at D19.
 | 2026-11-15 | Phase 11 | Complete. alert_rule and notification (RLS); settings page; daily alert_scan queued once per local day after 06:00 (reminders N days before cutoff, late reports, missing accomplishments 3 days before, delays after locking) and event alerts (returned, locked, unlocked, plan submitted), all with dedupe keys; bell with unread count, panel and notifications page; daily email digest only with SMTP + agency switch, per-user opt-out, one per day, failures isolated. Frozen-clock tests for every trigger; scan twice/next day/replayed event create no duplicates; no-SMTP case sends nothing and the job succeeds. |
 | 2026-11-15 | Phase 12 | Complete. Phone layouts (no horizontal scroll at 360/480 px; charts follow their container; wide tables scroll in place), phone photo upload from the activity history, 'Open on a computer to edit' on editing screens, UX pass (unsaved-changes guard on in-app navigation, loading bar, one set of status words, empty states with next steps), axe WCAG 2.1 A/AA clean at desktop and phone, skip link, help page per role and ? tips on every scoring setting, Playwright smoke tests of the five flows at desktop and phone (make smoke, CI job). Fixed: background polls kept sessions alive past the idle timeout. |
 | 2026-11-15 | Phase 13 | Complete. Production hardening (strict CSP, JSON logs, HSTS only behind TLS, Caddy with upload limit); single-machine compose with Caddy HTTPS and cloud compose (managed PostgreSQL + S3), both started from scratch in CI; backup/restore with checksums and retention, backup-wipe-restore reproduces all 191 frozen results; offline bundle with install/update and automatic rollback (tested with a broken release); signed Ed25519 licence (banner, read-only after expiry, seats); ADMIN_GUIDE.md; offline install verified with the containers cut off from the internet. |
+| 2026-11-15 | Phase 14 | Complete. Security review (docs/SECURITY.md) with 39 same-agency foreign keys, sign-in and export rate limits and a clean runtime dependency audit; cross-tenant test of every API route; load test at the D13 ceiling (month lock ~2 s); Sample Bureau demo (five levels, capped preset, equal weights); user guide with screenshots and generated API reference; version 1.0.0 with changelog, release checklist and tag-triggered release build; final pass over this file. Owner steps left: replace the placeholder licence public key, then tag v1.0.0. |

@@ -51,7 +51,6 @@ Pygments (BSD-2-Clause).
 |---|---|---|
 | react, react-dom, scheduler | 19.3.1 | MIT |
 | react-router-dom, react-router, cookie, set-cookie-parser | 7.18.5 | MIT |
-| @tanstack/react-table, table-core, react-store, store | 9.3.1 | MIT |
 | use-sync-external-store | — | MIT |
 | echarts | 6.1.0 | Apache-2.0 |
 | zrender | (echarts dependency) | BSD-3-Clause |

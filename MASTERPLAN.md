@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 5
-LAST COMPLETED TASK: P5.3
-NEXT TASK          : P5.4
+LAST COMPLETED TASK: P5.4
+NEXT TASK          : P5.5
 BLOCKERS / NOTES   : Phase 4 done except P4.2/P4.6 (BLOCKED: reference workbook missing; extractor and golden tests ready). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -845,7 +845,7 @@ agency with no code changes.
 - [x] **P5.3** Plan API: create draft for (office, fiscal year); read with outline, activities,
   targets and indicators in one call; bulk save (the grid posts all changed rows at once);
   submit; approve; return to draft.
-- [ ] **P5.4** Plan validation service (run on save as warnings, on submit as errors):
+- [x] **P5.4** Plan validation service (run on save as warnings, on submit as errors):
   monthly targets must sum to the annual target for `quantity` and `money`; `total_cost` should
   equal `annual_target × unit_cost` when both are present (warning only, cost may be typed);
   zero cost under `cost_share` (warning); `manual` weights sum to 1; duplicate codes; activity

@@ -11,9 +11,9 @@
 
 ```
 CURRENT PHASE      : 1
-LAST COMPLETED TASK: P1.8
-NEXT TASK          : P1.6
-BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. Phase 1 order is P1.8 → P1.6 → P1.7 → P1.9 → P1.10 (D23)
+LAST COMPLETED TASK: P1.6
+NEXT TASK          : P1.7
+BLOCKERS / NOTES   : reference/ not present: P4.2 and P4.6 will be blocked. Phase 1 order P1.8 → P1.6 → P1.7 → P1.9 → P1.10 (D23); platform UI pages are built in P1.10
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
 
@@ -730,7 +730,7 @@ deliberately wrong query.
   > NOTE: the administrator reset is the service `accounts.services.admin_reset_password`; its
   > endpoint `users/{id}/reset-password` is added with the Users API in P2.5.
 - [x] **P1.5** Optional TOTP two-factor: enrol with QR code, verify at sign-in, recovery codes.
-- [ ] **P1.6** Platform-owner area under `/platform/` (separate sign-in, uses `app_owner`): list,
+- [x] **P1.6** Platform-owner area under `/platform/` (separate sign-in, uses `app_owner`): list,
   create, suspend agencies; create an agency's first administrator; hidden entirely when
   `DEPLOYMENT_MODE=single`. `manage.py bootstrap_single_agency` for single mode.
 - [ ] **P1.7** Support grants: an agency administrator can grant a platform admin time-limited

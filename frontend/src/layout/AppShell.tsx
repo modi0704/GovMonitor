@@ -1,11 +1,14 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
+import { useLeaveGuard } from '../lib/unsaved';
+import LoadingBar from './LoadingBar';
 import NotificationBell from './NotificationBell';
 import { NAV_ITEMS } from './nav';
 
 export default function AppShell() {
   const { me, signOut } = useAuth();
   const navigate = useNavigate();
+  useLeaveGuard();
   return (
     <div className="shell">
       <header className="topbar">
@@ -42,6 +45,7 @@ export default function AppShell() {
             </NavLink>
           ))}
       </nav>
+      <LoadingBar />
       <main className="content">
         <Outlet />
       </main>

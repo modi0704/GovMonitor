@@ -202,7 +202,10 @@ export default function SubmissionBoardPage() {
             </div>
           )}
           {b.offices.length === 0 ? (
-            <p className="notice">No office has an approved plan for this year yet.</p>
+            <p className="notice">
+              No office has an approved plan for this year yet. Approve plans on the Approvals page;
+              each office with an approved plan then appears here every month.
+            </p>
           ) : (
             <table className="table">
               <thead>

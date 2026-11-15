@@ -9,6 +9,8 @@ import { dateTime, monthYear, percent } from '../../lib/format';
 import ResultPanel from '../../components/ResultTiles';
 import MovDialog from './MovDialog';
 import type { MovTarget } from './movUpload';
+import { ACTIVITY_STATUS_WORD } from '../../lib/statusWords';
+import { useUnsavedChanges } from '../../lib/unsaved';
 
 interface Edit {
   actual?: string;
@@ -101,12 +103,7 @@ export default function MonthlyReportPage() {
 
   const dirty = Object.keys(edits).length > 0 || Object.keys(indEdits).length > 0;
 
-  useEffect(() => {
-    if (!dirty) return;
-    const guard = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener('beforeunload', guard);
-    return () => window.removeEventListener('beforeunload', guard);
-  }, [dirty]);
+  useUnsavedChanges('monthly-report', dirty);
 
   // Live result panel: ask the engine for the office result with the unsaved numbers (debounced).
   useEffect(() => {
@@ -256,7 +253,12 @@ export default function MonthlyReportPage() {
           {notice}
         </p>
       )}
-      {years.data?.length === 0 && <p className="notice">There is no fiscal year yet.</p>}
+      {years.data?.length === 0 && (
+        <p className="notice">
+          There is no fiscal year yet. The agency administrator opens one on the Fiscal years page;
+          then each office&apos;s approved plan appears here for monthly reporting.
+        </p>
+      )}
       {report && !report.has_plan && (
         <p className="notice">
           {view === 'owner'
@@ -417,7 +419,7 @@ export default function MonthlyReportPage() {
                             <span
                               className={`chip ${a.behind ? 'status-delayed' : 'status-on_time'}`}
                             >
-                              {a.behind ? 'Behind' : 'On track'}
+                              {ACTIVITY_STATUS_WORD[a.behind ? 'delayed' : 'on_time']}
                             </span>
                           )}
                         </td>

@@ -18,7 +18,7 @@ export default function NotificationBell() {
   useEffect(() => {
     let active = true;
     api
-      .get<{ unread: number }>('notifications/unread-count')
+      .get<{ unread: number }>('notifications/unread-count', undefined, undefined, true)
       .then((d) => active && setUnread(d.unread))
       .catch(() => undefined);
     const timer = window.setInterval(refresh, UNREAD_POLL_MS);

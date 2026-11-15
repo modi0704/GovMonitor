@@ -174,7 +174,12 @@ export default function DashboardPage() {
         )}
       </div>
       <FormError message={error ?? years.error} />
-      {years.data?.length === 0 && <p className="notice">There is no fiscal year yet.</p>}
+      {years.data?.length === 0 && (
+        <p className="notice">
+          There is no fiscal year yet. The agency administrator opens one on the Fiscal years page,
+          offices enter their plans, and results appear here once plans are approved.
+        </p>
+      )}
       {data && !data.has_result && (
         <p className="notice">
           {data.office.name} has no results for {monthYear(data.period.start_date)}: no approved

@@ -4,14 +4,8 @@ import FormError from '../../components/FormError';
 import Modal from '../../components/Modal';
 import { monthName, percent } from '../../lib/format';
 import { ACCEPT, uploadMov } from '../reporting/movUpload';
+import { ACTIVITY_STATUS_WORD } from '../../lib/statusWords';
 import type { DashActivity } from './types';
-
-const KIND_WORD = {
-  ahead: 'Ahead',
-  on_time: 'On time',
-  delayed: 'Behind',
-  no_target: 'No target',
-} as const;
 
 interface History {
   activity: {
@@ -97,7 +91,7 @@ export default function ActivitiesPanel({
                       <span
                         className={`chip status-${a.status_kind === 'no_target' ? 'on_time' : a.status_kind}`}
                       >
-                        {KIND_WORD[a.status_kind]}
+                        {ACTIVITY_STATUS_WORD[a.status_kind]}
                       </span>
                     )}
                   </td>

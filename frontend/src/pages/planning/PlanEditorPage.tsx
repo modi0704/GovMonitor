@@ -38,6 +38,7 @@ import {
   type ServerRow,
 } from './gridModel';
 import IndicatorsTab, { type ServerIndicator } from './IndicatorsTab';
+import { useUnsavedChanges } from '../../lib/unsaved';
 
 export interface Issue {
   row: string | null;
@@ -147,14 +148,7 @@ export default function PlanEditorPage() {
   const dirty = payload.rows.length > 0 || payload.deleted_rows.length > 0 || indicatorsDirty;
 
   // Unsaved-changes guard (P12.4).
-  useEffect(() => {
-    if (!dirty) return;
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [dirty]);
+  useUnsavedChanges('plan-editor', dirty);
 
   // Live weights and planned curve from the engine (results/preview), debounced.
   useEffect(() => {

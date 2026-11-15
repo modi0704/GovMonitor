@@ -61,6 +61,23 @@ export interface RequestOptions {
   /** Do not raise the session-expired event on 401/403 (used by the sign-in calls). */
   quietAuth?: boolean;
   base?: string;
+  /** Background poll: not shown by the loading bar. */
+  background?: boolean;
+}
+
+// Requests in flight, for the shell's loading bar (P12.4). Background polls do not count.
+let inFlight = 0;
+const inFlightListeners = new Set<() => void>();
+function setInFlight(delta: number) {
+  inFlight = Math.max(0, inFlight + delta);
+  inFlightListeners.forEach((fn) => fn());
+}
+export function subscribeInFlight(fn: () => void): () => void {
+  inFlightListeners.add(fn);
+  return () => inFlightListeners.delete(fn);
+}
+export function requestsInFlight(): number {
+  return inFlight;
 }
 
 export async function apiRequest<T = unknown>(path: string, opts: RequestOptions = {}): Promise<T> {
@@ -88,20 +105,25 @@ export async function apiRequest<T = unknown>(path: string, opts: RequestOptions
   }
 
   let response: Response;
+  let text: string;
+  if (!opts.background) setInFlight(1);
   try {
-    response = await fetch(url, {
-      method,
-      headers,
-      body,
-      credentials: 'same-origin',
-      signal: opts.signal,
-    });
-  } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') throw err;
-    throw new ApiError(0, null);
+    try {
+      response = await fetch(url, {
+        method,
+        headers,
+        body,
+        credentials: 'same-origin',
+        signal: opts.signal,
+      });
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') throw err;
+      throw new ApiError(0, null);
+    }
+    text = await response.text();
+  } finally {
+    if (!opts.background) setInFlight(-1);
   }
-
-  const text = await response.text();
   let data: unknown = null;
   if (text) {
     try {
@@ -125,8 +147,12 @@ export async function apiRequest<T = unknown>(path: string, opts: RequestOptions
 }
 
 export const api = {
-  get: <T>(path: string, query?: RequestOptions['query'], signal?: AbortSignal) =>
-    apiRequest<T>(path, { query, signal }),
+  get: <T>(
+    path: string,
+    query?: RequestOptions['query'],
+    signal?: AbortSignal,
+    background = false,
+  ) => apiRequest<T>(path, { query, signal, background }),
   post: <T>(path: string, body?: unknown, opts: Omit<RequestOptions, 'method' | 'body'> = {}) =>
     apiRequest<T>(path, { ...opts, method: 'POST', body }),
   put: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'PUT', body }),

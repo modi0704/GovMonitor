@@ -11,8 +11,8 @@
 
 ```
 CURRENT PHASE      : 12
-LAST COMPLETED TASK: P12.3
-NEXT TASK          : P12.4
+LAST COMPLETED TASK: P12.4
+NEXT TASK          : P12.5
 BLOCKERS / NOTES   : Reference files in reference/ (git-ignored). See the P14.1 note on cross-agency foreign keys
 LAST UPDATED       : 2026-11-15 by Claude Code (build agent)
 ```
@@ -1061,7 +1061,7 @@ and a ranking slide whose order matches section 8.2's ranking rule.
   attach it (same rules and permissions as desktop).
 - [x] **P12.3** On small screens the plan editor, monthly grid, structure, users, settings and
   audit pages show a clear "Open on a computer to edit" message instead of a broken grid.
-- [ ] **P12.4** UX pass on desktop: empty states that say what to do next; consistent status
+- [x] **P12.4** UX pass on desktop: empty states that say what to do next; consistent status
   words; confirmation with consequences for lock, unlock, approve, deactivate; unsaved-changes
   guard; loading and error states on every page; keyboard access to the grids.
 - [ ] **P12.5** Accessibility checks: colour contrast, focus order, labels on inputs, charts
@@ -1198,6 +1198,7 @@ changed, why. Start ids at D19.
 | D36 | 2026-11-15 | export_template rows with agency_id NULL are the system defaults (created by migration; readable by every agency through the global_read policy, writable by none). Effective settings = built-in values < system row < the agency's own row, which is created on the first change. The isolation test 'no agency sees nothing' now counts only rows that belong to an agency, and a new test proves system rows cannot be changed or inserted by app_user (Claude Code) | 6.4 asks for system-wide rows; built-in values keep exports working even if a test flush or an operator removes the system rows |
 | D37 | 2026-11-15 | PowerPoint deck: offices in scope with no result for the month (no approved plan beneath them) get no dashboard slide; the notes slide lists them. The scope's root is the overall slide and is not repeated as an office slide. Office slide titles are the office name alone; a suffix such as '(continued)' is kept and the name cut instead. Text is fitted with Arial advance widths (no font file needed) (Claude Code) | A slide of empty charts says nothing; listing them keeps the deck honest about coverage. 'One slide per office' (Phase 10 exit) then means one per office that has figures |
 | D38 | 2026-11-15 | Alert recipients: 'admins of an office' are admin assignments at that office, or at its nearest ancestor that has any; 'agency administrators' are admins of the root; delay alerts go to every assignment (admin or read-only) at the office and above. Offices that must report are those owning an approved plan (as the submission board). Missing accomplishments are grouped into one notification per office (owner and implementing) rather than one per activity. Delay alerts use the most recent month locked within the last 14 days, and roll-up offices are included. Notifications are created in bulk and never audited (they derive from audited changes); the scan is queued once per local day after 06:00. PUBLIC_URL (new env var) makes email links absolute (Claude Code) | Agency administrators would otherwise get every office's reminders; per-activity alerts would flood inboxes; a 14-day window stops a first scan from alerting on months locked long ago |
+| D39 | 2026-11-15 | UX pass (P12.4): loading is shown by one shared bar under the navigation, driven by the API client's count of requests in flight (after 300 ms; background polls excluded), rather than per-page spinners; unsaved changes are guarded app-wide by a capture-phase link listener plus beforeunload, used by the plan editor and the monthly report; activity-level status words come from one module (Ahead of plan / On plan / Behind plan / No target) while office results keep the scoring profile's labels; confirmations for lock, unlock, approve and deactivate already stated their consequences and were kept (Claude Code) | One mechanism covers every page and every future page; the router in use (BrowserRouter) has no navigation blocker, so the guard intercepts link clicks before the router |
 
 ---
 

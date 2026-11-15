@@ -1219,3 +1219,29 @@ label.inline {
   font-size: 1.25rem;
   margin-top: 0;
 }
+
+/* ---- Loading bar (P12.4) ---- */
+.loading-bar {
+  height: 3px;
+  overflow: hidden;
+  font-size: 0;
+  background: transparent;
+}
+.loading-bar.is-visible {
+  background: linear-gradient(90deg, var(--primary) 0%, var(--focus) 50%, var(--primary) 100%);
+  background-size: 200% 100%;
+  animation: loading-slide 1.2s linear infinite;
+}
+@keyframes loading-slide {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar.is-visible {
+    animation: none;
+  }
+}

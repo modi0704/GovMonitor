@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # One image for web and worker (MASTERPLAN 5.1). Build from the repository root:
 #   docker build -f deploy/Dockerfile -t govmonitor:dev .
 # Behind a TLS-inspecting proxy, pass its CA bundle as an optional build secret (never stored in the

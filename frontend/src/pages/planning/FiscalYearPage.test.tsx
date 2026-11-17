@@ -39,7 +39,7 @@ it('lets the agency administrator move one month’s cutoff', async () => {
     </MemoryRouter>,
   );
   const user = userEvent.setup();
-  const buttons = await screen.findAllByRole('button', { name: 'Change cutoff' });
+  const buttons = await screen.findAllByRole('button', { name: 'Change deadline' });
   expect(buttons).toHaveLength(1); // the locked month keeps its cutoff
   await user.click(buttons[0]!);
   await user.click(screen.getByRole('button', { name: 'Save' }));

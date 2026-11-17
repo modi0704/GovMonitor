@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/useAuth';
 import { GUIDES, type Guide } from './guides';
 
@@ -16,6 +17,11 @@ export default function HelpPage() {
   return (
     <section className="page">
       <h1>Help</h1>
+      <p>
+        <Link className="btn btn-primary" to="/user-guide">
+          Open full user guide
+        </Link>
+      </p>
       <div className="tabs" role="tablist" aria-label="Guides">
         {GUIDES.map((g) => (
           <button

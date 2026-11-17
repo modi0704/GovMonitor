@@ -7,6 +7,7 @@ import FormError from '../../components/FormError';
 import { useAuth } from '../../auth/useAuth';
 import HelpTip from '../../components/HelpTip';
 import { SCORING_TIPS } from './scoringTips';
+import { scoringMethodDescription, scoringMethodName } from './scoringMethodText';
 
 type Draft = Omit<ScoringProfile, 'id' | 'fiscal_year_id' | 'version' | 'locked_months'>;
 
@@ -18,83 +19,83 @@ interface Choice {
 /** Every setting of the scoring profile, explained in plain language (P5.2, P12.6). */
 const HELP = {
   weighting: {
-    title: 'How activities are weighted',
-    text: 'Each activity counts towards its office’s score in proportion to this weight.',
+    title: 'How much each activity counts',
+    text: 'Weight means the share of the office’s score assigned to an activity.',
     choices: [
       {
         value: 'cost_share',
-        label: 'By cost — an activity costing 60% of the plan counts for 60% (the workbook method)',
+        label: 'By cost - an activity using 60% of the planned cost counts for 60% of the score',
       },
       { value: 'equal', label: 'Equally — every activity counts the same' },
       {
         value: 'manual',
-        label: 'Set by hand — offices type the weights; they must add up to 100%',
+        label: 'Enter each share in the plan - all shares must total 100%',
       },
     ] as Choice[],
   },
   cap_at_100: {
-    title: 'Ceiling at 100%',
-    text: 'When on, doing more than planned counts as 100% for that activity. When off, over-delivery raises the score above 100% (the workbook method).',
+    title: 'Limit scores to 100%',
+    text: 'Turn on to stop an activity’s score at 100%. Turn off to count work completed above the annual target.',
   },
   on_time_tolerance: {
-    title: 'On-time margin (percentage points)',
-    text: 'Results this close to the plan, above or below, are labelled on time. 0 means only an exact match is on time.',
+    title: 'Allowed gap for on-time status (points)',
+    text: 'A gap this small, above or below plan, still counts as on time. Enter 0 to require an exact match. A move from 40% to 45% is 5 percentage points.',
   },
   labels: {
     title: 'Status words',
     text: 'The words shown when an office is ahead of, on, or behind its plan.',
   },
   rollup: {
-    title: 'How offices add up to their parent',
-    text: 'How a service’s score is built from its divisions’ scores.',
+    title: 'Combine office results',
+    text: 'Choose how offices contribute to the result of the office they report to.',
     choices: [
       {
         value: 'budget_weighted',
-        label: 'By budget — larger budgets weigh more (the workbook method)',
+        label: 'By budget - offices with larger budgets count more',
       },
-      { value: 'simple_average', label: 'Simple average — every office weighs the same' },
+      { value: 'simple_average', label: 'Equal share - every office counts the same' },
     ] as Choice[],
   },
   indicator_weighting: {
-    title: 'How indicators are weighted within an office',
+    title: 'How much each indicator counts',
     choices: [
       { value: 'equal', label: 'Equally' },
-      { value: 'manual', label: 'By the weight typed for each indicator' },
+      { value: 'manual', label: 'Use the share entered for each indicator' },
     ] as Choice[],
   },
   indicator_rollup: {
-    title: 'How indicator scores add up to the parent',
+    title: 'Combine indicator results',
     choices: [
       {
         value: 'all_indicators',
-        label: 'Average of every indicator beneath it (the workbook method)',
+        label: 'Average all indicators from the offices below',
       },
       { value: 'office_scores', label: 'Average of the offices’ indicator scores' },
     ] as Choice[],
   },
   ranking_metric: {
-    title: 'What offices are ranked by',
+    title: 'Rank offices by',
     choices: [
-      { value: 'cumulative_actual', label: 'Accomplishment to date (the workbook method)' },
-      { value: 'variance', label: 'Accomplishment minus plan' },
-      { value: 'actual_over_plan', label: 'Accomplishment as a share of plan' },
+      { value: 'cumulative_actual', label: 'Work completed to date' },
+      { value: 'variance', label: 'Gap from plan' },
+      { value: 'actual_over_plan', label: 'Completed work compared with work due' },
     ] as Choice[],
   },
   cutoff_day: {
-    title: 'Monthly cutoff day',
+    title: 'Monthly report deadline day',
     text: 'Reports for a month are due by this day of the following month.',
   },
   auto_lock: {
-    title: 'Lock months automatically at cutoff',
-    text: 'When on, each month locks by itself once its cutoff passes. When off, the agency administrator locks months by hand.',
+    title: 'Finalize months after the deadline',
+    text: 'Automatically lock the month after its deadline, including incomplete reports. Leave off to review and lock each month yourself.',
   },
   mov_required: {
     title: 'Require supporting files',
-    text: 'When on, every reported accomplishment needs at least one supporting file (means of verification) before the report can be submitted.',
+    text: 'Require a photo or document for every reported accomplishment before the report can be submitted.',
   },
   show_actual_amounts: {
-    title: 'Ask for amounts actually spent',
-    text: 'Adds an optional “amount spent” column to monthly reports. Where filled in, funds used show real amounts instead of the estimate.',
+    title: 'Show actual spending',
+    text: 'Add an Amount spent column to monthly reports. Once spending is entered, funds used show those amounts. Complete all spending entries to keep totals accurate.',
   },
 };
 
@@ -221,7 +222,7 @@ export default function ScoringProfilePage() {
       <p className="muted">
         Version {profile.version}.{' '}
         {profile.locked_months > 0
-          ? `${profile.locked_months} locked month(s) keep the results they were locked with; changes apply to open months only.`
+          ? `${profile.locked_months} finalized month(s) keep their current figures. New settings apply only to months still open.`
           : 'No month is locked yet.'}
       </p>
       {!isAdmin && (
@@ -229,7 +230,7 @@ export default function ScoringProfilePage() {
       )}
       <div className="card stack">
         <h2>
-          Start from a preset <HelpTip label="Presets">{SCORING_TIPS.preset}</HelpTip>
+          Choose a starting method <HelpTip label="Starting methods">{SCORING_TIPS.preset}</HelpTip>
         </h2>
         {presets.data?.map((p) => (
           <label key={p.name} className="check">
@@ -241,13 +242,13 @@ export default function ScoringProfilePage() {
               onChange={() => applyPreset(p.name)}
             />
             <span>
-              <strong>{p.name.replaceAll('_', ' ')}</strong> —{' '}
-              <span className="muted">{p.description}</span>
+              <strong>{scoringMethodName(p.name)}</strong> -{' '}
+              <span className="muted">{scoringMethodDescription(p.name)}</span>
             </span>
           </label>
         ))}
         {draft.preset === 'custom' && (
-          <p className="muted small">The current settings do not match a preset (custom).</p>
+          <p className="muted small">You are using your agency’s own combination of settings.</p>
         )}
       </div>
       <div className="card stack">

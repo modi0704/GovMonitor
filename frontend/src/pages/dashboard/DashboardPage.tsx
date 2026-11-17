@@ -81,7 +81,7 @@ export default function DashboardPage() {
   const h = data?.headline;
 
   return (
-    <section className="page page-wide">
+    <section className="page page-wide analytics-page">
       <div className="page-header">
         <div>
           {data && (
@@ -102,13 +102,29 @@ export default function DashboardPage() {
             </p>
           )}
           <h1>{data ? data.office.name : 'Dashboard'}</h1>
+          <p className="page-description">
+            Performance overview{data ? ` · ${monthYear(data.period.start_date)}` : ''}
+          </p>
         </div>
         {data && (
           <div className="row">
             <span className={`badge ${data.final ? 'badge-final' : 'badge-provisional'}`}>
-              {data.label}
+              {data.final ? 'FINAL' : 'NOT FINAL'}
             </span>
-            <button type="button" className="btn" onClick={() => setExporting(true)}>
+            <button type="button" className="btn btn-primary" onClick={() => setExporting(true)}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 3v12m-4-4 4 4 4-4M5 16v5h14v-5" />
+              </svg>
               Export
             </button>
           </div>
@@ -190,7 +206,16 @@ export default function DashboardPage() {
         <>
           <ResultPanel
             result={h}
-            monthLabel={`${monthYear(data.period.start_date)} · ${data.label === 'FINAL' ? 'final figures' : 'provisional, the month is still open'}`}
+            history={
+              data.series
+                ? {
+                    actual: data.series.cum_actual,
+                    planned: data.series.cum_plan,
+                    month: data.period.month_index,
+                  }
+                : undefined
+            }
+            monthLabel={`${monthYear(data.period.start_date)} · ${data.label === 'FINAL' ? 'final figures' : 'not final; this month can still change'}`}
           />
           <div className="tabs" role="tablist">
             <button
@@ -218,19 +243,35 @@ export default function DashboardPage() {
       {data && h && data.series && tab === 'overview' && (
         <div className="dash-grid">
           <Chart
-            label="Progress to date: plan and actual (cumulative)"
-            height={260}
+            label="Delivery trend"
+            className="delivery-chart"
+            height={280}
             option={{
-              grid: { left: 45, right: 15, top: 30, bottom: 30 },
-              legend: { top: 0 },
+              grid: { left: 45, right: 18, top: 45, bottom: 28 },
+              legend: {
+                top: 0,
+                right: 0,
+                itemWidth: 18,
+                itemHeight: 2,
+                textStyle: { color: CHART_COLORS.text, fontSize: 11 },
+              },
               tooltip: {
                 trigger: 'axis',
                 valueFormatter: (v: number | null) => (v === null ? '—' : percent(v)),
               },
-              xAxis: { type: 'category', data: months },
+              xAxis: {
+                type: 'category',
+                data: months,
+                boundaryGap: false,
+                axisLine: { show: false },
+                axisTick: { show: false },
+                axisLabel: { color: CHART_COLORS.text, fontSize: 10, margin: 14 },
+              },
               yAxis: {
                 type: 'value',
                 axisLabel: { formatter: (v: number) => `${Math.round(v * 100)}%` },
+                axisLine: { show: false },
+                splitLine: { lineStyle: { color: CHART_COLORS.grid } },
               },
               series: [
                 {
@@ -238,7 +279,8 @@ export default function DashboardPage() {
                   name: 'Plan',
                   data: data.series.cum_plan.map(Number),
                   color: CHART_COLORS.plan,
-                  lineStyle: { type: 'dashed' },
+                  lineStyle: { type: 'dashed', width: 2 },
+                  showSymbol: false,
                 },
                 {
                   type: 'line',
@@ -246,11 +288,14 @@ export default function DashboardPage() {
                   data: data.series.cum_actual.map((v) => (v === null ? null : Number(v))),
                   color: CHART_COLORS.actual,
                   symbolSize: 7,
+                  showSymbol: false,
+                  lineStyle: { width: 3 },
+                  areaStyle: { color: CHART_COLORS.actual, opacity: 0.06 },
                 },
               ],
             }}
             table={{
-              caption: 'Cumulative plan and actual by month',
+              caption: 'Planned and completed work to date by month',
               headers: ['Month', 'Plan', 'Actual'],
               rows: months.map((m, i) => [
                 m,
@@ -267,46 +312,72 @@ export default function DashboardPage() {
           {data.quarters.length > 0 && (
             <div className="card dash-wide">
               <h2>By quarter</h2>
-              <table className="table compact">
-                <thead>
-                  <tr>
-                    <th>Period</th>
-                    <th>Plan</th>
-                    <th>Actual</th>
-                    <th>Variance</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.quarters.map((q) => (
-                    <tr key={q.quarter}>
+              <div className="quarter-grid">
+                {data.quarters.map((q) => (
+                  <div className="quarter-summary" key={q.quarter}>
+                    <span className="quarter-label">
+                      Q{q.quarter}
+                      <span>{q.partial ? 'In progress' : 'Quarter total'}</span>
+                    </span>
+                    <strong>{percent(q.actual)}</strong>
+                    <div className="metric-track" aria-hidden="true">
+                      <span
+                        style={{ width: `${Math.min(100, Math.max(0, Number(q.actual) * 100))}%` }}
+                      />
+                    </div>
+                    <span className="quarter-meta">
+                      Target {percent(q.plan)}
+                      <span className={Number(q.variance) < 0 ? 'text-delayed' : 'text-ahead'}>
+                        {Number(q.variance) > 0 ? '+' : ''}
+                        {(Number(q.variance) * 100).toFixed(1)} points
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <details className="details-disclosure">
+                <summary>Quarter details</summary>
+                <table className="table compact">
+                  <thead>
+                    <tr>
+                      <th>Period</th>
+                      <th>Plan</th>
+                      <th>Actual</th>
+                      <th>Variance</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.quarters.map((q) => (
+                      <tr key={q.quarter}>
+                        <td>
+                          Q{q.quarter} ({months[q.first - 1]}–{months[q.last - 1]})
+                          {q.partial ? ', so far' : ''}
+                        </td>
+                        <td>{percent(q.plan)}</td>
+                        <td>{percent(q.actual)}</td>
+                        <td>{percent(q.variance)}</td>
+                        <td>
+                          <StatusChip result={q} />
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
                       <td>
-                        Q{q.quarter} ({months[q.first - 1]}–{months[q.last - 1]})
-                        {q.partial ? ', so far' : ''}
+                        <strong>Year to date</strong>
                       </td>
-                      <td>{percent(q.plan)}</td>
-                      <td>{percent(q.actual)}</td>
-                      <td>{percent(q.variance)}</td>
+                      <td>{percent(h.cum_plan)}</td>
                       <td>
-                        <StatusChip result={q} />
+                        <strong>{percent(h.cum_actual)}</strong>
+                      </td>
+                      <td>{percent(h.variance)}</td>
+                      <td>
+                        <StatusChip result={h} />
                       </td>
                     </tr>
-                  ))}
-                  <tr>
-                    <td>
-                      <strong>Year to date</strong>
-                    </td>
-                    <td>{percent(h.cum_plan)}</td>
-                    <td>
-                      <strong>{percent(h.cum_actual)}</strong>
-                    </td>
-                    <td>{percent(h.variance)}</td>
-                    <td>
-                      <StatusChip result={h} />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </details>
             </div>
           )}
           {data.children.length > 0 && (
@@ -341,6 +412,13 @@ export default function DashboardPage() {
                           <td>{percent(c.result.cum_plan)}</td>
                           <td>
                             <strong>{percent(c.result.cum_actual)}</strong>
+                            <div className="table-meter" aria-hidden="true">
+                              <span
+                                style={{
+                                  width: `${Math.min(100, Math.max(0, Number(c.result.cum_actual) * 100))}%`,
+                                }}
+                              />
+                            </div>
                           </td>
                           <td>{percent(c.result.variance)}</td>
                           <td>
@@ -387,7 +465,16 @@ export default function DashboardPage() {
                       </td>
                       <td>{i.annual_target}</td>
                       <td>{i.actual_to_date ?? '—'}</td>
-                      <td>{percent(i.rate)}</td>
+                      <td>
+                        {percent(i.rate)}
+                        <div className="table-meter" aria-hidden="true">
+                          <span
+                            style={{
+                              width: `${Math.min(100, Math.max(0, Number(i.rate) * 100))}%`,
+                            }}
+                          />
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -425,15 +512,40 @@ function FundsChart({ total, used, estimate }: { total: string; used: string; es
   const remaining = Math.max(0, Number(total) - Number(used));
   return (
     <Chart
-      label={`Funds used${estimate ? ' (estimate)' : ''} and remaining`}
-      height={260}
+      label="Budget overview"
+      className="budget-chart"
+      height={230}
+      centerLabel={{
+        value: Number(total) > 0 ? `${Math.round((Number(used) / Number(total)) * 100)}%` : '—',
+        caption: estimate ? 'Used · estimated' : 'Budget used',
+      }}
+      footer={
+        <>
+          <div className="budget-legend">
+            <span>
+              <i />
+              {estimate ? 'Used (estimate)' : 'Used'}
+            </span>
+            <strong>{money(used)}</strong>
+          </div>
+          <div className="budget-legend budget-remaining">
+            <span>
+              <i />
+              Remaining
+            </span>
+            <strong>{money(remaining)}</strong>
+          </div>
+        </>
+      }
       option={{
         tooltip: { trigger: 'item', valueFormatter: (v: number) => money(v) },
-        legend: { bottom: 0 },
+        legend: { show: false },
         series: [
           {
             type: 'pie',
-            radius: ['50%', '75%'],
+            stillShowZeroSum: false,
+            radius: ['72%', '88%'],
+            itemStyle: { borderColor: '#fff', borderWidth: 4 },
             label: { show: false },
             data: [
               {
@@ -497,7 +609,22 @@ export function RankingCard({
                   </>
                 )}
               </td>
-              <td>{r.result ? percent(r.result.cum_actual) : 'No result'}</td>
+              <td>
+                {r.result ? (
+                  <>
+                    {percent(r.result.cum_actual)}
+                    <div className="table-meter" aria-hidden="true">
+                      <span
+                        style={{
+                          width: `${Math.min(100, Math.max(0, Number(r.result.cum_actual) * 100))}%`,
+                        }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  'No result'
+                )}
+              </td>
               <td>{r.result && <StatusChip result={r.result} />}</td>
             </tr>
           ))}

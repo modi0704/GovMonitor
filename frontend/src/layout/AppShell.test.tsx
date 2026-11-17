@@ -8,6 +8,48 @@ import { ME, mockApi } from '../test/mockApi';
 
 afterEach(() => vi.unstubAllGlobals());
 
+it('opens the compact menu, focuses navigation, and returns focus on Escape', async () => {
+  mockApi({
+    'GET /api/v1/auth/csrf': { body: {} },
+    'GET /api/v1/me': { body: ME },
+  });
+  render(
+    <MemoryRouter initialEntries={['/help']}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </MemoryRouter>,
+  );
+  await screen.findByRole('heading', { name: 'Help' });
+  const user = userEvent.setup();
+  const menu = screen.getByRole('button', { name: 'Menu' });
+  await user.click(menu);
+  expect(menu).toHaveAttribute('aria-expanded', 'true');
+  expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveFocus();
+  await user.keyboard('{Escape}');
+  expect(menu).toHaveAttribute('aria-expanded', 'false');
+  expect(menu).toHaveFocus();
+});
+
+it('keeps agency management destinations out of a read-only user navigation', async () => {
+  mockApi({
+    'GET /api/v1/auth/csrf': { body: {} },
+    'GET /api/v1/me': { body: ME },
+  });
+  render(
+    <MemoryRouter initialEntries={['/help']}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </MemoryRouter>,
+  );
+  await screen.findByRole('heading', { name: 'Help' });
+  expect(screen.queryByRole('link', { name: 'Users' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Approvals' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Submissions' })).not.toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'My exports' })).toBeInTheDocument();
+});
+
 it('the first Tab reaches a skip link that leads to the page content', async () => {
   mockApi({
     'GET /api/v1/auth/csrf': { body: {} },

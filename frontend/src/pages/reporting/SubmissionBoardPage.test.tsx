@@ -62,7 +62,7 @@ it('shows who has not submitted and locks the month', async () => {
     </MemoryRouter>,
   );
   expect(await screen.findByText(/Not submitted yet \(1\):/)).toBeInTheDocument();
-  expect(screen.getByText('Cutoff in 3 day(s)')).toBeInTheDocument();
+  expect(screen.getByText('Due in 3 day(s)')).toBeInTheDocument();
   await userEvent.click(screen.getByRole('button', { name: 'Lock January 2026' }));
   expect(confirm.mock.calls[0]![0]).toMatch(/1 office\(s\) have not submitted/);
   expect(calls.some((c) => c.method === 'POST' && c.path === '/api/v1/periods/m1/lock')).toBe(true);

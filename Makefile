@@ -41,8 +41,8 @@ logs: ## Follow container logs
 migrate: ## Apply migrations inside the running stack (as app_owner)
 	$(COMPOSE) exec web entrypoint.sh migrate
 
-seed-demo: ## Load the demo agencies inside the running stack
-	$(COMPOSE) exec web entrypoint.sh manage seed_demo
+seed-demo: ## Development only: load training agencies under development settings
+	$(COMPOSE) exec -e DJANGO_SETTINGS_MODULE=config.settings.dev web entrypoint.sh manage seed_demo
 
 release: ## Release build (docs/RELEASE.md): image govmonitor:$(VERSION) and its offline bundle
 	@grep -q PLACEHOLDER backend/apps/tenancy/licence_public_key.txt && \

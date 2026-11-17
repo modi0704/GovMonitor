@@ -61,15 +61,15 @@ export default function AlertSettingsPage() {
     <section className="page">
       <h1>Alerts</h1>
       <p className="muted">
-        Every morning the system reminds offices about cutoffs, flags missing accomplishments and
-        delays, and tells administrators about submissions, approvals and locked months.
+        Each morning, the app reminds offices about report deadlines and highlights missing or
+        delayed work. Administrators also receive updates on reports, approvals, and final results.
       </p>
       <FormError message={error ?? rule.error} />
       {message && <p className="form-message">{message}</p>}
       {data && (
         <form className="stack" onSubmit={save}>
           <label>
-            Remind offices this many days before the cutoff
+            Remind offices this many days before the deadline
             <input
               value={days}
               inputMode="numeric"
@@ -96,11 +96,11 @@ export default function AlertSettingsPage() {
               disabled={!data.email_available}
               onChange={(e) => setEdits((x) => ({ ...x, email: e.target.checked }))}
             />
-            Also send a daily email digest
+            Also send a daily email summary
           </label>
           {!data.email_available && (
             <p className="muted small">
-              Email is not configured on this server, so alerts appear in the app only.
+              Email is not set up for this agency. Alerts appear in the app only.
             </p>
           )}
           <div className="row">

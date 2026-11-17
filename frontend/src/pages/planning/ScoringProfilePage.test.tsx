@@ -69,7 +69,7 @@ it('asks for confirmation when months are locked, then saves', async () => {
     </MemoryRouter>,
   );
   const user = userEvent.setup();
-  await user.click(await screen.findByRole('checkbox', { name: 'Ceiling at 100%' }));
+  await user.click(await screen.findByRole('checkbox', { name: 'Limit scores to 100%' }));
   await user.click(screen.getByRole('button', { name: 'Save settings' }));
   expect(await screen.findByText('Saved (version 2).')).toBeInTheDocument();
   expect(confirm).toHaveBeenCalledWith('Some months are locked. Confirm?');

@@ -37,7 +37,7 @@ it('edits the title and footer and saves them', async () => {
   );
   const user = userEvent.setup();
   const title = await screen.findByLabelText('Report title');
-  expect(screen.getByText(/using the system default/)).toBeInTheDocument();
+  expect(screen.getByText(/using the standard design/)).toBeInTheDocument();
   await user.clear(title);
   await user.type(title, 'Quarterly Review');
   await user.type(screen.getByLabelText('Footer text'), 'Internal');

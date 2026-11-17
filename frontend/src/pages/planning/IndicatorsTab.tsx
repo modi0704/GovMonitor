@@ -92,8 +92,8 @@ export default function IndicatorsTab({
   return (
     <div className="stack">
       <p className="muted small">
-        Indicators are scored separately from activities: the rate is the actual to date (or the
-        latest value) over the annual target.
+        Indicators track results, such as people trained. Their scores compare reported results with
+        the yearly target and are kept separate from activity scores.
       </p>
       {issues.length > 0 && (
         <ul className="form-message">
@@ -186,7 +186,7 @@ export default function IndicatorsTab({
                     }
                   >
                     <option value="sum">Total of the months</option>
-                    <option value="last">Latest value</option>
+                    <option value="last">Latest reported result</option>
                   </select>
                 </td>
                 {r.targets.map((t, m) => (

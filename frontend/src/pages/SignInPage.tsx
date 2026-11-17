@@ -85,7 +85,7 @@ export default function SignInPage() {
         subtitle={
           useRecovery
             ? 'Enter one of your recovery codes. Each code works once.'
-            : 'Enter the 6-digit code from your authenticator app.'
+            : 'Enter the 6-digit code from your phone’s sign-in code app.'
         }
         onSubmit={submitCode}
       >
@@ -123,7 +123,7 @@ export default function SignInPage() {
     <AuthCard title="Sign in" onSubmit={submitPassword}>
       {(sessionExpired || params.get('expired')) && (
         <p className="form-message" role="status">
-          Your session ended because it was idle. Please sign in again.
+          You were signed out after a period without activity. Please sign in again.
         </p>
       )}
       <label>

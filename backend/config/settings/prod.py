@@ -3,6 +3,8 @@ from config.env import env, env_bool, env_int
 from .base import *  # noqa: F403
 
 DEBUG = False
+# Demo seeding is a development/test tool and is not registered in the shipped app.
+INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "seed"]  # noqa: F405
 if SECRET_KEY.startswith("insecure-"):  # noqa: F405
     raise RuntimeError("Set SECRET_KEY for production")
 

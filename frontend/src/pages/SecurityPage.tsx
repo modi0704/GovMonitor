@@ -68,8 +68,7 @@ export default function SecurityPage() {
       <div className="card">
         <h2>Two-step verification</h2>
         <p className="muted">
-          When it is on, signing in also needs a 6-digit code from an authenticator app on your
-          phone.
+          When turned on, sign-in also needs a 6-digit code from a sign-in code app on your phone.
         </p>
         <FormError message={error} />
         {codes && (
@@ -107,7 +106,7 @@ export default function SecurityPage() {
           </form>
         ) : setup ? (
           <form onSubmit={enable} className="stack">
-            <p>1. Scan this code with your authenticator app.</p>
+            <p>1. Scan this code using your phone’s sign-in code app.</p>
             <div className="qr" dangerouslySetInnerHTML={{ __html: setup.qr_svg }} />
             <p className="muted small">
               Cannot scan? Enter this key: <code>{setup.secret}</code>

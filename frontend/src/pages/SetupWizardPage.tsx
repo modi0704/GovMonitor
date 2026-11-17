@@ -145,9 +145,10 @@ export default function SetupWizardPage() {
       <div className="card stack">
         {step === 0 && (
           <>
-            <h2>What are the levels of your structure called?</h2>
+            <h2>How are your offices organized?</h2>
             <p className="muted">
-              From the top down, for example Ministry → Service → Division. You can add more later.
+              Start with the highest office, for example Ministry, then Service, then Division. You
+              can add more levels later.
             </p>
             {levels.map((name, i) => (
               <label key={i}>
@@ -225,9 +226,7 @@ export default function SetupWizardPage() {
               value={officeText}
               aria-label="Offices"
               onChange={(e) => setOfficeText(e.target.value)}
-              placeholder={
-                'ODS\tOffice of the Director for Services\n\tPME\tPlanning and Monitoring'
-              }
+              placeholder="Enter your office codes and names, one office per line."
             />
             {importErrors.length > 0 && (
               <ul className="form-error">
@@ -256,7 +255,10 @@ export default function SetupWizardPage() {
             </p>
             {created.length > 0 && (
               <div className="notice">
-                <p>Temporary passwords (shown once — hand them over securely):</p>
+                <p>
+                  Temporary passwords are shown once. Give each password privately to its account
+                  holder:
+                </p>
                 <ul className="plain-list">
                   {created.map((c) => (
                     <li key={c.email}>

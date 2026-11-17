@@ -23,6 +23,8 @@ frontend/dist/
 frontend/coverage/
 frontend/test-results/
 frontend/playwright-report/
+frontend/public/user-guide/
+frontend/src/pages/help/userGuide.generated.json
 
 # Runtime data
 var/

@@ -9,8 +9,9 @@ export default function HomePage() {
   const { me } = useAuth();
   const setupNotice = me?.is_agency_admin && !me.agency.setup_complete && (
     <div className="page notice">
-      <strong>Your agency is not set up yet.</strong> Name your levels, build your office structure
-      and add the first users. <Link to="/setup">Start the setup</Link>
+      <strong>Your agency is not set up yet.</strong>
+      Set up your offices and give staff access to the app.
+      <Link to="/setup">Start the setup</Link>
     </div>
   );
   if (me && me.roles.length > 0) {

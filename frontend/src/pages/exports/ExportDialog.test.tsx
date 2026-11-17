@@ -81,7 +81,7 @@ it('queues an export with the chosen scope, month and view, then offers the file
   }
 });
 
-it('asks for slide groups when exporting a PowerPoint deck', async () => {
+it('asks for slide groups when exporting a PowerPoint presentation', async () => {
   const calls = mockApi({
     'POST /api/v1/exports/pptx': { status: 202, body: job('queued') },
   });
@@ -100,10 +100,10 @@ it('asks for slide groups when exporting a PowerPoint deck', async () => {
     </MemoryRouter>,
   );
   expect(screen.queryByLabelText('Rankings')).not.toBeInTheDocument();
-  await user.click(screen.getByLabelText(/PowerPoint deck/));
+  await user.click(screen.getByLabelText(/PowerPoint presentation/));
   await user.click(screen.getByLabelText('The whole agency'));
   await user.click(screen.getByLabelText('Indicator tables'));
-  await user.click(screen.getByRole('button', { name: 'Prepare deck' }));
+  await user.click(screen.getByRole('button', { name: 'Prepare presentation' }));
   expect(calls.find((c) => c.method === 'POST')).toMatchObject({
     path: '/api/v1/exports/pptx',
     body: {

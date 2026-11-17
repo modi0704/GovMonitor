@@ -86,7 +86,9 @@ export default function PlanVersionsPage() {
                 <Link to={`/plans/${v.id}`}>Version {v.version}</Link>
               </td>
               <td>
-                <span className={`chip chip-plan-${v.status}`}>{v.status}</span>
+                <span className={`chip chip-plan-${v.status}`}>
+                  {v.status === 'superseded' ? 'replaced' : v.status}
+                </span>
               </td>
               <td>{money(v.planned_cost)}</td>
               <td>{v.submitted_at ? `${dateTime(v.submitted_at)} · ${v.submitted_by}` : '—'}</td>

@@ -107,7 +107,7 @@ export default function ExportDialog({
                 checked={format === 'xlsx'}
                 onChange={() => setFormat('xlsx')}
               />
-              Excel workbook (one sheet per office, live formulas)
+              Excel workbook (one sheet per office, with calculations)
             </label>
             <label className="check">
               <input
@@ -116,7 +116,7 @@ export default function ExportDialog({
                 checked={format === 'pptx'}
                 onChange={() => setFormat('pptx')}
               />
-              PowerPoint deck (ready to present)
+              PowerPoint presentation (ready to share)
             </label>
           </fieldset>
           <fieldset className="stack">
@@ -157,7 +157,7 @@ export default function ExportDialog({
               {periods.map((p) => (
                 <option key={p.id} value={p.id}>
                   {monthYear(p.start_date)}
-                  {p.status === 'locked' ? ' (final)' : ' (provisional)'}
+                  {p.status === 'locked' ? ' (final)' : ' (not final)'}
                 </option>
               ))}
             </select>
@@ -202,7 +202,7 @@ export default function ExportDialog({
               className="btn btn-primary"
               disabled={busy || (format === 'pptx' && groups.length === 0)}
             >
-              {format === 'pptx' ? 'Prepare deck' : 'Prepare workbook'}
+              {format === 'pptx' ? 'Prepare presentation' : 'Prepare workbook'}
             </button>
           </div>
         </form>

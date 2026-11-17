@@ -88,11 +88,11 @@ export default function SubmissionBoardPage() {
     if (!b) return;
     const missing = b.not_submitted.length;
     const warning = missing
-      ? ` ${missing} office(s) have not submitted; their figures are frozen as they stand.`
+      ? ` ${missing} office(s) have not submitted. Their current figures will still be included.`
       : '';
     if (
       !window.confirm(
-        `Lock ${month}? Every office's results for the month are frozen and nothing can be changed.${warning}`,
+        `Lock ${month}? This makes the month's results final for every office and stops report changes.${warning}`,
       )
     )
       return;
@@ -102,7 +102,7 @@ export default function SubmissionBoardPage() {
   function unlock() {
     if (!b) return;
     const reason = window.prompt(
-      `Why unlock ${month}? The frozen results are deleted (a copy is kept in the audit log) and offices can change their reports again.`,
+      `Why reopen ${month}? Offices can change their reports again. Final figures will be recalculated, and a copy of the previous results stays in the audit log.`,
     );
     if (!reason) return;
     run(() => api.post(`periods/${b.period.id}/unlock`, { reason }), `${month} is unlocked.`);
@@ -167,11 +167,11 @@ export default function SubmissionBoardPage() {
                   className={`chip ${b.period.days_to_cutoff < 0 ? 'status-delayed' : 'chip-fy-open'}`}
                 >
                   {b.period.days_to_cutoff >= 0
-                    ? `Cutoff in ${b.period.days_to_cutoff} day(s)`
-                    : `Cutoff passed ${-b.period.days_to_cutoff} day(s) ago`}
+                    ? `Due in ${b.period.days_to_cutoff} day(s)`
+                    : `Deadline passed ${-b.period.days_to_cutoff} day(s) ago`}
                 </span>
               )}{' '}
-              <span className="muted small">Cutoff {dateTime(b.period.cutoff_at)}</span>
+              <span className="muted small">Report deadline {dateTime(b.period.cutoff_at)}</span>
             </div>
             <div className="row">
               {b.period.status === 'open' && (

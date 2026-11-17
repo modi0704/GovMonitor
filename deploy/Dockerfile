@@ -12,6 +12,7 @@ RUN --mount=type=secret,id=extra_ca,required=false \
     if [ -s /run/secrets/extra_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/extra_ca; fi \
  && npm ci --no-audit --no-fund
 COPY frontend/ ./
+COPY docs/ /src/docs/
 RUN npm run build
 
 # ---- Stage 2: install Python dependencies ----------------------------------------------------

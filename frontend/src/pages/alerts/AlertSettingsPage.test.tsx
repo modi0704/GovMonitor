@@ -30,12 +30,12 @@ it('shows the rule in percentage points and saves it as a share', async () => {
     </MemoryRouter>,
   );
   const user = userEvent.setup();
-  const days = await screen.findByLabelText(/days before the cutoff/);
+  const days = await screen.findByLabelText(/days before the deadline/);
   expect(days).toHaveValue('5, 1');
   const threshold = screen.getByLabelText(/behind plan by more than/);
   expect(threshold).toHaveValue(5);
-  expect(screen.getByLabelText(/daily email digest/)).toBeDisabled();
-  expect(screen.getByText(/Email is not configured/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/daily email summary/)).toBeDisabled();
+  expect(screen.getByText(/Email is not set up/)).toBeInTheDocument();
   await user.clear(days);
   await user.type(days, '7, 2');
   await user.clear(threshold);

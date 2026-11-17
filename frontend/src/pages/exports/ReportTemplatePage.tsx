@@ -79,15 +79,11 @@ export default function ReportTemplatePage() {
   }
 
   async function reset() {
-    if (
-      !window.confirm(
-        'Go back to the system default title, colours and footer, and remove the logo?',
-      )
-    )
+    if (!window.confirm('Restore the standard title, colours, and footer, and remove the logo?'))
       return;
     await api.del('export-templates/pptx').catch((err: unknown) => setError(errorMessage(err)));
     setEdits({});
-    setMessage('Back to the system default.');
+    setMessage('Standard design restored.');
     reload();
   }
 
@@ -97,7 +93,8 @@ export default function ReportTemplatePage() {
     <section className="page">
       <h1>Report template</h1>
       <p className="muted">
-        Used by the PowerPoint export. {data?.customised ? '' : 'You are using the system default.'}
+        Choose the appearance of downloaded PowerPoint reports.
+        {data?.customised ? '' : 'You are using the standard design.'}
       </p>
       <FormError message={error ?? template.error} />
       {message && <p className="form-message">{message}</p>}
@@ -154,7 +151,7 @@ export default function ReportTemplatePage() {
             </button>
             {data?.customised && (
               <button type="button" className="btn" onClick={reset}>
-                Use the system default
+                Use the standard design
               </button>
             )}
           </div>

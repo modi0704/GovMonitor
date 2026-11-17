@@ -261,7 +261,7 @@ function UserPanel({
           Add access
         </button>
       </form>
-      <h3>Effective scope</h3>
+      <h3>Offices this user can access</h3>
       {scope.data && scope.data.length === 0 && (
         <p className="muted small">Cannot see any office.</p>
       )}

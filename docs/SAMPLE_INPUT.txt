@@ -1,0 +1,95 @@
+GOVMONITOR - PRACTICE INPUT
+==========================
+Use these invented figures in a learning copy, not an official reporting year.
+Nothing in this file is loaded into the app automatically.
+Open INPUT_AND_METRICS.txt for the exact entry steps and expected results.
+
+SETUP
+Fiscal year label: Practice 2026
+Start year: 2026
+First month: January
+Scoring preset: Excel method
+Office code: PRAC
+Office name: Practice Office
+Approved budget: 100000
+Weights: by cost (the app calculates them)
+Monthly reporting: manual locking; supporting files optional for this exercise
+Do not enter actual spending for this exercise; the funds card will be an estimate.
+
+PLAN ROW 1
+Kind: Output
+Code: OUT-01
+Title: Community services delivered
+Leave quantity, cost, and monthly cells empty on this heading row.
+
+PLAN ROW 2
+Kind: Activity
+Code: ACT-01
+Title: Community consultation sessions
+Unit: session
+Target: 12
+Unit cost: 5000
+Total cost: 60000
+Measure: Quantity
+Implementing office: PRAC
+January: 1
+February: 1
+March: 1
+April: 1
+May: 1
+June: 1
+July: 1
+August: 1
+September: 1
+October: 1
+November: 1
+December: 1
+Calculated weight: 60%
+
+PLAN ROW 3
+Kind: Activity
+Code: ACT-02
+Title: Client assistance cases completed
+Unit: case
+Target: 120
+Unit cost: leave empty; enter the combined budget under Total cost
+Total cost: 40000
+Measure: Quantity
+Implementing office: PRAC
+January: 10
+February: 10
+March: 10
+April: 10
+May: 10
+June: 10
+July: 10
+August: 10
+September: 10
+October: 10
+November: 10
+December: 10
+Calculated weight: 40%
+
+JANUARY MONTHLY REPORT
+ACT-01 - Done this month: 1
+Remarks: One community consultation session completed.
+ACT-02 - Done this month: 8
+Remarks: Eight client assistance cases completed.
+Reason for delay: Two clients had incomplete documents. Follow up in February.
+
+FEBRUARY MONTHLY REPORT
+ACT-01 - Done this month: 1
+Remarks: One community consultation session completed.
+ACT-02 - Done this month: 12
+Remarks: Ten scheduled cases and the two pending January cases completed.
+
+CHECK YOUR RESULTS
+January: This month 7.67%; To date 7.67%; plan 8.33%; variance -0.67 points.
+January status: DELAYED. Estimated funds used: PHP 7666.67.
+February: This month 9.00%; To date 16.67%; plan to date 16.67%.
+February variance: 0.00 points. Status: ON-TIME.
+February estimated funds used to date: PHP 16666.67.
+
+Only January and February have reported figures in this exercise.
+Do not type percentages into Done this month: enter the quantities above.
+The example does not use the optional Indicators tab.

@@ -5,6 +5,7 @@ import { errorMessage, useResource } from '../api/useResource';
 import FormError from '../components/FormError';
 import Modal from '../components/Modal';
 import { useAuth } from '../auth/useAuth';
+import { auditLabel } from '../lib/auditLabels';
 
 interface Filters {
   from: string;
@@ -144,7 +145,9 @@ export default function AuditPage() {
           <select value={filters.action} onChange={set('action')}>
             <option value="">Any</option>
             {options.actions.map((a) => (
-              <option key={a}>{a}</option>
+              <option key={a} value={a}>
+                {auditLabel(a)}
+              </option>
             ))}
           </select>
         </label>
@@ -165,7 +168,9 @@ export default function AuditPage() {
           <select value={filters.entity_type} onChange={set('entity_type')}>
             <option value="">Any</option>
             {options.entity_types.map((t) => (
-              <option key={t}>{t}</option>
+              <option key={t} value={t}>
+                {auditLabel(t)}
+              </option>
             ))}
           </select>
         </label>
@@ -207,12 +212,12 @@ export default function AuditPage() {
                 <td>{r.actor}</td>
                 <td>
                   <button type="button" className="btn-link-plain" onClick={() => open(r)}>
-                    {r.action}
+                    {auditLabel(r.action)}
                   </button>
                 </td>
-                <td>{r.entity_type}</td>
+                <td>{auditLabel(r.entity_type)}</td>
                 <td>{r.office_id ? (officeName.get(r.office_id) ?? '—') : '—'}</td>
-                <td className="muted small">{r.changed.join(', ')}</td>
+                <td className="muted small">{r.changed.map(auditLabel).join(', ')}</td>
               </tr>
             ))}
           </tbody>
@@ -225,13 +230,13 @@ export default function AuditPage() {
       )}
       {detail && (
         <Modal
-          title={`${detail.action} · ${detail.entity_type || 'event'}`}
+          title={`${auditLabel(detail.action)} · ${auditLabel(detail.entity_type || 'change')}`}
           onClose={() => setDetail(null)}
           wide
         >
           <p className="muted small">
-            {new Date(detail.at).toLocaleString()} · {detail.actor} ({detail.actor_type}) · IP{' '}
-            {detail.ip ?? '—'} · request {detail.request_id || '—'}
+            {new Date(detail.at).toLocaleString()} · {detail.actor} ({auditLabel(detail.actor_type)}
+            ) · Connection address {detail.ip ?? '-'} · Reference {detail.request_id || '-'}
           </p>
           <table className="table">
             <thead>
@@ -244,7 +249,7 @@ export default function AuditPage() {
             <tbody>
               {detail.changed.map((field) => (
                 <tr key={field}>
-                  <td>{field}</td>
+                  <td>{auditLabel(field)}</td>
                   <td>{show(detail.before?.[field])}</td>
                   <td>{show(detail.after?.[field])}</td>
                 </tr>

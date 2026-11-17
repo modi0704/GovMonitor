@@ -15,24 +15,24 @@ export const GUIDES: Guide[] = [
       {
         heading: 'Set up (once)',
         steps: [
-          'Structure: name the levels and build the office tree. Groups compare offices that are not siblings (e.g. field centers).',
+          'Structure: organize your offices and name their levels. Use Groups to compare offices from different parts of the agency.',
           'Users: add people and give each an office and a level — admin (can edit that office and everything beneath) or read-only.',
-          'Fiscal years: open the year, choose a scoring preset and the monthly cutoff day. Hover the ? next to any scoring setting for an example.',
-          'Alerts and Report template: choose reminder days and the delay threshold; set the deck title, colours and logo.',
+          'Fiscal years: open the year, choose a scoring method, and set the report deadline. Select the question mark beside a setting for an example.',
+          'Alerts: set reminders and choose how far behind plan an office must be before an alert is sent. Report template: choose the presentation title, colours, and logo.',
         ],
       },
       {
         heading: 'Plans',
         steps: [
-          'Offices enter or import their plans and submit them. Approvals lists what is waiting; approving makes the plan the baseline.',
-          'A change later is a revision: a new version that you approve again. Months already locked keep the version they were scored with.',
+          'Offices enter or upload their plans and submit them. Approvals shows plans waiting for review. Once approved, a plan is used to compare monthly progress.',
+          'To change an approved plan, create a new draft and have it approved. Months already finalized keep their original results.',
         ],
       },
       {
         heading: 'Every month',
         steps: [
           'Submissions shows which offices have reported. Return a report with a note if it needs changes.',
-          'Lock the month when it is complete: results are frozen and become FINAL everywhere. Unlocking needs a reason and is recorded.',
+          'After review, lock the month to make its results final and stop changes. Reopening a month requires a reason that is saved in the audit log.',
           'Export to Excel or PowerPoint from the dashboard; files wait under My exports.',
         ],
       },
@@ -58,7 +58,7 @@ export const GUIDES: Guide[] = [
         ],
       },
       {
-        heading: 'Every month, before the cutoff',
+        heading: 'Every month, before the deadline',
         steps: [
           'Monthly report: type what was accomplished for each activity, add remarks, and a reason for any delay.',
           'Attach supporting files (photos, scans). On a phone, open the activity from the dashboard and use Take photo.',
@@ -68,7 +68,7 @@ export const GUIDES: Guide[] = [
       {
         heading: 'Reminders',
         steps: [
-          'The bell (and, if your agency turned it on, a daily email) reminds you before the cutoff and if accomplishments are missing.',
+          'The bell reminds you about report deadlines and missing accomplishments. Your agency may also send a daily email summary.',
         ],
       },
     ],
@@ -81,15 +81,15 @@ export const GUIDES: Guide[] = [
       {
         heading: 'Dashboard',
         steps: [
-          'Choose the month and the office. FINAL means the month is locked; PROVISIONAL means it can still change.',
-          'The curve compares cumulative plan and accomplishment; the tiles show plan, actual, variance and status.',
+          'Choose the month and office. FINAL means the figures are locked. NOT FINAL means reports may still change.',
+          'The chart compares planned and completed work since the year began. The cards show progress, the gap from plan, status, and funds used.',
           'Activities lists every activity with its progress; click one to see each month and its supporting files.',
         ],
       },
       {
         heading: 'Rankings and alerts',
         steps: [
-          'Rankings orders offices under the same parent, or in a group, by accomplishment. Equal values share a rank.',
+          'Rankings compares offices reporting to the same office, or offices in a chosen group. Offices with equal results share a rank.',
           'The bell tells you when an office you follow falls behind plan after a month is locked.',
         ],
       },

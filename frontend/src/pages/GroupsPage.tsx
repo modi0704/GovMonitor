@@ -37,14 +37,15 @@ export default function GroupsPage() {
         )}
       </div>
       <p className="muted">
-        A group puts offices from anywhere in the structure side by side, for example “Mainland
-        centers”. Rankings are shown for each group.
+        Create a group to compare selected offices, such as mainland field offices. Each group has
+        its own rankings.
       </p>
       <FormError message={error ?? groups.error} />
       {groups.loading && <p>Loading…</p>}
       {groups.data && groups.data.length === 0 && (
         <p className="notice">
-          No groups yet.{isAdmin ? ' Create one to compare offices that are not siblings.' : ''}
+          No groups yet.
+          {isAdmin ? 'Create a group to compare offices from different supervising offices.' : ''}
         </p>
       )}
       {groups.data?.map((g) => (

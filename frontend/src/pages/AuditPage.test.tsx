@@ -48,7 +48,7 @@ it('lists entries, filters by action and shows before/after', async () => {
     </MemoryRouter>,
   );
   const user = userEvent.setup();
-  await user.click(await screen.findByRole('button', { name: 'update' }));
+  await user.click(await screen.findByRole('button', { name: 'Updated' }));
   const dialog = await screen.findByRole('dialog');
   expect(within(dialog).getByText('Old')).toBeInTheDocument();
   expect(within(dialog).getByText('New')).toBeInTheDocument();

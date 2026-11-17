@@ -16,7 +16,7 @@ export interface Job {
 
 export const KIND_LABEL: Record<Job['kind'], string> = {
   export_xlsx: 'Excel workbook',
-  export_pptx: 'PowerPoint deck',
+  export_pptx: 'PowerPoint presentation',
   import_plan: 'Plan import',
 };
 
@@ -29,7 +29,7 @@ export const STATUS_LABEL: Record<JobStatus, string> = {
 
 export const SCOPE_LABEL: Record<string, string> = {
   office: 'One office',
-  subtree: 'Office and everything beneath',
+  subtree: 'Office and the offices under it',
   agency: 'Whole agency',
 };
 

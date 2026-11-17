@@ -45,8 +45,8 @@ export default function FiscalYearPage() {
         {fy.data && <Link to={`/fiscal-years/${fy.data.id}/scoring`}>Scoring settings</Link>}
       </div>
       <p className="muted">
-        Reports for each month are due at its cutoff. The default comes from the cutoff day in the
-        scoring settings;
+        Reports are due on the date shown for each month. The starting date comes from the deadline
+        day in Scoring settings;
         {isAdmin
           ? ' you can move it for a single month here.'
           : ' the agency administrator can move it for a single month.'}
@@ -57,7 +57,7 @@ export default function FiscalYearPage() {
           <tr>
             <th>Month</th>
             <th>Status</th>
-            <th>Cutoff</th>
+            <th>Report deadline</th>
             <th aria-label="Actions" />
           </tr>
         </thead>
@@ -76,7 +76,7 @@ export default function FiscalYearPage() {
                 {editing[p.id] !== undefined ? (
                   <input
                     type="datetime-local"
-                    aria-label={`Cutoff for ${monthYear(p.start_date)}`}
+                    aria-label={`Deadline for ${monthYear(p.start_date)}`}
                     value={editing[p.id]}
                     onChange={(e) => setEditing({ ...editing, [p.id]: e.target.value })}
                   />
@@ -91,7 +91,7 @@ export default function FiscalYearPage() {
                     className="btn btn-small"
                     onClick={() => setEditing({ ...editing, [p.id]: toLocalInput(p.cutoff_at) })}
                   >
-                    Change cutoff
+                    Change deadline
                   </button>
                 )}
                 {editing[p.id] !== undefined && (

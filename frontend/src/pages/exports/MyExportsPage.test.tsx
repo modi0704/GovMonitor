@@ -54,7 +54,7 @@ it('lists exports and polls while one is being prepared', async () => {
     );
     expect(await screen.findByText('Preparing…')).toBeInTheDocument();
     expect(screen.getByText('ValueError: disk full')).toBeInTheDocument();
-    expect(screen.getAllByText('Office and everything beneath')).toHaveLength(2);
+    expect(screen.getAllByText('Office and the offices under it')).toHaveLength(2);
     await vi.advanceTimersByTimeAsync(3100);
     const link = await screen.findByRole('link', { name: 'alpha-DIV-2026-Mar-2026.xlsx' });
     expect(link).toHaveAttribute('href', '/api/v1/jobs/a/download');

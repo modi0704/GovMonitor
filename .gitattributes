@@ -6,5 +6,6 @@ Dockerfile text eol=lf
 Caddyfile text eol=lf
 *.png binary
 *.jpg binary
+*.pdf binary
 *.xlsx binary
 *.pptx binary

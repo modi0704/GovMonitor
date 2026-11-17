@@ -16,7 +16,26 @@ export default function Modal({
     const previous = document.activeElement as HTMLElement | null;
     ref.current?.querySelector<HTMLElement>('input, select, textarea, button')?.focus();
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+      if (e.key === 'Tab' && ref.current) {
+        const controls = Array.from(
+          ref.current.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]',
+          ),
+        ).filter((el) => !el.closest('[hidden]'));
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
     }
     document.addEventListener('keydown', onKey);
     return () => {

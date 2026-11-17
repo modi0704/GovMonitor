@@ -25,9 +25,9 @@ interface Rankings {
 }
 
 const METRIC = {
-  cumulative_actual: 'Accomplishment to date',
-  variance: 'Accomplishment minus plan',
-  actual_over_plan: 'Accomplishment as a share of plan',
+  cumulative_actual: 'Work completed to date',
+  variance: 'Gap from plan',
+  actual_over_plan: 'Completed work compared with work due',
 } as Record<string, string>;
 
 function Change({ change }: { change: number | null }) {
@@ -77,7 +77,7 @@ export default function RankingsPage() {
         <h1>Rankings</h1>
         {d && (
           <span className={`badge ${d.label === 'FINAL' ? 'badge-final' : 'badge-provisional'}`}>
-            {d.label}
+            {d.label === 'FINAL' ? 'FINAL' : 'NOT FINAL'}
           </span>
         )}
       </div>
@@ -117,8 +117,8 @@ export default function RankingsPage() {
       <FormError message={data.error} />
       {d && d.sets.length === 0 && (
         <p className="notice">
-          There is nothing to rank yet: no office in your scope has two or more offices beneath it,
-          and there are no groups.
+          There are no offices to compare yet. Rankings need at least two offices reporting to the
+          same office, or a comparison group you can access.
         </p>
       )}
       {d && d.set && (

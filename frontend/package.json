@@ -7,6 +7,9 @@
     "node": ">=22.12"
   },
   "scripts": {
+    "predev": "node scripts/sync-user-guide.mjs",
+    "prebuild": "node scripts/sync-user-guide.mjs",
+    "pretest": "node scripts/sync-user-guide.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",

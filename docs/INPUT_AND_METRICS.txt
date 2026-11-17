@@ -1,0 +1,149 @@
+GOVMONITOR - HOW TO ENTER THE PRACTICE INPUT AND READ THE RESULTS
+==============================================================
+Use SAMPLE_INPUT.txt beside this file. Work on a computer.
+The figures are for learning. Use approved figures for official reporting.
+
+1. SIGN IN AND PREPARE
+Sign in with your own agency administrator account.
+Open User guide in the left menu for the full screen-by-screen instructions.
+If first-time setup appears, complete the agency's level names and office setup.
+
+In a learning copy, create the office PRAC - Practice Office under the agency.
+Use Structure, select the parent office, then Add office.
+Give office staff access through Users if another person will enter the report.
+An agency administrator can perform this entire learning exercise.
+
+2. CREATE THE PRACTICE YEAR
+Open Fiscal years > New fiscal year.
+Set Label to Practice 2026 and Start year to 2026.
+Use January as the first month of the agency's fiscal year for this example.
+Choose Excel method and create the year.
+Open the year's scoring settings. Keep weights by cost, no ceiling, and
+zero on-time margin. For this exercise, leave automatic locking off and
+supporting files optional. Save settings if you changed them.
+Select Open for the year and confirm.
+These settings explain the expected figures below; other settings can change them.
+
+3. ENTER THE ANNUAL PLAN
+Open Plans. Choose Practice 2026 and find PRAC.
+Select Start empty plan. Open the draft if the editor does not open automatically.
+On Activities, set New row to Output and select Add at end.
+Fill OUT-01 and its title. Leave its quantity, cost, and month cells empty.
+Select that row. Set New row to Activity, then Add below selected.
+Fill ACT-01 using PLAN ROW 2 in SAMPLE_INPUT.txt.
+Add another Activity below ACT-01 and fill ACT-02 using PLAN ROW 3.
+Keep both activities under OUT-01. Use Quantity for both measures.
+Select PRAC as the implementing office for both activities.
+Enter plain numbers without PHP or a percent sign.
+For ACT-02, leave Unit cost empty and enter Total cost as exactly 40000.
+Total cost is the amount used to calculate its weight.
+The monthly totals must equal 12 sessions and 120 cases respectively.
+Leave Weight for the app to calculate: ACT-01 is 60%, ACT-02 is 40%.
+Leave Indicators empty for this exercise.
+Select Save and resolve any listed problems.
+Select Submit for approval and confirm.
+
+4. APPROVE THE PLAN
+Open Approvals, select Practice 2026, and Review the PRAC plan.
+Check the three rows, target totals, monthly schedule, and costs.
+Return to Approvals. Under Budget vs planned cost, find PRAC, enter 100000
+in Approved budget, and select Save beside that amount.
+In the approval queue, select Approve for PRAC and confirm.
+The plan should say Approved before monthly entry starts.
+
+5. ENTER JANUARY
+Open Monthly report. Choose PRAC, Practice 2026, and January 2026.
+Use the office's own plan.
+For ACT-01 enter 1 in Done this month.
+For ACT-02 enter 8 in Done this month.
+Copy the January remarks and the delay reason from SAMPLE_INPUT.txt.
+Leave actual spending empty for this exercise.
+Select Save and wait for Saved, then select Submit report and confirm.
+For official reports, attach genuine proof whenever required by your agency.
+
+6. REVIEW AND FINALIZE JANUARY
+Open Submissions. Choose Practice 2026 and January 2026.
+Open report for PRAC and check the quantities and delay explanation.
+If a correction is needed, Return the report with a clear note, correct it,
+save it, and submit again.
+When every report for the month has been reviewed, select Lock January 2026.
+Lock applies to the entire agency's selected month, not just PRAC.
+Confirm only after checking the list. This is why the exercise needs a learning copy.
+
+7. ENTER FEBRUARY
+Repeat the reporting steps for February: ACT-01 = 1 and ACT-02 = 12.
+Enter only February's completed work, including the two cases finished late.
+Do not enter 2 sessions and 20 cases; those are the two-month totals.
+Save, submit, review, then lock February after January is locked.
+
+8. READ THE DASHBOARD
+Choose PRAC, Practice 2026, and the month you are checking.
+Use the office's own plan, with offices beneath it, when that choice appears.
+
+THIS MONTH
+The share of the entire year's weighted work completed in this one month.
+It is not the share of the month's workload completed.
+January: 7.67%. February: 9.00%.
+The badge compares this figure with the month's plan.
+February's badge is +0.67 pp vs plan: 9.00% completed against 8.33% planned.
+
+TO DATE
+The share of the year's weighted work completed from January through the
+selected month. January: 7.67%. February: 16.67%.
+The February change badge is +9.00 pp vs last month.
+The small line shows recorded history; a missing figure is not a zero.
+
+VARIANCE
+Completed progress to date minus planned progress to date.
+January: 7.67% minus 8.33% = -0.67 percentage points.
+February: 16.67% minus 16.67% = 0.00 percentage points.
+A percentage point is the difference between two percentages.
+For example, moving from 40% to 45% is a gain of 5 points.
+
+STATUS
+With the example's zero margin: negative = DELAYED, zero = ON-TIME,
+positive = ADVANCED. Your agency may choose other words or a margin.
+January is delayed. February is on time after catching up on both cases.
+
+FUNDS USED (ESTIMATE)
+This exercise has no recorded actual spending. The app estimates funds used
+from the overall progress and the PHP 100000 budget.
+January: PHP 7666.67 used, PHP 92333.33 remaining.
+February: PHP 16666.67 used to date, PHP 83333.33 remaining.
+These are estimates, not proof of payments. If actual spending is recorded,
+read its label carefully; the displayed basis can change.
+
+DELIVERY TREND AND BUDGET OVERVIEW
+Green line = completed work. Dashed gray line = planned work.
+Completed work below plan means the office is behind its planned pace.
+The budget ring shows the share used. View as table gives the exact figures.
+View as chart returns to the picture.
+By quarter summarizes quarter totals. Quarter details opens the full numbers.
+
+WHY THE ACTIVITIES COUNT DIFFERENTLY
+ACT-01's PHP 60000 cost gives it 60% of the office score.
+ACT-02's PHP 40000 cost gives it 40%.
+January score = (1 / 12 x 60%) + (8 / 120 x 40%) = 7.67%.
+February total = (2 / 12 x 60%) + (20 / 120 x 40%) = 16.67%.
+The office score does not simply average the two activity percentages.
+
+RANKINGS AND FINALITY
+Rankings compare only the offices in the selected scope and group.
+One practice office alone does not provide a useful comparison.
+FINAL means the month is locked. PROVISIONAL means figures may still change.
+Saved means entries were kept. Submitted means sent for review.
+Neither Saved nor Submitted means the month is final.
+
+9. DOWNLOAD THE RESULT
+On Dashboard, choose the office, year, and final month first.
+Select Export > Excel workbook. Choose PRAC only and the intended month.
+Select Prepare workbook. Wait for Ready in the dialog or My exports.
+Select the filename to download it. Check the month and figures in the file.
+Sign out when finished.
+
+IF YOUR FIGURES DIFFER
+Check office, month, year, plan version, and scoring settings first.
+Confirm costs are 60000 and 40000 and monthly targets sum to annual targets.
+Check that January entries were not entered again in February.
+Check whether the funds card uses an estimate or recorded spending.
+Do not change official scoring rules merely to reproduce a practice result.

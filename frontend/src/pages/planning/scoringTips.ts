@@ -1,29 +1,29 @@
 /** Longer explanations, with small examples, for every scoring setting (P12.6). */
 export const SCORING_TIPS: Record<string, string> = {
   preset:
-    'A preset fills in every setting below at once. "Workbook compatible" gives the same numbers as the agency’s Excel monitoring workbook. You can change single settings afterwards; the preset then shows as custom.',
+    'Choose a starting method to fill in the settings below. Excel method follows the agency’s monitoring workbook. You can then adjust individual choices for your agency.',
   weighting:
-    'Example: activities costing 600,000, 300,000 and 100,000 weigh 60%, 30% and 10% by cost; equal weighting gives each a third; manual weights are typed per activity and must add up to 100%.',
+    'For activities costing 600,000, 300,000 and 100,000, cost-based scoring assigns 60%, 30% and 10% of the office score. Equal shares give each activity one third. Shares entered by hand must total 100%.',
   cap_at_100:
-    'Example: plan 10, done 12. Without the ceiling the activity counts 120% and can lift the office above 100%. With it, it counts 100%, so over-delivery cannot hide other activities’ delays.',
+    'Example: plan 10, done 12. Without the limit, the activity scores 120%. With the limit, it scores 100%, so extra work on one activity cannot hide delays in others.',
   on_time_tolerance:
-    'Example with 2 points: plan 50%, done 48.5% → on time; done 47% → behind. Ahead and behind are judged on the cumulative figures for the month.',
+    'With a 2-point allowance, 48.5% completed against a 50% plan is on time; 47% is behind. Compare work completed since the year began with the plan for the same months.',
   labels:
-    'These words appear on dashboards, exports and decks for offices ahead of, on, or behind plan. Changing them does not change any number.',
+    'These words appear on dashboards and downloaded reports for offices ahead of, on, or behind plan. Changing the words does not change any figures.',
   rollup:
-    'Example: division X (budget 1,000,000, 78%) and Y (budget 3,000,000, 90%). By budget the service scores 87%; as a simple average, 84%.',
+    'Two divisions have budgets of 1,000,000 and 3,000,000, with progress of 78% and 90%. Combining them by budget gives their supervising office 87%. Giving both equal shares gives 84%.',
   indicator_weighting:
-    'Equal: every indicator of an office counts the same. Manual: type a weight per indicator in the plan; weights must add up to 100%.',
+    'An indicator tracks a result, such as people trained. Give each indicator an equal share of the score, or enter the share for each one in the plan. Entered shares must total 100%.',
   indicator_rollup:
-    'All indicators: the parent averages every indicator beneath it. Office scores: the parent averages its offices’ indicator scores, so an office with many indicators does not dominate.',
+    'Average all indicators from the offices below, or average each office’s indicator score. The second choice gives offices an equal say even when they track different numbers of indicators.',
   ranking_metric:
-    'Cumulative accomplishment ranks by the share of the year’s plan done; variance ranks by how far ahead of plan; actual over plan ranks by accomplishment relative to what was due so far. Equal values share a rank.',
+    'Rank by the share of the year’s work completed, the gap from plan, or completed work divided by the work due so far. Offices with equal results share a rank.',
   cutoff_day:
-    'Example: cutoff day 5 → January reports are due by 5 February, end of day, in the agency’s time zone. Each month’s cutoff can be moved on the fiscal year page.',
+    'If the deadline day is 5, January reports are due by the end of 5 February in the agency’s time zone. Change one month’s deadline on the fiscal year page.',
   auto_lock:
-    'Locked months are final: results are frozen and reports cannot change. Months always lock in order; an administrator can unlock one with a reason (kept in the audit log).',
+    'Locking a month makes its results final and stops report changes. Lock months in order. An administrator can reopen a month by giving a reason, which is saved in the audit log.',
   mov_required:
-    'MOV = means of verification: a photo, scan or document proving the accomplishment. With this on, a report cannot be submitted while an accomplishment has no file.',
+    'A supporting file is a photo, scan, or document that shows the work was completed. When files are required, every reported accomplishment needs one before submission.',
   show_actual_amounts:
-    'Without amounts, funds used are estimated as budget × cumulative accomplishment and labelled as an estimate. Where amounts are entered, the real figures are shown instead.',
+    'If no spending is entered, estimated funds used equal the budget multiplied by progress to date. Once actual spending is entered, those amounts are shown instead. Complete all entries so the total covers all spending.',
 };

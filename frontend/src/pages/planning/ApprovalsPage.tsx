@@ -46,7 +46,7 @@ export default function ApprovalsPage() {
     if (path === 'approve') {
       if (
         !window.confirm(
-          `Approve the ${plan.office.code} plan, version ${plan.version}? It becomes the baseline for scoring; an earlier approved version is superseded.`,
+          `Approve the ${plan.office.code} plan, version ${plan.version}? Monthly reports will be compared with its targets. This replaces any earlier approved plan.`,
         )
       )
         return;
@@ -137,8 +137,8 @@ export default function ApprovalsPage() {
       )}
       <h2>Budget vs planned cost</h2>
       <p className="muted small">
-        The approved budget is the office's appropriation; the planned cost is the total cost of its
-        activities.
+        The approved budget is the amount allocated to the office; planned cost is the total cost of
+        its activities.
       </p>
       <table className="table">
         <thead>

@@ -1,0 +1,59 @@
+GOVMONITOR - RUN, UPDATE, AND CLOSE ON THIS WINDOWS PC
+====================================================
+Open Docker Desktop first. Wait until its engine is running.
+Open PowerShell and use the commands below.
+
+OPEN THE PROJECT
+cd 'D:\BARMM PROJECT\Monitoring Tool - copy\GovMonitor'
+
+APPLY THIS UPDATE ONCE
+docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build web worker
+
+SET UP YOUR REAL AGENCY ONCE
+docker compose -f deploy/docker-compose.yml --env-file deploy/.env exec web entrypoint.sh manage initialize_workspace
+
+The setup asks for the real agency name, short code, your name, and your email.
+It creates an administrator and shows a temporary password once.
+Keep that password privately, sign in, and change it when asked.
+The recognized built-in sample agencies are suspended and their demo accounts
+are disabled. Their old records are retained; no official records are deleted.
+If a sample agency has other users or was renamed, it is left untouched and
+the command tells you which agency needs a separate review.
+Running setup again with the same details keeps the existing account/password.
+It does not create plans, reports, practice figures, or a reporting year.
+Do not use the old demo email addresses to sign in after setup.
+
+RUN THE APP ON LATER DAYS
+docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d
+
+OPEN IN YOUR BROWSER
+http://localhost:8000/
+
+USER GUIDE INSIDE THE APP
+Sign in, then choose User guide in the left menu.
+Search for a task, select a section, or download the complete PDF.
+The User guide page contains help only. Keep these operator commands in this separate file.
+
+CLOSE THE APP WITHOUT REMOVING SAVED DATA
+Save and submit your work as needed. Sign out, then run:
+docker compose -f deploy/docker-compose.yml --env-file deploy/.env stop
+
+Start again later using the RUN THE APP command above.
+Closing the browser alone leaves the app running in the background.
+Do not add -v to a removal command; that would remove stored data.
+
+CHECK WHETHER THE APP IS RUNNING
+docker compose -f deploy/docker-compose.yml --env-file deploy/.env ps
+
+READ A STARTUP ERROR
+docker compose -f deploy/docker-compose.yml --env-file deploy/.env logs --tail 80 web worker
+
+ABOUT THE EARLIER PREVIEW AT PORT 5173
+The normal Docker app uses port 8000. It does not need the preview server.
+If you started npm run dev in a separate PowerShell window, press Ctrl+C in
+that window to stop that preview. Docker stop does not stop a separate preview.
+
+IF DOCKER SAYS ACCESS IS DENIED
+Confirm Docker Desktop is running and you are using your normal Windows account
+with Docker access. Restart Docker Desktop after any account-permission change.
+If the update fails, keep the error message; do not reset Docker or erase volumes.

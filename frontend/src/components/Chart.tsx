@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { BarChart, LineChart, PieChart } from 'echarts/charts';
 import {
   GridComponent,
@@ -36,11 +36,17 @@ export default function Chart({
   table,
   height = 260,
   label,
+  centerLabel,
+  footer,
+  className = '',
 }: {
   option: EChartsCoreOption;
   table: ChartTable;
   height?: number;
   label: string;
+  centerLabel?: { value: string; caption: string };
+  footer?: ReactNode;
+  className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [asTable, setAsTable] = useState(false);
@@ -69,7 +75,7 @@ export default function Chart({
   }, [option, asTable]);
 
   return (
-    <figure className="chart">
+    <figure className={`chart ${className}`}>
       <div className="chart-toolbar">
         <figcaption>{label}</figcaption>
         <button type="button" className="btn btn-link small" onClick={() => setAsTable(!asTable)}>
@@ -99,13 +105,22 @@ export default function Chart({
           </table>
         </div>
       ) : (
-        <div
-          ref={ref}
-          style={{ height }}
-          role="img"
-          aria-label={`${label}. Use “View as table” for the numbers.`}
-        />
+        <div className="chart-plot">
+          <div
+            ref={ref}
+            style={{ height }}
+            role="img"
+            aria-label={`${label}. Use “View as table” for the numbers.`}
+          />
+          {centerLabel && (
+            <div className="chart-center" aria-hidden="true">
+              <strong>{centerLabel.value}</strong>
+              <span>{centerLabel.caption}</span>
+            </div>
+          )}
+        </div>
       )}
+      {!asTable && footer && <div className="chart-footer">{footer}</div>}
     </figure>
   );
 }

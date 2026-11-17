@@ -33,4 +33,5 @@ export const NAV_ITEMS: NavItem[] = [
   },
   { to: '/audit', label: 'Audit log', show: agencyAdmin, desktopOnly: true },
   { to: '/help', label: 'Help', show: always },
+  { to: '/user-guide', label: 'User guide', show: always },
 ];

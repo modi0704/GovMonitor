@@ -29,7 +29,7 @@ it("opens on the reader's own role and switches to the others", async () => {
   const own = await screen.findByRole('tab', { name: 'Office administrator (you)' });
   expect(own).toHaveAttribute('aria-selected', 'true');
   expect(
-    screen.getByRole('heading', { name: 'Every month, before the cutoff' }),
+    screen.getByRole('heading', { name: 'Every month, before the deadline' }),
   ).toBeInTheDocument();
   await userEvent.setup().click(screen.getByRole('tab', { name: 'Read-only user' }));
   expect(screen.getByRole('heading', { name: 'Rankings and alerts' })).toBeInTheDocument();
@@ -44,10 +44,10 @@ it('an agency administrator starts on their guide; a viewer on theirs', async ()
 });
 
 it('help tips open on focus, describe the setting and close with Escape', async () => {
-  render(<HelpTip label="Ceiling at 100%">{SCORING_TIPS.cap_at_100}</HelpTip>);
+  render(<HelpTip label="Limit scores to 100%">{SCORING_TIPS.cap_at_100}</HelpTip>);
   const user = userEvent.setup();
   await user.tab();
-  const button = screen.getByRole('button', { name: 'About: Ceiling at 100%' });
+  const button = screen.getByRole('button', { name: 'About: Limit scores to 100%' });
   expect(button).toHaveFocus();
   expect(screen.getByRole('tooltip')).toHaveTextContent(/plan 10, done 12/);
   expect(button).toHaveAccessibleDescription(/plan 10, done 12/);

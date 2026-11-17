@@ -35,7 +35,7 @@ export default function MyExportsPage() {
             <tr>
               <th scope="col">Requested</th>
               <th scope="col">Type</th>
-              <th scope="col">Scope</th>
+              <th scope="col">Offices included</th>
               <th scope="col">Status</th>
               <th scope="col">File</th>
             </tr>

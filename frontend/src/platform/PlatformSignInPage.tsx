@@ -41,7 +41,7 @@ export default function PlatformSignInPage() {
       </label>
       {needCode && (
         <label>
-          Code from your authenticator app
+          Code from your phone’s sign-in app
           <input
             inputMode="numeric"
             maxLength={6}

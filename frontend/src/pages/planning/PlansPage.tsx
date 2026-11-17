@@ -12,7 +12,7 @@ const STATUS_LABEL = {
   draft: 'Draft',
   submitted: 'Waiting for approval',
   approved: 'Approved',
-  superseded: 'Superseded',
+  superseded: 'Replaced',
 };
 
 /** Plans per office for one fiscal year; start a plan; open the editor (P5.3, P5.5). */

@@ -342,9 +342,9 @@ function MoveDialog({
   return (
     <Modal title={`Move ${office.name}`} onClose={onClose}>
       <form className="stack" onSubmit={submit}>
-        <p className="muted">The office moves with everything beneath it.</p>
+        <p className="muted">This also moves every office reporting under it.</p>
         <label>
-          New parent office
+          New supervising office
           <select value={target} onChange={(e) => setTarget(e.target.value)}>
             {targets.map((r) => (
               <option key={r.id} value={r.id}>
@@ -432,7 +432,7 @@ function ImportDialog({ parent, onClose, onDone }: DialogProps & { parent: Offic
             setPreview(null);
           }}
           aria-label="Offices to add"
-          placeholder={'PME\tPlanning and Monitoring\n\tPME-1\tMonitoring Unit'}
+          placeholder="Enter your office codes and names, one office per line."
           className="mono"
         />
         <FormError message={error} />
@@ -507,8 +507,8 @@ function LevelsDialog({ levels, onClose, onDone }: DialogProps & { levels: Level
     <Modal title="Level names" onClose={onClose}>
       <form className="stack" onSubmit={submit}>
         <p className="muted small">
-          What each level of your structure is called, from the top. Exports and reports use these
-          names.
+          Name the groups of offices from the top down, such as Ministry, Service, and Division.
+          Reports use these names.
         </p>
         {names.map((n, i) => (
           <label key={i}>
@@ -521,7 +521,7 @@ function LevelsDialog({ levels, onClose, onDone }: DialogProps & { levels: Level
           </label>
         ))}
         <button type="button" className="btn btn-link" onClick={() => setNames([...names, ''])}>
-          Add a deeper level
+          Add another level below
         </button>
         <FormError message={error} />
         <div className="row">

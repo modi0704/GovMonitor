@@ -90,7 +90,7 @@ it('shows the session-expired message when the server ends the session', async (
     window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
   });
   await waitFor(() => expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument());
-  expect(screen.getByRole('status')).toHaveTextContent('Your session ended');
+  expect(screen.getByRole('status')).toHaveTextContent('You were signed out');
 });
 
 it('never redirects to another site after sign-in', async () => {

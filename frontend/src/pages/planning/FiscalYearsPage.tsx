@@ -7,6 +7,7 @@ import FormError from '../../components/FormError';
 import Modal from '../../components/Modal';
 import { useAuth } from '../../auth/useAuth';
 import { monthYear } from '../../lib/format';
+import { scoringMethodDescription, scoringMethodName } from './scoringMethodText';
 
 const STATUS_HELP = {
   draft: 'Being prepared: plans can be entered, nothing is reported yet.',
@@ -78,9 +79,7 @@ export default function FiscalYearsPage() {
                   <span className={`chip chip-fy-${fy.status}`}>{fy.status}</span>
                 </td>
                 <td>
-                  <Link to={`/fiscal-years/${fy.id}/scoring`}>
-                    {fy.preset.replaceAll('_', ' ')}
-                  </Link>
+                  <Link to={`/fiscal-years/${fy.id}/scoring`}>{scoringMethodName(fy.preset)}</Link>
                 </td>
                 <td className="actions">
                   {isAdmin && fy.status === 'draft' && (
@@ -187,9 +186,9 @@ function CreateDialog({
                 onChange={() => setPreset(p.name)}
               />
               <span>
-                <strong>{p.name.replaceAll('_', ' ')}</strong>
+                <strong>{scoringMethodName(p.name)}</strong>
                 <br />
-                <span className="muted small">{p.description}</span>
+                <span className="muted small">{scoringMethodDescription(p.name)}</span>
               </span>
             </label>
           ))}

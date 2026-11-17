@@ -93,8 +93,8 @@ const COLUMN_LABEL: Record<string, string> = {
 const STATUS_TEXT = {
   draft: 'Draft — being prepared',
   submitted: 'Submitted — waiting for approval',
-  approved: 'Approved — the baseline for scoring',
-  superseded: 'Superseded — replaced by a later version',
+  approved: 'Approved - used to compare monthly progress',
+  superseded: 'Replaced by a newer approved plan',
 };
 
 export default function PlanEditorPage() {
@@ -345,7 +345,7 @@ export default function PlanEditorPage() {
               onClick={() =>
                 action(
                   'approve',
-                  'Approve this plan? It becomes the baseline that monthly reports are scored against.',
+                  'Approve this plan? Monthly reports will be compared with its targets.',
                 )
               }
             >
@@ -373,7 +373,7 @@ export default function PlanEditorPage() {
             onClick={() =>
               action(
                 'revise',
-                'Start a revision? A new draft version is created; the approved version stays in force until the revision is approved.',
+                'Create a new draft of this plan? The current approved plan remains in use until the new draft is approved.',
               )
             }
           >
@@ -539,7 +539,7 @@ export default function PlanEditorPage() {
                       {GRID_COLUMNS.slice(0, 6).map((c) => (
                         <th key={c}>{COLUMN_LABEL[c]}</th>
                       ))}
-                      <th title="Computed by the scoring rules; typed by hand only under manual weighting">
+                      <th title="Share of the office score. Calculated automatically unless your agency asks you to enter it.">
                         Weight
                       </th>
                       <th>Measure</th>
@@ -736,7 +736,7 @@ export default function PlanEditorPage() {
           </div>
           <aside className="editor-side">
             <Chart
-              label="Planned progress (cumulative)"
+              label="Planned progress to date"
               height={200}
               option={{
                 grid: { left: 40, right: 10, top: 10, bottom: 25 },
@@ -758,13 +758,13 @@ export default function PlanEditorPage() {
                 ],
               }}
               table={{
-                caption: 'Planned cumulative progress by month',
+                caption: 'Planned progress to date by month',
                 headers: ['Month', 'Planned'],
                 rows: months.map((m, i) => [m, percent(preview?.cum_plan[i] ?? null)]),
               }}
             />
             <Chart
-              label="Weight of each activity"
+              label="Each activity’s share of the score"
               height={Math.max(160, activityRows.length * 18 + 40)}
               option={{
                 grid: { left: 70, right: 15, top: 5, bottom: 20 },
@@ -787,7 +787,7 @@ export default function PlanEditorPage() {
                 ],
               }}
               table={{
-                caption: 'Weight of each activity',
+                caption: 'Each activity’s share of the score',
                 headers: ['Activity', 'Weight'],
                 rows: weightTable,
               }}

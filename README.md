@@ -1,13 +1,36 @@
 # GovMonitor — Performance Monitoring Web Application
 
-A multi-agency web application for monitoring and evaluating the performance of government offices
-against their annual work and financial plans. It replaces a manual Excel workflow.
+A web application for monitoring the performance of government offices against their annual work
+and financial plans. It replaces the monitoring Excel workbook.
 
-**Start with [`MASTERPLAN.md`](MASTERPLAN.md).** It is the single source of truth for the build:
+## How it works (for users)
+
+One monitoring officer collects the figures from the offices they handle and types them in. The app
+opens on **Step-by-step**, a progress bar with six steps:
+
+1. **Add your offices** (once)
+2. **Set up the year** (once a year)
+3. **Enter each office's plan**: activities, monthly targets, costs, output targets (once a year)
+4. **Enter the monthly results** of each office (every month)
+5. **Check and close the month** (every month)
+6. **Download the report**: the monthly Excel/PowerPoint report, or the **over-all performance
+   presentation for the year** (based on activities and on output indicators, with rankings)
+
+The app calculates everything else: plan versus actual, gap, status (ADVANCED / ON-TIME / DELAYED),
+funds, S-curves and rankings. It can be set up for any agency's offices.
+
+**Read the [User Guide](docs/USER_GUIDE.md)** ([PDF](docs/user-guide/USER_GUIDE.pdf)) — short and
+step by step. To start, update or close the app on Windows, follow
+[docs/RUN_AND_CLOSE.txt](docs/RUN_AND_CLOSE.txt). To practise with invented figures, use
+[docs/SAMPLE_INPUT.txt](docs/SAMPLE_INPUT.txt) and [docs/INPUT_AND_METRICS.txt](docs/INPUT_AND_METRICS.txt).
+
+## For developers
+
+Start with [`MASTERPLAN.md`](MASTERPLAN.md). It is the single source of truth for the build:
 decisions, data model, the scoring method, test vectors and the phase-by-phase task list with the
 current status.
 
-## Repository layout
+### Repository layout
 
 | Path | Contents |
 |---|---|
@@ -18,7 +41,7 @@ current status.
 | `tools/` | Fixture extraction, vendor licence tool, API reference generator |
 | `reference/` | The customer's original workbooks — git-ignored, read-only |
 
-## Running locally
+### Running locally
 
 Requirements: Docker with Compose, GNU Make. For development without Docker: Python 3.13,
 Node 22, PostgreSQL 16 or later.
@@ -45,15 +68,15 @@ sign-in and disables recognized built-in demo accounts. Training records are ret
 renamed agencies or agencies with other users are left untouched. No sample plans or reports are
 created. The demo loader is available only under development/test settings.
 
-## Documentation
+### Documentation
 
 * [Administrator guide](docs/ADMIN_GUIDE.md) — install (Linux, Windows Server, cloud), certificates,
   email, backups, updates, licence, troubleshooting.
-* [User guide](docs/USER_GUIDE.md) — by role, with screenshots.
+* [User guide](docs/USER_GUIDE.md) — the six steps in plain words, with screenshots.
   [Printable PDF](docs/user-guide/USER_GUIDE.pdf).
-  The full searchable guide is also inside the app at **User guide**; PDF downloads work without internet while the local app is running.
-* [Practice input](docs/SAMPLE_INPUT.txt), [entry and metrics](docs/INPUT_AND_METRICS.txt), and
-  [Windows start/stop commands](docs/RUN_AND_CLOSE.txt).
+  The same guide is inside the app under **User guide** (searchable, works without internet).
+* [Practice figures](docs/SAMPLE_INPUT.txt), [how to type them in and the expected results](docs/INPUT_AND_METRICS.txt),
+  and [Windows start / update / close commands](docs/RUN_AND_CLOSE.txt).
 * [API reference](docs/API.md) · [Security review](docs/SECURITY.md) ·
   [Release checklist](docs/RELEASE.md) · [Changelog](CHANGELOG.md) ·
   [Third-party licences](docs/THIRD_PARTY.md)

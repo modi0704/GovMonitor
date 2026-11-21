@@ -6,7 +6,9 @@ The reference's dashboard uses a four-card KPI row above a wide trend chart and 
 
 ## Decisions
 
-- Fixed white sidebar with task groups: Monitor, Plan & report, Agency, Support; concise labels and consistent SVG line icons.
+- Fixed white sidebar with task groups in plain words: Start here (Step-by-step), See results, Enter data, Settings (folded), Help; consistent SVG line icons.
+- The agency administrator's start page is Step-by-step: a six-step progress bar, what to collect from the offices before each step, and a per-office checklist. Pages that belong to a step show a green guide bar ("Step N of 6") with Back to the steps and Next links.
+- Plain-English wording: gap (not variance), close (not lock), Years, Offices, Downloads; a word list on the Help page.
 - Existing role restrictions, destinations, reporting rules, and data remain in force.
 - White work surfaces, neutral light background, crisp gray borders, subtle shadows, 20-24px card spacing, and green accents limited to primary actions, active navigation, positive indicators, and chart highlights.
 - Four KPI cards show monthly accomplishment, cumulative accomplishment, variance, and funds used. Percentage-point comparison badges distinguish plan comparison from previous-month comparison.
@@ -22,7 +24,7 @@ The reference's dashboard uses a four-card KPI row above a wide trend chart and 
 
 ## Implementation
 
-`frontend/src/workspace.css` defines the shared visual layer after the existing component styles. `AppShell.tsx` defines the grouped navigation, account summary, and mobile menu. `AuthCard.tsx` supplies the shared sign-in/password-page layout. `ResultTiles.tsx` and `Sparkline.tsx` render the KPI row; `DashboardPage.tsx` defines the chart layout and visual summaries. `chartTheme.ts` supplies the shared chart palette.
+`frontend/src/workspace.css` defines the shared visual layer after the existing component styles. `AppShell.tsx` and `layout/nav.ts` define the grouped navigation, account summary, and mobile menu; `lib/steps.ts`, `components/StepProgress.tsx`, `layout/GuideBar.tsx` and `pages/guide/GuidedStepsPage.tsx` the guided steps. `AuthCard.tsx` supplies the shared sign-in/password-page layout. `ResultTiles.tsx` and `Sparkline.tsx` render the KPI row; `DashboardPage.tsx` defines the chart layout and visual summaries. `chartTheme.ts` supplies the shared chart palette.
 
 ## Validation and local review
 
@@ -30,7 +32,7 @@ Completed: production build, lint/formatting, 87 tests across 33 files, and brow
 
 Browser verification includes desktop, tablet, and phone layouts; fixed desktop navigation; phone menu and horizontal overflow checks; chart/table toggling; and successful Excel report preparation. The development frontend runs on localhost:5173, with its local API proxy forwarding to the backend on port 8000. CSRF tokens are still required. Production Docker images still require rebuilding to serve the new frontend from port 8000.
 
-Current screenshots are embedded in `USER_GUIDE.md` and `user-guide/USER_GUIDE.pdf` (edition 2.3). The app has a searchable 34-section guide at `/user-guide`, with PDF download and section printing. Operator commands and practice text files remain separate documents and are excluded from the shipped guide assets. Guide text is rendered as React nodes, with no injected HTML.
+Current screenshots are embedded in `USER_GUIDE.md` and `user-guide/USER_GUIDE.pdf` (edition 3.0, built around the six guided steps). The app has a searchable 16-section guide at `/user-guide`, with PDF download and section printing. Operator commands and practice text files remain separate documents and are excluded from the shipped guide assets. Guide text is rendered as React nodes, with no injected HTML.
 
 Screen descriptions, tooltips, status messages, and help use plain language for monitoring and finance. Scoring methods have readable display names; office-access and audit labels describe what users can see and what changed. Stored setting keys, audit filter values, permissions, and calculations are unchanged.
 

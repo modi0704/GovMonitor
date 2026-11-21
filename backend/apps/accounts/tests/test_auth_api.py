@@ -128,8 +128,10 @@ def test_idle_timeout_ends_session(client, user, settings):
     assert r.status_code == 401 and r.json()["code"] == "session_expired"
 
 
-def test_background_polls_and_page_loads_do_not_keep_a_session_alive(client, user, settings):
+def test_background_polls_and_page_loads_do_not_keep_a_session_alive(client, user, settings, tmp_path):
     settings.SESSION_IDLE_MINUTES = 1
+    (tmp_path / "index.html").write_text("<!doctype html><title>app</title>")
+    settings.FRONTEND_DIST = tmp_path  # the page loads whether or not the frontend has been built
     login(client, "ana@alpha.gov")
     session = client.session
     started = int(timezone.now().timestamp()) - 50

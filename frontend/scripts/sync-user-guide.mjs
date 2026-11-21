@@ -15,13 +15,13 @@ const slug = (title) =>
     .replace(/[^a-z0-9 -]/g, '')
     .replaceAll(' ', '-');
 const sections = [...markdown.matchAll(/^## (.+)\r?\n([\s\S]*?)(?=^## |$(?![\s\S]))/gm)]
-  .filter((match) => !['Contents', 'Detailed User Guide & SOP'].includes(match[1]))
+  .filter((match) => !['Contents', 'User Guide', 'Detailed User Guide & SOP'].includes(match[1]))
   .map((match) => ({
     id: slug(match[1]),
     title: match[1],
     markdown: match[2].replaceAll('<!-- page -->', '').trim(),
   }));
-if (sections.length < 25) throw new Error('The full user guide is missing sections.');
+if (sections.length < 12) throw new Error('The full user guide is missing sections.');
 
 await mkdir(path.join(destination, 'images'), { recursive: true });
 const images = new Set(

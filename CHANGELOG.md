@@ -5,6 +5,9 @@ step on update (described here); minor and patch versions update with `update.sh
 
 ## Unreleased
 
+### Fixed
+- A backend test needed the built frontend and failed in CI.
+
 ### Easier to use
 - **Step-by-step** start page for the monitoring administrator: six steps (offices, year, plans,
   monthly results, check & close, report) with a progress bar, what to collect from the offices
@@ -13,6 +16,8 @@ step on update (described here); minor and patch versions update with `update.sh
 - Plain-English menu and screens: Downloads, Office plans, Monthly results, Who has reported,
   Years, Offices, Reminders, Report look, Change history; "gap" for variance, "close" for lock.
   Rarely used settings are folded away. A word list on the Help page.
+- A new, short user guide (edition 3.0, in the app and as a PDF) built around the six steps, with
+  new screenshots; simpler practice and Windows start/update/close instructions.
 
 ### Reporting
 - **Over-all performance for the year**: a PowerPoint deck modelled on the year-end presentation —

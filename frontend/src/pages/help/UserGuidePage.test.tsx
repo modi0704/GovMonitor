@@ -5,7 +5,7 @@ import GuideContent from './GuideContent';
 
 it('shows only the user guide, with PDF and print options and no command or practice downloads', () => {
   render(<UserGuidePage />);
-  expect(screen.getByRole('heading', { name: 'Overview & Roles' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Start Here' })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Download PDF' })).toHaveAttribute(
     'href',
     '/user-guide/USER_GUIDE.pdf',
@@ -22,17 +22,11 @@ it('shows only the user guide, with PDF and print options and no command or prac
 it('searches section contents and opens the selected control reference', async () => {
   render(<UserGuidePage />);
   const user = userEvent.setup();
-  await user.type(screen.getByRole('searchbox', { name: 'Find a topic' }), 'Quarter details');
+  await user.type(screen.getByRole('searchbox', { name: 'Find a topic' }), 'Delivery trend');
   const contents = screen.getByRole('navigation', { name: 'User guide sections' });
-  await user.click(
-    within(contents).getByRole('button', { name: 'Dashboard: Filters, Results & Office Detail' }),
-  );
-  expect(
-    screen.getByRole('heading', { name: 'Dashboard: Filters, Results & Office Detail' }),
-  ).toBeInTheDocument();
-  expect(
-    screen.getByRole('columnheader', { name: 'What it means and how to use it' }),
-  ).toBeInTheDocument();
+  await user.click(within(contents).getByRole('button', { name: 'Read the Dashboard' }));
+  expect(screen.getByRole('heading', { name: 'Read the Dashboard' })).toBeInTheDocument();
+  expect(screen.getByRole('columnheader', { name: 'What it means' })).toBeInTheDocument();
   await user.clear(screen.getByRole('searchbox'));
   await user.type(screen.getByRole('searchbox'), 'there-is-no-such-topic');
   expect(screen.getByText(/No matching topic/)).toBeInTheDocument();

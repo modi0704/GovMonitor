@@ -114,14 +114,14 @@ export const GUIDES: Guide[] = [
       {
         heading: 'Plan',
         steps: [
-          'Plans → your office → Edit. Type rows like a spreadsheet, paste from Excel, or Import from Excel using the template.',
+          'Office plans → your office → Edit. Type rows like a spreadsheet, paste from Excel, or Import from Excel using the template.',
           'Fix the messages shown under the grid (targets must add up, every activity needs a target), then Submit for approval.',
         ],
       },
       {
         heading: 'Every month, before the deadline',
         steps: [
-          'Monthly report: type what was accomplished for each activity, add remarks, and a reason for any delay.',
+          'Monthly results: type what was accomplished for each activity, add remarks, and a reason for any delay.',
           'Attach supporting files (photos, scans). On a phone, open the activity from the dashboard and use Take photo.',
           'Watch the live result panel: it shows your office’s figures as you type. Submit when done; the administrator may return it with a note.',
         ],
@@ -142,7 +142,7 @@ export const GUIDES: Guide[] = [
       {
         heading: 'Dashboard',
         steps: [
-          'Choose the month and office. FINAL means the figures are locked. NOT FINAL means reports may still change.',
+          'Choose the month and office. FINAL means the month is closed. PROVISIONAL means the figures may still change.',
           'The chart compares planned and completed work since the year began. The cards show progress, the gap from plan, status, and funds used.',
           'Activities lists every activity with its progress; click one to see each month and its supporting files.',
         ],
@@ -151,7 +151,7 @@ export const GUIDES: Guide[] = [
         heading: 'Rankings and alerts',
         steps: [
           'Rankings compares offices reporting to the same office, or offices in a chosen group. Offices with equal results share a rank.',
-          'The bell tells you when an office you follow falls behind plan after a month is locked.',
+          'The bell tells you when an office you follow falls behind plan after a month is closed.',
         ],
       },
     ],

@@ -108,7 +108,7 @@ export default function ResultPanel({
       </div>
       <div className="tile">
         <div className="tile-heading">
-          <span className="tile-label">Variance</span>
+          <span className="tile-label">Gap</span>
           <NavIcon name="Rankings" />
         </div>
         <span className="tile-value">{percent(result.variance)}</span>

@@ -25,6 +25,20 @@ it('walks through levels, top office, offices and finishes', async () => {
   const calls = mockApi({
     'GET /api/v1/auth/csrf': { body: {} },
     'GET /api/v1/me': { body: me },
+    'GET /api/v1/progress': {
+      body: {
+        steps: [],
+        current: 'offices',
+        offices_count: 0,
+        root: null,
+        fiscal_years: [],
+        fiscal_year: null,
+        plans: [],
+        period: null,
+        months: [],
+        monthly: [],
+      },
+    },
     'GET /api/v1/levels': { body: [{ id: 'l0', depth: 0, name: 'Agency', office_count: 1 }] },
     'GET /api/v1/offices': { body: [ROOT] },
     'PUT /api/v1/levels': { body: [] },

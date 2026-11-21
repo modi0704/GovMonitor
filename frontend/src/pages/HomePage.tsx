@@ -3,10 +3,19 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 
 const DashboardPage = lazy(() => import('./dashboard/DashboardPage'));
+const GuidedStepsPage = lazy(() => import('./guide/GuidedStepsPage'));
 
-/** Start page: setup reminders, then the dashboard of the user's top office (P8.2). */
+/** Start page. The agency administrator (who enters everything) starts on the step-by-step guide;
+ * everyone else on the dashboard of their top office (P8.2). */
 export default function HomePage() {
   const { me } = useAuth();
+  if (me?.is_agency_admin) {
+    return (
+      <Suspense fallback={<div className="page-loading">Loading…</div>}>
+        <GuidedStepsPage />
+      </Suspense>
+    );
+  }
   const setupNotice = me?.is_agency_admin && !me.agency.setup_complete && (
     <div className="page notice">
       <strong>Your agency is not set up yet.</strong>

@@ -6,34 +6,95 @@ export interface Guide {
   sections: { heading: string; steps: string[] }[];
 }
 
+/** Plain meanings of the words the app and the reports use. */
+export const WORDS: { word: string; meaning: string }[] = [
+  {
+    word: 'Plan',
+    meaning:
+      'What an office said it would do this year: its activities, how many each month, and their cost.',
+  },
+  {
+    word: 'Activity (PPA)',
+    meaning:
+      'One piece of planned work — a program, project or activity — with a yearly target number.',
+  },
+  { word: 'Actual', meaning: 'What the office really did, as reported each month.' },
+  {
+    word: 'Plan % / Actual % (total so far)',
+    meaning:
+      'How much of the whole year’s work should be done by this month, and how much is done. Bigger, costlier activities count for more.',
+  },
+  {
+    word: 'Gap (variance)',
+    meaning: 'Actual minus plan. Below zero means the office is behind; above zero means ahead.',
+  },
+  {
+    word: 'Status',
+    meaning: 'Ahead (ADVANCED), on plan (ON-TIME) or behind plan (DELAYED), from the gap.',
+  },
+  {
+    word: 'Output indicator (output target)',
+    meaning:
+      'A result counted over the year, for example “number of teachers trained”, with a yearly target.',
+  },
+  {
+    word: 'Output targets reached',
+    meaning: 'The share of the year’s output targets reached so far, averaged over the indicators.',
+  },
+  {
+    word: 'Funds remaining',
+    meaning:
+      'The budget not yet used, estimated from the work done (or from the amounts you entered).',
+  },
+  {
+    word: 'S-curve',
+    meaning:
+      'A line chart of plan and actual (total so far) month by month. The space between the lines is the gap.',
+  },
+  {
+    word: 'Mark as final (plan)',
+    meaning: 'Confirms an office’s plan so it is used for the monthly results.',
+  },
+  { word: 'Submit report', meaning: 'Marks an office’s month as done.' },
+  {
+    word: 'Close the month',
+    meaning:
+      'Makes a month’s figures final so they cannot change by mistake. Reopening needs a reason, which is recorded.',
+  },
+  {
+    word: 'Proof (MOV)',
+    meaning: 'Supporting files such as photos or signed reports attached to an activity.',
+  },
+  { word: 'Change history (audit log)', meaning: 'A record of who changed what and when.' },
+];
+
 export const GUIDES: Guide[] = [
   {
     key: 'agency_admin',
-    title: 'Agency administrator',
-    who: 'You set the agency up, approve plans, watch submissions and lock each month.',
+    title: 'Monitoring administrator',
+    who: 'You collect the figures from the offices you handle and enter everything yourself. Step-by-step (your start page) walks you through it with a progress bar.',
     sections: [
       {
-        heading: 'Set up (once)',
+        heading: 'Once: set up',
         steps: [
-          'Structure: organize your offices and name their levels. Use Groups to compare offices from different parts of the agency.',
-          'Users: add people and give each an office and a level — admin (can edit that office and everything beneath) or read-only.',
-          'Fiscal years: open the year, choose a scoring method, and set the report deadline. Select the question mark beside a setting for an example.',
-          'Alerts: set reminders and choose how far behind plan an office must be before an alert is sent. Report template: choose the presentation title, colours, and logo.',
+          'Step 1 — Offices: list the offices you monitor and which office is under which. Office groups let you compare offices from different parts of the agency (for example, island and mainland offices).',
+          'Step 2 — Years: add the year you monitor. The app creates its twelve months.',
+          'Optional: Users lets you give other people access (to view, or to enter their own office’s figures). You do not need it if you enter everything yourself.',
         ],
       },
       {
-        heading: 'Plans',
+        heading: 'Once a year: plans',
         steps: [
-          'Offices enter or upload their plans and submit them. Approvals shows plans waiting for review. Once approved, a plan is used to compare monthly progress.',
-          'To change an approved plan, create a new draft and have it approved. Months already finalized keep their original results.',
+          'Step 3 — Office plans: collect each office’s work and financial plan. For each office, press Start plan, type the activities, their target number per month and cost, and the output targets. You can also upload a filled-in Excel template.',
+          'When an office’s plan is complete, press Mark as final. Only final plans are used for the monthly results. To change a final plan later, revise it; closed months keep their results.',
         ],
       },
       {
         heading: 'Every month',
         steps: [
-          'Submissions shows which offices have reported. Return a report with a note if it needs changes.',
-          'After review, lock the month to make its results final and stop changes. Reopening a month requires a reason that is saved in the audit log.',
-          'Export to Excel or PowerPoint from the dashboard; files wait under My exports.',
+          'Step 4 — Monthly results: collect each office’s accomplishment report. Open the office, type what it did, give a short reason for anything behind plan, save, then Submit report to mark it as done.',
+          'Step 5 — Check and close: look over the dashboard and rankings. When the figures are right, close the month so they become final.',
+          'Step 6 — Download: the monthly report (Excel or PowerPoint), or the over-all performance presentation for the year. Files stay under Downloads.',
         ],
       },
       {

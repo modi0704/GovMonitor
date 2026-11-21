@@ -33,10 +33,10 @@ interface Board {
 }
 
 const STATUS = {
-  draft: 'Not submitted',
-  submitted: 'Submitted',
-  returned: 'Returned',
-  locked: 'Locked',
+  draft: 'Not done yet',
+  submitted: 'Done',
+  returned: 'Needs changes',
+  locked: 'Closed',
 };
 
 /** Submission board (P7.6): every office's status for one month; return, lock, unlock. */
@@ -60,7 +60,9 @@ export default function SubmissionBoardPage() {
   if (me && !me.is_agency_admin) {
     return (
       <section className="page">
-        <p className="notice">Only the agency administrator manages submissions and locking.</p>
+        <p className="notice">
+          Only the agency administrator sees who has reported and closes months.
+        </p>
       </section>
     );
   }
@@ -92,11 +94,14 @@ export default function SubmissionBoardPage() {
       : '';
     if (
       !window.confirm(
-        `Lock ${month}? This makes the month's results final for every office and stops report changes.${warning}`,
+        `Close ${month}? This makes the month's results final for every office and stops changes.${warning}`,
       )
     )
       return;
-    run(() => api.post(`periods/${b.period.id}/lock`), `${month} is locked.`);
+    run(
+      () => api.post(`periods/${b.period.id}/lock`),
+      `${month} is closed. Its figures are final.`,
+    );
   }
 
   function unlock() {
@@ -105,7 +110,7 @@ export default function SubmissionBoardPage() {
       `Why reopen ${month}? Offices can change their reports again. Final figures will be recalculated, and a copy of the previous results stays in the audit log.`,
     );
     if (!reason) return;
-    run(() => api.post(`periods/${b.period.id}/unlock`, { reason }), `${month} is unlocked.`);
+    run(() => api.post(`periods/${b.period.id}/unlock`, { reason }), `${month} is open again.`);
   }
 
   function returnReport(row: BoardRow) {
@@ -120,7 +125,7 @@ export default function SubmissionBoardPage() {
   return (
     <section className="page page-wide">
       <div className="page-header">
-        <h1>Submissions</h1>
+        <h1>Who has reported</h1>
         <div className="row">
           <label className="inline">
             Fiscal year
@@ -141,7 +146,7 @@ export default function SubmissionBoardPage() {
               {periods.map((p) => (
                 <option key={p.id} value={p.id}>
                   {monthYear(p.start_date)}
-                  {p.status === 'locked' ? ' (locked)' : ''}
+                  {p.status === 'locked' ? ' (closed)' : ''}
                 </option>
               ))}
             </select>
@@ -160,7 +165,7 @@ export default function SubmissionBoardPage() {
             <div>
               {b.period.status === 'locked' ? (
                 <span className="chip chip-sub-locked">
-                  Locked {dateTime(b.period.locked_at)} by {b.period.locked_by}
+                  Closed {dateTime(b.period.locked_at)} by {b.period.locked_by}
                 </span>
               ) : (
                 <span
@@ -180,20 +185,20 @@ export default function SubmissionBoardPage() {
                   className="btn btn-primary"
                   onClick={lock}
                   disabled={!b.period.can_lock}
-                  title={b.period.can_lock ? '' : 'Earlier months must be locked first'}
+                  title={b.period.can_lock ? '' : 'Close the earlier months first'}
                 >
-                  Lock {month}
+                  Close {month}
                 </button>
               )}
               {b.period.can_unlock && (
                 <button type="button" className="btn btn-danger" onClick={unlock}>
-                  Unlock {month}
+                  Reopen {month}
                 </button>
               )}
             </div>
           </div>
           {b.period.status === 'open' && !b.period.can_lock && (
-            <p className="muted small">Earlier months must be locked before this one.</p>
+            <p className="muted small">Close the earlier months first.</p>
           )}
           {b.not_submitted.length > 0 && b.period.status === 'open' && (
             <div className="form-message">

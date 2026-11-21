@@ -29,7 +29,7 @@ const SUBMISSION_TEXT = {
   draft: 'Not submitted yet',
   submitted: 'Submitted — waiting for review',
   returned: 'Returned for correction',
-  locked: 'Locked — final',
+  locked: 'Closed — final',
 };
 
 function num(v: string | null | undefined): number {
@@ -204,7 +204,7 @@ export default function MonthlyReportPage() {
   return (
     <section className="page page-full">
       <div className="page-header">
-        <h1>Monthly report</h1>
+        <h1>Monthly results</h1>
       </div>
       <div className="filters">
         <label>
@@ -226,7 +226,7 @@ export default function MonthlyReportPage() {
           </select>
         </label>
         <label>
-          Fiscal year
+          Year
           <select value={fyId ?? ''} onChange={(e) => choose({ fy: e.target.value, period: null })}>
             {years.data?.map((y) => (
               <option key={y.id} value={y.id}>
@@ -241,7 +241,7 @@ export default function MonthlyReportPage() {
             {periods.map((p) => (
               <option key={p.id} value={p.id}>
                 {monthYear(p.start_date)}
-                {p.status === 'locked' ? ' (locked)' : ''}
+                {p.status === 'locked' ? ' (closed)' : ''}
               </option>
             ))}
           </select>
@@ -255,8 +255,8 @@ export default function MonthlyReportPage() {
       )}
       {years.data?.length === 0 && (
         <p className="notice">
-          There is no fiscal year yet. The agency administrator opens one on the Fiscal years page;
-          then each office&apos;s approved plan appears here for monthly reporting.
+          There is no year yet. The agency administrator adds one on the Years page; then each
+          office&apos;s approved plan appears here for monthly reporting.
         </p>
       )}
       {report && !report.has_plan && (
@@ -280,7 +280,7 @@ export default function MonthlyReportPage() {
                   ` · submitted ${dateTime(report.submission.submitted_at)} by ${report.submission.submitted_by}`}
               </span>
               {report.period.status === 'locked' && (
-                <p className="muted small">This month is locked; its figures are final.</p>
+                <p className="muted small">This month is closed; its figures are final.</p>
               )}
             </div>
             <div className="row">

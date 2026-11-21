@@ -77,7 +77,7 @@ export default function ApprovalsPage() {
   return (
     <section className="page page-wide">
       <div className="page-header">
-        <h1>Plan approvals</h1>
+        <h1>Plans to approve</h1>
         <label className="inline">
           Fiscal year
           <select value={fyId ?? ''} onChange={(e) => setParams({ fy: e.target.value })}>

@@ -75,7 +75,7 @@ it('queues an export with the chosen scope, month and view, then offers the file
     await vi.advanceTimersByTimeAsync(4100);
     const link = await screen.findByRole('link', { name: 'Download most-RDS.xlsx' });
     expect(link).toHaveAttribute('href', '/api/v1/jobs/j1/download');
-    expect(screen.getByRole('link', { name: 'My exports' })).toHaveAttribute('href', '/exports');
+    expect(screen.getByRole('link', { name: 'Downloads' })).toHaveAttribute('href', '/exports');
   } finally {
     vi.useRealTimers();
   }
@@ -113,5 +113,41 @@ it('asks for slide groups when exporting a PowerPoint presentation', async () =>
       view: 'owner',
       groups: ['overall', 'offices', 'rankings'],
     },
+  });
+});
+
+it('queues the over-all performance deck for the year with its title', async () => {
+  const calls = mockApi({
+    'POST /api/v1/exports/pptx': { status: 202, body: job('queued', { kind: 'export_pptx' }) },
+    'GET /api/v1/jobs/j1': { body: job('queued', { kind: 'export_pptx' }) },
+  });
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter>
+      <ExportDialog
+        officeId="root"
+        officeLabel="Ministry"
+        periods={PERIODS}
+        periodId="dec"
+        view="owner"
+        canExportAgency
+        initialFormat="year"
+        defaultTitle="Over-all performance 2023"
+        onClose={() => {}}
+      />
+    </MemoryRouter>,
+  );
+  expect(screen.queryByLabelText('Scores of')).not.toBeInTheDocument();
+  const title = screen.getByLabelText('Title on the first slide');
+  await user.clear(title);
+  await user.type(title, "Ministry's over-all performance");
+  await user.click(screen.getByRole('button', { name: 'Prepare presentation' }));
+  expect(calls.find((c) => c.method === 'POST')?.body).toEqual({
+    scope: 'agency',
+    office_id: 'root',
+    period_id: 'dec',
+    view: 'owner',
+    style: 'year',
+    title: "Ministry's over-all performance",
   });
 });

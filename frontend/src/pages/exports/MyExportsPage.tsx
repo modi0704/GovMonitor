@@ -20,7 +20,7 @@ export default function MyExportsPage() {
 
   return (
     <section className="page">
-      <h1>My exports</h1>
+      <h1>Downloads</h1>
       <p className="muted">
         Exports are prepared in the background. Files stay here so you can download them again.
       </p>

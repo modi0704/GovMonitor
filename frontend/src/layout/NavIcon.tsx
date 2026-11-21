@@ -1,6 +1,7 @@
 /** Consistent, decorative line icons. The adjacent link text supplies the accessible name. */
 export default function NavIcon({ name }: { name: string }) {
   const paths: Record<string, string> = {
+    Steps: 'M4 6h2 M4 12h2 M4 18h2 M9 6h11 M9 12h11 M9 18h11',
     Dashboard: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
     Rankings: 'M4 20V12h4v8 M10 20V4h4v16 M16 20V8h4v12',
     'Monthly report': 'M6 3h12v18H6z M9 7h6 M9 11h6 M9 15h3',

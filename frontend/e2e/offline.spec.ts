@@ -10,6 +10,7 @@ test.use({ ignoreHTTPSErrors: true });
 
 const PAGES = [
   '/',
+  '/dashboard',
   '/rankings',
   '/reports',
   '/submissions',
@@ -53,7 +54,8 @@ test('every page and both exports stay on the site', async ({ page, baseURL }, i
     await page.waitForLoadState('networkidle');
   }
   await exportFile(page, 'Excel workbook', 'xlsx');
-  await exportFile(page, 'PowerPoint deck', 'pptx');
+  await exportFile(page, 'PowerPoint presentation for the month', 'pptx');
+  await exportFile(page, 'Over-all performance for the year', 'pptx');
 
   expect(outside, `requests outside ${site}:\n${outside.join('\n')}`).toEqual([]);
   expect(
@@ -63,7 +65,7 @@ test('every page and both exports stay on the site', async ({ page, baseURL }, i
 });
 
 async function exportFile(page: Page, format: string, ext: string) {
-  await page.goto('/');
+  await page.goto('/dashboard');
   await page.getByRole('button', { name: 'Export' }).click();
   const dialog = page.getByRole('dialog', { name: 'Export' });
   await dialog.getByLabel(new RegExp(format)).check();

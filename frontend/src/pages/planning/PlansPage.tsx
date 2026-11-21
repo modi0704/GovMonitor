@@ -77,9 +77,9 @@ export default function PlansPage() {
   return (
     <section className="page page-wide">
       <div className="page-header">
-        <h1>Plans</h1>
+        <h1>Office plans</h1>
         <label className="inline">
-          Fiscal year
+          Year
           <select value={fyId ?? ''} onChange={(e) => setParams({ fy: e.target.value })}>
             {years.data?.map((y) => (
               <option key={y.id} value={y.id}>
@@ -93,7 +93,7 @@ export default function PlansPage() {
       {years.data?.length === 0 && (
         <p className="notice">
           There is no fiscal year yet. The agency administrator creates one on the{' '}
-          <Link to="/fiscal-years">Fiscal years</Link> page.
+          <Link to="/fiscal-years">Years</Link> page.
         </p>
       )}
       {fyId && offices.data && (

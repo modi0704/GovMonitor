@@ -28,7 +28,7 @@ export default function AlertSettingsPage() {
   if (me && !me.is_agency_admin) {
     return (
       <section className="page">
-        <h1>Alerts</h1>
+        <h1>Reminders</h1>
         <p className="notice">Only the agency administrator can change alert settings.</p>
       </section>
     );
@@ -59,7 +59,7 @@ export default function AlertSettingsPage() {
 
   return (
     <section className="page">
-      <h1>Alerts</h1>
+      <h1>Reminders</h1>
       <p className="muted">
         Each morning, the app reminds offices about report deadlines and highlights missing or
         delayed work. Administrators also receive updates on reports, approvals, and final results.

@@ -3,6 +3,23 @@
 All notable changes. Versions follow semantic versioning: a new major version may need a manual
 step on update (described here); minor and patch versions update with `update.sh` alone.
 
+## Unreleased
+
+### Easier to use
+- **Step-by-step** start page for the monitoring administrator: six steps (offices, year, plans,
+  monthly results, check & close, report) with a progress bar, what to collect from the offices
+  before each step, and a checklist of every office. A guide bar on each related page shows the
+  step and links back. "Mark as final" confirms a plan in one go.
+- Plain-English menu and screens: Downloads, Office plans, Monthly results, Who has reported,
+  Years, Offices, Reminders, Report look, Change history; "gap" for variance, "close" for lock.
+  Rarely used settings are folded away. A word list on the Help page.
+
+### Reporting
+- **Over-all performance for the year**: a PowerPoint deck modelled on the year-end presentation —
+  over-all performance based on activities (PPAs) and on output indicators, panels for the offices
+  beneath, each office's activities month by month, indicators, and rankings by activities and by
+  output indicators.
+
 ## 1.0.0 — 2026-11-15
 
 First release.

@@ -5,7 +5,8 @@ import { useLeaveGuard } from '../lib/unsaved';
 import { useFocusableScrollRegions } from './useFocusableScrollRegions';
 import LoadingBar from './LoadingBar';
 import NotificationBell from './NotificationBell';
-import { NAV_ITEMS } from './nav';
+import GuideBar from './GuideBar';
+import { NAV_GROUPS, NAV_ITEMS } from './nav';
 import NavIcon from './NavIcon';
 
 const mainElement = () => document.querySelector<HTMLElement>('main.content');
@@ -29,32 +30,16 @@ export default function AppShell() {
     document.addEventListener('keydown', closeOnEscape);
     return () => document.removeEventListener('keydown', closeOnEscape);
   }, [menuOpen]);
-  const groups = [
-    { title: 'Monitor', labels: ['Dashboard', 'Rankings', 'My exports'] },
-    { title: 'Plan & report', labels: ['Plans', 'Approvals', 'Monthly report', 'Submissions'] },
-    {
-      title: 'Agency',
-      labels: [
-        'Fiscal years',
-        'Structure',
-        'Groups',
-        'Users',
-        'Alerts',
-        'Report template',
-        'Audit log',
-      ],
-    },
-    { title: 'Support', labels: ['User guide', 'Help'] },
-  ];
+  const visible = NAV_ITEMS.filter((item) => me && item.show(me));
   const activePage =
-    [...NAV_ITEMS]
+    [...visible]
       .sort((a, b) => b.to.length - a.to.length)
       .find((item) => item.to !== '/' && location.pathname.startsWith(item.to))?.label ??
     (location.pathname === '/account/security'
       ? 'Account security'
       : location.pathname === '/setup'
         ? 'Agency setup'
-        : 'Dashboard');
+        : (visible.find((item) => item.to === '/')?.label ?? 'Dashboard'));
   const role = me?.is_agency_admin
     ? 'Agency administrator'
     : me?.roles.some((r) => r.level === 'admin')
@@ -90,36 +75,46 @@ export default function AppShell() {
         </NavLink>
         <p className="sidebar-caption">AGENCY WORKSPACE</p>
         <nav className="mainnav" aria-label="Main">
-          {groups.map((group) => {
+          {NAV_GROUPS.map((group) => {
             const items = group.labels.flatMap((label) =>
-              NAV_ITEMS.filter((item) => item.label === label && me && item.show(me)),
+              visible.filter((item) => item.label === label),
             );
-            return items.length > 0 ? (
+            if (items.length === 0) return null;
+            const links = items.map((item) => (
+              <NavLink
+                key={`${item.to}-${item.label}`}
+                to={item.to}
+                end={item.to === '/'}
+                onClick={closeMenu}
+                className={({ isActive }) =>
+                  [item.desktopOnly ? 'desktop-only' : '', isActive ? 'active' : '']
+                    .filter(Boolean)
+                    .join(' ')
+                }
+              >
+                <NavIcon name={item.icon} />
+                <span>{item.label}</span>
+              </NavLink>
+            ));
+            if (group.folded) {
+              const holdsActive = items.some((item) => item.label === activePage);
+              return (
+                <details
+                  className="nav-group nav-fold"
+                  key={group.title}
+                  open={holdsActive || undefined}
+                >
+                  <summary className="nav-group-title">{group.title}</summary>
+                  {links}
+                </details>
+              );
+            }
+            return (
               <div className="nav-group" key={group.title}>
                 <p className="nav-group-title">{group.title}</p>
-                {items.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.to === '/'}
-                    onClick={closeMenu}
-                    className={({ isActive }) =>
-                      [
-                        item.desktopOnly ? 'desktop-only' : '',
-                        isActive || (item.to === '/' && location.pathname === '/dashboard')
-                          ? 'active'
-                          : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')
-                    }
-                  >
-                    <NavIcon name={item.label} />
-                    <span>{item.label}</span>
-                  </NavLink>
-                ))}
+                {links}
               </div>
-            ) : null;
+            );
           })}
         </nav>
         <div className="sidebar-footer">
@@ -146,7 +141,7 @@ export default function AppShell() {
           </div>
           <nav className="topnav" aria-label="Account">
             <NotificationBell />
-            <NavLink to="/account/security" className="account-link" aria-label={accountName}>
+            <NavLink to="/account/security" className="account-link">
               <span className="account-avatar" aria-hidden="true">
                 {initials}
               </span>
@@ -180,6 +175,7 @@ export default function AppShell() {
         )}
         <LoadingBar />
         <main className="content" id="main-content" tabIndex={-1}>
+          {me?.is_agency_admin && <GuideBar />}
           <Outlet />
         </main>
         <footer className="workspace-footer">

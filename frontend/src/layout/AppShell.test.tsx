@@ -45,9 +45,9 @@ it('keeps agency management destinations out of a read-only user navigation', as
   );
   await screen.findByRole('heading', { name: 'Help' });
   expect(screen.queryByRole('link', { name: 'Users' })).not.toBeInTheDocument();
-  expect(screen.queryByRole('link', { name: 'Approvals' })).not.toBeInTheDocument();
-  expect(screen.queryByRole('link', { name: 'Submissions' })).not.toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'My exports' })).toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Plans to approve' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Who has reported' })).not.toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Downloads' })).toBeInTheDocument();
 });
 
 it('the first Tab reaches a skip link that leads to the page content', async () => {

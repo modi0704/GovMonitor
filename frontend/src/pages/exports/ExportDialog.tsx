@@ -11,7 +11,7 @@ import { isPending, SLIDE_GROUPS, STATUS_LABEL, type Job, type SlideGroup } from
 export const JOB_POLL_MS = 2000;
 
 type Scope = 'office' | 'subtree' | 'agency';
-type Format = 'xlsx' | 'pptx';
+type Format = 'xlsx' | 'pptx' | 'year';
 
 /** Export dialog (P9.4, P10.3): format, scope, month, view (and slide groups for a deck); queues
  * the export and follows the job. */
@@ -22,6 +22,8 @@ export default function ExportDialog({
   periodId,
   view,
   canExportAgency,
+  initialFormat = 'xlsx',
+  defaultTitle = 'Over-all performance',
   onClose,
 }: {
   officeId: string;
@@ -30,11 +32,16 @@ export default function ExportDialog({
   periodId: string;
   view: 'owner' | 'implementing';
   canExportAgency: boolean;
+  initialFormat?: Format;
+  defaultTitle?: string;
   onClose: () => void;
 }) {
-  const [format, setFormat] = useState<Format>('xlsx');
+  const [format, setFormat] = useState<Format>(initialFormat);
+  const [title, setTitle] = useState(defaultTitle);
   const [groups, setGroups] = useState<SlideGroup[]>(SLIDE_GROUPS.map((g) => g.key));
-  const [scope, setScope] = useState<Scope>('office');
+  const [scope, setScope] = useState<Scope>(
+    initialFormat === 'year' && canExportAgency ? 'agency' : 'office',
+  );
   const [month, setMonth] = useState(periodId);
   const [chosenView, setChosenView] = useState(view);
   const [job, setJob] = useState<Job | null>(null);
@@ -61,12 +68,17 @@ export default function ExportDialog({
     try {
       const body = { scope, office_id: officeId, period_id: month, view: chosenView };
       setJob(
-        await api.post<Job>(
-          `exports/${format}`,
-          format === 'pptx'
-            ? { ...body, groups: SLIDE_GROUPS.map((g) => g.key).filter((k) => groups.includes(k)) }
-            : body,
-        ),
+        format === 'year'
+          ? await api.post<Job>('exports/pptx', { ...body, style: 'year', title })
+          : await api.post<Job>(
+              `exports/${format}`,
+              format === 'pptx'
+                ? {
+                    ...body,
+                    groups: SLIDE_GROUPS.map((g) => g.key).filter((k) => groups.includes(k)),
+                  }
+                : body,
+            ),
       );
     } catch (err) {
       setError(errorMessage(err));
@@ -92,7 +104,7 @@ export default function ExportDialog({
             </p>
           )}
           <p className="muted small">
-            Every export also stays in <Link to="/exports">My exports</Link>.
+            Every file also stays in <Link to="/exports">Downloads</Link>.
           </p>
           <FormError message={error} />
         </div>
@@ -116,9 +128,25 @@ export default function ExportDialog({
                 checked={format === 'pptx'}
                 onChange={() => setFormat('pptx')}
               />
-              PowerPoint presentation (ready to share)
+              PowerPoint presentation for the month (ready to share)
+            </label>
+            <label className="check">
+              <input
+                type="radio"
+                name="format"
+                checked={format === 'year'}
+                onChange={() => setFormat('year')}
+              />
+              Over-all performance for the year (PowerPoint, based on activities and on output
+              indicators, with rankings)
             </label>
           </fieldset>
+          {format === 'year' && (
+            <label>
+              Title on the first slide
+              <input value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />
+            </label>
+          )}
           <fieldset className="stack">
             <legend>What to include</legend>
             <label className="check">
@@ -152,7 +180,7 @@ export default function ExportDialog({
             )}
           </fieldset>
           <label>
-            Month
+            {format === 'year' ? 'Figures as of the end of' : 'Month'}
             <select value={month} onChange={(e) => setMonth(e.target.value)}>
               {periods.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -162,16 +190,18 @@ export default function ExportDialog({
               ))}
             </select>
           </label>
-          <label>
-            Scores of
-            <select
-              value={chosenView}
-              onChange={(e) => setChosenView(e.target.value as 'owner' | 'implementing')}
-            >
-              <option value="owner">Each office's own plan (with offices beneath)</option>
-              <option value="implementing">Activities each office carries out</option>
-            </select>
-          </label>
+          {format !== 'year' && (
+            <label>
+              Scores of
+              <select
+                value={chosenView}
+                onChange={(e) => setChosenView(e.target.value as 'owner' | 'implementing')}
+              >
+                <option value="owner">Each office's own plan (with offices beneath)</option>
+                <option value="implementing">Activities each office carries out</option>
+              </select>
+            </label>
+          )}
           {format === 'pptx' && (
             <fieldset className="stack">
               <legend>Slides</legend>
@@ -202,7 +232,7 @@ export default function ExportDialog({
               className="btn btn-primary"
               disabled={busy || (format === 'pptx' && groups.length === 0)}
             >
-              {format === 'pptx' ? 'Prepare presentation' : 'Prepare workbook'}
+              {format === 'xlsx' ? 'Prepare workbook' : 'Prepare presentation'}
             </button>
           </div>
         </form>

@@ -64,7 +64,7 @@ export default function ActivitiesPanel({
                 <th>Weight</th>
                 <th>Target to date</th>
                 <th>Done to date</th>
-                <th>Variance</th>
+                <th>Gap</th>
                 <th>Status</th>
                 <th>Reason for delay</th>
               </tr>

@@ -37,10 +37,9 @@ it("opens on the reader's own role and switches to the others", async () => {
 
 it('an agency administrator starts on their guide; a viewer on theirs', async () => {
   renderHelp({ is_agency_admin: true });
-  expect(await screen.findByRole('tab', { name: 'Agency administrator (you)' })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  );
+  expect(
+    await screen.findByRole('tab', { name: 'Monitoring administrator (you)' }),
+  ).toHaveAttribute('aria-selected', 'true');
 });
 
 it('help tips open on focus, describe the setting and close with Escape', async () => {

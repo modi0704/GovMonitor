@@ -145,7 +145,7 @@ export default function DashboardPage() {
       )}
       <div className="filters">
         <label>
-          Fiscal year
+          Year
           <select value={fyId ?? ''} onChange={(e) => go({ fy: e.target.value, period: null })}>
             {years.data?.map((y) => (
               <option key={y.id} value={y.id}>
@@ -192,8 +192,8 @@ export default function DashboardPage() {
       <FormError message={error ?? years.error} />
       {years.data?.length === 0 && (
         <p className="notice">
-          There is no fiscal year yet. The agency administrator opens one on the Fiscal years page,
-          offices enter their plans, and results appear here once plans are approved.
+          There is no year yet. The agency administrator adds one on the Years page, offices enter
+          their plans, and results appear here once plans are approved.
         </p>
       )}
       {data && !data.has_result && (
@@ -343,7 +343,7 @@ export default function DashboardPage() {
                       <th>Period</th>
                       <th>Plan</th>
                       <th>Actual</th>
-                      <th>Variance</th>
+                      <th>Gap</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -389,7 +389,7 @@ export default function DashboardPage() {
                     <th>Office</th>
                     <th>Plan to date</th>
                     <th>Actual to date</th>
-                    <th>Variance</th>
+                    <th>Gap</th>
                     <th>Status</th>
                     <th>Rank</th>
                     <th>Funds</th>

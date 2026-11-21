@@ -54,6 +54,6 @@ it.each(['/structure', '/users', '/audit', '/reports', '/plans/p1', '/settings/a
 it('on a computer the page itself is shown', async () => {
   phone(false);
   renderAt('/audit');
-  expect(await screen.findByRole('heading', { name: 'Audit log' })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'Change history' })).toBeInTheDocument();
   expect(screen.queryByText('Open on a computer to edit')).not.toBeInTheDocument();
 });

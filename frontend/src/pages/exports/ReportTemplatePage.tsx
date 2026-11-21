@@ -34,7 +34,7 @@ export default function ReportTemplatePage() {
   if (me && !me.is_agency_admin) {
     return (
       <section className="page">
-        <h1>Report template</h1>
+        <h1>Report look</h1>
         <p className="notice">Only the agency administrator can change the report template.</p>
       </section>
     );
@@ -91,7 +91,7 @@ export default function ReportTemplatePage() {
 
   return (
     <section className="page">
-      <h1>Report template</h1>
+      <h1>Report look</h1>
       <p className="muted">
         Choose the appearance of downloaded PowerPoint reports.
         {data?.customised ? '' : 'You are using the standard design.'}

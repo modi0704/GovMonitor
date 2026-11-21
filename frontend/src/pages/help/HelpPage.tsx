@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/useAuth';
-import { GUIDES, type Guide } from './guides';
+import { GUIDES, WORDS, type Guide } from './guides';
 
 /** In-app help (P12.6): a one-page guide per role, the reader's own role first. */
 export default function HelpPage() {
@@ -48,6 +48,18 @@ export default function HelpPage() {
             </ol>
           </div>
         ))}
+      </div>
+      <div className="card">
+        <h2 id="word-list">Word list</h2>
+        <p className="muted">What the words in the app and the reports mean, in plain English.</p>
+        <dl className="word-list">
+          {WORDS.map((w) => (
+            <div key={w.word}>
+              <dt>{w.word}</dt>
+              <dd>{w.meaning}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

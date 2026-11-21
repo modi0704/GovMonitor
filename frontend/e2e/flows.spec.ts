@@ -140,7 +140,7 @@ test.describe.serial('desktop: the five flows', () => {
     const years = await api<{ id: string; status: string }[]>(page, 'GET', 'fiscal-years');
     fyId = years[0]!.id;
     await page.goto(`/fiscal-years/${fyId}/scoring`);
-    await page.getByRole('spinbutton', { name: 'Monthly cutoff day' }).fill('12');
+    await page.getByRole('spinbutton', { name: 'Monthly report deadline day' }).fill('12');
     await page.getByRole('button', { name: /^Save/ }).click();
     await expect(page.getByText(/Saved|saved/).first()).toBeVisible();
     const fy = await api<{ periods: { id: string; month_index: number }[] }>(
@@ -274,9 +274,11 @@ test.describe.serial('desktop: the five flows', () => {
     chief.on('dialog', (d) => d.accept());
     await signIn(chief, admin);
     await chief.goto(`/submissions?fy=${fyId}&period=${jan.id}`);
-    await expect(chief.getByRole('row', { name: /PME/ }).getByText(/Submitted/)).toBeVisible();
-    await chief.getByRole('button', { name: /^Lock / }).click();
-    await expect(chief.getByText(/is locked/).first()).toBeVisible();
+    await expect(
+      chief.getByRole('row', { name: /PME/ }).getByText('Done', { exact: true }),
+    ).toBeVisible();
+    await chief.getByRole('button', { name: /^Close / }).click();
+    await expect(chief.getByText(/is closed/).first()).toBeVisible();
     await chief.goto(`/dashboard?fy=${fyId}&period=${jan.id}`);
     await expect(chief.getByText('FINAL', { exact: true })).toBeVisible();
     await chief.close();
@@ -290,7 +292,9 @@ test.describe.serial('desktop: the five flows', () => {
     await signIn(page, viewer);
     await page.goto(`/dashboard?fy=${fyId}&period=${jan.id}`);
     await expect(page.getByRole('heading', { name: 'Department of Smoke' })).toBeVisible();
-    await expect(page.getByText('Progress to date: plan and actual (cumulative)')).toBeVisible();
+    await expect(
+      page.getByRole('img', { name: 'Progress to date: actual and planned history' }),
+    ).toBeVisible();
     await page.goto(`/rankings?fy=${fyId}&period=${jan.id}`);
     await expect(page.getByRole('heading', { name: 'Rankings' })).toBeVisible();
     await page.goto(`/dashboard?fy=${fyId}&period=${jan.id}`);
@@ -309,7 +313,8 @@ test.describe.serial('desktop: the five flows', () => {
     await page.goto(`/dashboard?fy=${fyId}&period=${jan.id}`);
     for (const [format, ext] of [
       ['Excel workbook', 'xlsx'],
-      ['PowerPoint deck', 'pptx'],
+      ['PowerPoint presentation for the month', 'pptx'],
+      ['Over-all performance for the year', 'pptx'],
     ] as const) {
       await page.getByRole('button', { name: 'Export' }).click();
       const dialog = page.getByRole('dialog', { name: 'Export' });
@@ -323,7 +328,7 @@ test.describe.serial('desktop: the five flows', () => {
       await page.keyboard.press('Escape');
     }
     await page.goto('/exports');
-    await expect(page.getByRole('link', { name: /\.pptx$/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /-overall\.pptx$/ })).toBeVisible();
   });
 });
 

@@ -72,7 +72,7 @@ export default function AuditPage() {
   if (me && !me.is_agency_admin) {
     return (
       <section className="page">
-        <h1>Audit log</h1>
+        <h1>Change history</h1>
         <p className="notice">Only the agency administrator can view the audit log.</p>
       </section>
     );
@@ -105,7 +105,7 @@ export default function AuditPage() {
   return (
     <section className="page page-wide">
       <div className="page-header">
-        <h1>Audit log</h1>
+        <h1>Change history</h1>
         <a className="btn" href={`${API_BASE}/audit-log/export.csv?${query(applied)}`} download>
           Download CSV
         </a>

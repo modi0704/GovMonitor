@@ -93,7 +93,7 @@ export default function StructurePage() {
   return (
     <section className="page page-wide">
       <div className="page-header">
-        <h1>Structure</h1>
+        <h1>Offices</h1>
         {isAdmin && (
           <button type="button" className="btn" onClick={() => setDialog({ kind: 'levels' })}>
             Level names

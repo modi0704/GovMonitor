@@ -17,6 +17,7 @@ from apps.accounts import permissions as perm
 from apps.planning.models import FiscalYear, Plan, ReportingPeriod
 from apps.reporting.models import OfficeSubmission
 from apps.structure.models import Office
+from apps.structure.ordering import tree_key
 from apps.tenancy.models import Agency
 
 DONE_REPORT = (OfficeSubmission.Status.SUBMITTED, OfficeSubmission.Status.LOCKED)
@@ -46,6 +47,9 @@ def _office(o: Office) -> dict:
 
 
 class ProgressView(APIView):
+    """GET ``?fiscal_year=&period=`` — the six guided steps, which are done, and the per-office checklist
+    of plans and of the chosen month (agency administrator)."""
+
     permission_classes = [perm.IsAgencyAdmin]
 
     def get(self, request):
@@ -62,7 +66,9 @@ class ProgressView(APIView):
                 years[0] if years else None
             )
 
-        offices = list(Office.objects.filter(is_active=True).order_by("path"))
+        offices = list(Office.objects.filter(is_active=True))
+        by_id = {str(o.id): o for o in offices}
+        offices.sort(key=lambda o: tree_key(o, by_id))
         root = next((o for o in offices if o.parent_id is None), None)
         parents = {o.parent_id for o in offices if o.parent_id}
         sub_offices = [o for o in offices if o.parent_id is not None]

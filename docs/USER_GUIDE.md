@@ -1,13 +1,16 @@
 # GovMonitor
 ## Detailed User Guide & SOP
 
-Edition 2.3 | 17 November 2026
+Edition 3.0 | 21 November 2026
 
 For first-time office staff, reviewers, managers, and agency administrators.
 
 ## Contents
 
 1. [Overview & Roles](#overview--roles)
+1. [Step-by-Step: The Monitoring Routine (Start Here)](#step-by-step-the-monitoring-routine-start-here)
+1. [Over-All Performance Presentation for the Year](#over-all-performance-presentation-for-the-year)
+1. [Word List: Plain Meanings](#word-list-plain-meanings)
 2. [Getting Started: Sign In & Password Help](#getting-started-sign-in--password-help)
 3. [Account Security & Personal Email Alerts](#account-security--personal-email-alerts)
 4. [Your Workspace: Navigation & Shared Controls](#your-workspace-navigation--shared-controls)
@@ -59,7 +62,7 @@ This guide explains the screens, editable fields, buttons, links, choices, and c
 
 ### The reporting cycle
 
-Prepare the agency and year. Prepare a plan. Submit and approve the plan. Enter the month's completed work. Save and attach proof. Submit the monthly report. Review and correct it. Lock the month. Check and download final results.
+**Simplest way:** the monitoring administrator follows **Step-by-step** and enters everything. Otherwise: prepare the agency and year. Prepare a plan. Submit and approve the plan. Enter the month's completed work. Save and attach proof. Submit the monthly report. Review and correct it. Lock the month. Check and download final results.
 
 **Save, submit, and lock are different:** Save keeps your entries. Submit sends them for review and stops editing. Lock freezes a month's results for the whole agency.
 
@@ -68,6 +71,69 @@ Prepare the agency and year. Prepare a plan. Submit and approve the plan. Enter 
 This edition describes the updated navigation and controls. Actual screenshots of the redesigned app appear at the end. They show the Sample Ministry training data, which differs from the worked example in this guide.
 
 **Start here:** First-time users should read Getting Started, Your Workspace, and the section for their task. Agency administrators should also read Setup, Fiscal Years, and Scoring Settings before opening reporting.
+
+<!-- page -->
+
+## Step-by-Step: The Monitoring Routine (Start Here)
+
+**Who:** The monitoring administrator (agency administrator) — the one person who enters everything. **Open:** the start page, or **Step-by-step** at the top of the menu.
+
+You do not need the offices to sign in. Collect the figures from the offices you handle (for example your provincial offices and divisions), then type them in here. The page shows a **progress bar** with six numbered steps. A green tick means the step is done; the ringed number is the step you are on. Select any step to jump to it, or use **Next** and **Back** at the bottom.
+
+| Step | What to collect from the offices first | What to do in the app | Done when |
+|---|---|---|---|
+| 1. Offices | The names of the offices and which office is under which | **Open the offices** (or **Use the setup wizard** the first time) | Your offices are listed |
+| 2. Year | The year to monitor | **Add the year**; the app creates its twelve months | A year exists |
+| 3. Plans | Each office's work and financial plan: activities, target number per month, cost, output targets | For each office: **Start plan**, type the plan (or import the Excel template), then **Mark as final** | Every office's plan is **Final** |
+| 4. Monthly results | Each office's accomplishment report, reasons for delays, proof if required | For each office: **Enter results**, type what it did, **Save**, then **Submit report** | Every office shows **Done** for the month |
+| 5. Check & close | — | **Open the dashboard**, check the figures, then **Close** the month | The month is **closed** (final) |
+| 6. Report | — | **Over-all performance for the year** or **Monthly report** | — |
+
+Choose the **Year** and **Month** at the top of the page; the checklist follows your choice. While you work on a page that belongs to a step (for example Office plans or Monthly results), a green bar at the top shows **Step N of 6** with **Back to the steps** and **Next** links, so you always know where you are.
+
+**Mark as final** confirms a plan in one go (it is submitted and approved at once). Other people's accounts, approvals and returns still exist under **Settings** for agencies that want offices to enter their own figures, but you do not need them.
+
+<!-- page -->
+
+## Over-All Performance Presentation for the Year
+
+**Who:** Agency administrator and anyone who can export the whole agency. **Open:** step 6 of **Step-by-step** → **Over-all performance for the year**, or **Export** on the dashboard → **Over-all performance for the year (PowerPoint)**.
+
+Choose the month the figures are **as of** (usually December), and type the **Title on the first slide**, for example *Ministry's over-all performance*. The presentation follows the agency's year-end slides:
+
+| Slide | What it shows |
+|---|---|
+| Title | Agency, your title, "As of December 31, 2023" (the last day of the chosen month) |
+| Over-all | Two panels. **Based on activities (PPAs):** plan, actual, gap, status, funds remaining (% and amount) and the S-curve with plan, actual and gap lines. **Based on output indicators:** target, share reached, gap, status and a month-by-month line. Underneath, one small panel per office directly beneath (for example Operations, Support to Operations, General Administration). |
+| Offices beneath | For every office that has offices under it: a small panel per office — plan, actual, gap, status, funds remaining, output targets reached. |
+| Each office | Its dashboard (tiles, S-curve, funds), its **activities by month** (dark cell = month planned, with the planned number; yellow cell = month with an accomplishment, with the number done) and its output indicators. |
+| Rankings | **Based on activities** and **based on output indicators**, for each set of offices compared together (offices under the same parent and your office groups). Sets where nobody has a result yet are left out. |
+| Closing | Thank you. |
+
+Colours and the logo come from **Settings → Report look**. The file waits under **Downloads**.
+
+<!-- page -->
+
+## Word List: Plain Meanings
+
+The same list is on **Help and word list**.
+
+| Word in the app | Meaning |
+|---|---|
+| Plan | What an office said it would do this year: its activities, how many each month, and their cost. |
+| Activity (PPA) | One piece of planned work — a program, project or activity — with a yearly target number. |
+| Actual | What the office really did, as reported each month. |
+| Plan % / Actual % (total so far) | How much of the year's work should be done by this month, and how much is done. Bigger, costlier activities count for more. Older screens call this *cumulative*. |
+| Gap | Actual minus plan (also called *variance*). Below zero = behind plan. |
+| Status | ADVANCED (ahead), ON-TIME, or DELAYED (behind), from the gap. |
+| Output indicator / output target | A result counted over the year, such as "number of teachers trained", with a yearly target. |
+| Funds remaining | Budget not yet used, estimated from the work done or from amounts entered. |
+| S-curve | Line chart of plan and actual, total so far, month by month. |
+| Close the month | Makes a month's figures final (older name: *lock*). Reopen needs a reason. |
+| Proof (MOV) | Supporting files such as photos or signed reports. |
+| Change history | Who changed what and when (older name: *audit log*). |
+
+**Menu names in this edition:** Step-by-step (new), Downloads (was My exports), Office plans (Plans), Monthly results (Monthly report), Who has reported (Submissions), and under **Settings**: Offices (Structure), Office groups (Groups), Years (Fiscal years), Users, Plans to approve (Approvals), Reminders (Alerts), Report look (Report template), Change history (Audit log). Sections further down may still use the older names.
 
 <!-- page -->
 
@@ -127,10 +193,11 @@ Enabling personal email alerts does not enable email for the agency. If the agen
 
 | Group / control | Destinations or result |
 |---|---|
-| Monitor | Dashboard, Rankings, and My exports. Use these to follow and share results. |
-| Plan & report | Plans, Approvals, Monthly report, and Submissions. Approval and submission management appear for agency administrators. |
-| Agency | Fiscal years, Structure, Groups, Users, Alerts, Report template, and Audit log. Management choices depend on your role. |
-| Support / Help | Short instructions by role. |
+| Start here | **Step-by-step** (agency administrator): the guided routine with the progress bar. It is also the administrator's start page. |
+| See results | Dashboard, Rankings, and Downloads. Use these to follow and share results. |
+| Enter data | Office plans, Monthly results, and Who has reported (agency administrator). |
+| Settings (select to open) | Offices, Office groups, Years, Users, Plans to approve, Reminders, Report look, and Change history. Management choices depend on your role. |
+| Help / Help and word list | Short instructions by role and the plain meanings of the words used. |
 | Support / User guide | Search the complete guide, read any section, print it, or download the PDF. |
 | GovMonitor name and logo | Return to the start page. This usually shows the dashboard or setup reminders. |
 | Agency name and page name | Confirm where you are working. These headings do not switch agencies. |

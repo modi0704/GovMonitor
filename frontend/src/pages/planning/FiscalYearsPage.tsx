@@ -40,7 +40,7 @@ export default function FiscalYearsPage() {
   return (
     <section className="page">
       <div className="page-header">
-        <h1>Fiscal years</h1>
+        <h1>Years</h1>
         {isAdmin && (
           <button type="button" className="btn btn-primary" onClick={() => setCreating(true)}>
             New fiscal year

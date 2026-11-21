@@ -163,7 +163,7 @@ Generated from the code by `tools/api_docs.py`; do not edit by hand.
 | GET | `/api/v1/jobs/{job_id}` | `job` | One export or import job: status, result summary, `download_url` when done. |
 | GET | `/api/v1/jobs/{job_id}/download` | `job-download` | Download a finished job's file (audited). |
 | POST | `/api/v1/exports/xlsx` | `export-xlsx` | POST {scope: office\|subtree\|agency, office_id, period_id, view: owner\|implementing}. |
-| POST | `/api/v1/exports/pptx` | `export-pptx` | POST {scope, office_id, period_id, view, groups: [overall\|offices\|rankings\|indicators]}. |
+| POST | `/api/v1/exports/pptx` | `export-pptx` | POST {scope, office_id, period_id, view, groups: [overall\|offices\|rankings\|indicators]}, or {…, style: "year", title} for the year's over-all performance deck. |
 | GET | `/api/v1/imports/plan-template` | `import-plan-template` | GET ?fiscal_year_id[&office_id] — the import template: the office sheet with headers only. |
 | POST | `/api/v1/imports/plan` | `import-plan` | POST multipart {file, office_id, fiscal_year_id} — queue the import of a draft plan. |
 | GET | `/api/v1/export-templates/{kind}` | `export-template` | GET the effective settings; PATCH some of them; DELETE to go back to the system default. |
@@ -189,6 +189,12 @@ Generated from the code by `tools/api_docs.py`; do not edit by hand.
 | Method | Path | Name | What it does |
 |---|---|---|---|
 | GET | `/api/v1/health` | `health` | Liveness and readiness: database, storage, worker heartbeat, deployment mode. No sign-in. |
+
+## Other
+
+| Method | Path | Name | What it does |
+|---|---|---|---|
+| GET | `/api/v1/progress` | `progress` | GET ``?fiscal_year=&period=`` — the six guided steps, which are done, and the per-office checklist of plans and of the chosen month (agency administrator). |
 
 ## Platform owners (multi-agency mode only)
 

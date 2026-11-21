@@ -83,7 +83,7 @@ export default function RankingsPage() {
       </div>
       <div className="filters">
         <label>
-          Fiscal year
+          Year
           <select value={fyId ?? ''} onChange={(e) => setParams({ fy: e.target.value })}>
             {years.data?.map((y) => (
               <option key={y.id} value={y.id}>

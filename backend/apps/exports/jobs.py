@@ -36,6 +36,19 @@ def export_pptx(job: Job) -> dict:
 
     sc = export_scope.resolve(job.params)
     settings = templates.effective("pptx")
+    if job.params.get("style") == "year":
+        from apps.exports import pptx_year
+
+        data, summary = pptx_year.build(
+            sc,
+            title=job.params.get("title", ""),
+            settings=settings,
+            logo=templates.logo_bytes(settings),
+            user=job.requested_by,
+        )
+        name = file_name(sc, "pptx").replace(".pptx", "-overall.pptx")
+        storage.store_result(job, name, data)
+        return {"file_name": name, "slides": summary["slides"], "offices": summary["offices"]}
     data, summary = pptx_writer.build(
         sc,
         groups=tuple(job.params.get("groups") or SLIDE_GROUPS),

@@ -36,9 +36,19 @@ class XlsxExportView(APIView):
 
 
 class PptxExportView(APIView):
-    """POST {scope, office_id, period_id, view, groups: [overall|offices|rankings|indicators]}."""
+    """POST {scope, office_id, period_id, view, groups: [overall|offices|rankings|indicators]}, or
+    {…, style: "year", title} for the year's over-all performance deck."""
 
     def post(self, request):
+        style = request.data.get("style") or "monthly"
+        if style not in ("monthly", "year"):
+            message = "Choose the monthly report or the over-all performance deck."
+            return Response({"style": [message]}, status=400)
+        if style == "year":
+            title = request.data.get("title") or ""
+            if not isinstance(title, str) or len(title.strip()) > 120:
+                return Response({"title": ["At most 120 characters."]}, status=400)
+            return queue_export(request, Job.Kind.EXPORT_PPTX, {"style": "year", "title": title.strip()})
         groups = request.data.get("groups") or list(SLIDE_GROUPS)
         if not isinstance(groups, list) or not groups or any(g not in SLIDE_GROUPS for g in groups):
             return Response(

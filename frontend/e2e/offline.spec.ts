@@ -29,8 +29,9 @@ const PAGES = [
   '/account/security',
 ];
 
-test('every page and both exports stay on the site', async ({ page, baseURL }, info) => {
+test('every page and every export stays on the site', async ({ page, baseURL }, info) => {
   test.skip(info.project.name !== 'desktop', 'desktop run is enough here');
+  test.setTimeout(240_000); // every page, then three exports that each wait for the worker
   const site = new URL(baseURL!).origin;
   const outside: string[] = [];
   const failed: string[] = [];

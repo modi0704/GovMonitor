@@ -61,7 +61,7 @@ if docker compose --env-file .env exec -T web python -c \
   echo "the containers can still reach the internet" >&2; exit 1
 fi
 echo "offline: containers cannot reach the internet"
-docker compose --env-file .env exec -T web entrypoint.sh manage seed_demo >/dev/null
+docker compose --env-file .env exec -T -e DJANGO_SETTINGS_MODULE=config.settings.dev web entrypoint.sh manage seed_demo >/dev/null
 lic=$(curl -fsS http://localhost:8000/api/v1/health)
 echo "offline: $lic"
 cd - >/dev/null

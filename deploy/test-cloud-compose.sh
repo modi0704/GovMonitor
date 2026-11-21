@@ -58,7 +58,7 @@ for _ in $(seq 1 60); do
 done
 curl -fsS "http://localhost:$WEB_PORT/api/v1/health"; echo
 
-$COMPOSE exec -T web entrypoint.sh manage seed_demo >/dev/null
+$COMPOSE exec -T -e DJANGO_SETTINGS_MODULE=config.settings.dev web entrypoint.sh manage seed_demo >/dev/null
 $COMPOSE exec -T web entrypoint.sh manage shell -c "
 from apps.tenancy.models import Agency
 from apps.tenancy import context

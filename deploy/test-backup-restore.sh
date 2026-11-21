@@ -27,7 +27,7 @@ files() {  # stored files, without the worker's heartbeat (it changes every few 
 
 $COMPOSE up -d
 wait_healthy
-$COMPOSE exec -T web entrypoint.sh manage seed_demo >/dev/null
+$COMPOSE exec -T -e DJANGO_SETTINGS_MODULE=config.settings.dev web entrypoint.sh manage seed_demo >/dev/null
 # A stored file to carry across: an export produced by the worker.
 $COMPOSE exec -T web entrypoint.sh manage shell -c "
 from apps.tenancy.models import Agency

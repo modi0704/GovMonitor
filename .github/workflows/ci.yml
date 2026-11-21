@@ -134,7 +134,9 @@ jobs:
         run: deploy/test-backup-restore.sh
       - name: Offline bundle — install, update, automatic rollback
         run: |
-          make down
+          # The bundle installs under the same compose project; start it on empty volumes (the stack
+          # above used other database passwords).
+          docker compose -f deploy/docker-compose.yml down -v
           deploy/test-offline-bundle.sh
       - uses: actions/setup-node@v4
         with:

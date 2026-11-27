@@ -11,6 +11,9 @@ it('shows only the user guide, with PDF and print options and no command or prac
     '/user-guide/USER_GUIDE.pdf',
   );
   expect(
+    screen.getByRole('link', { name: 'Practice guide with sample data (PDF)' }),
+  ).toHaveAttribute('href', '/user-guide/USER_GUIDE_WITH_SAMPLE_DATA.pdf');
+  expect(
     screen.getAllByRole('link').filter((link) => link.getAttribute('href')?.endsWith('.txt')),
   ).toHaveLength(0);
   expect(screen.getByRole('button', { name: 'Print section' })).toBeInTheDocument();

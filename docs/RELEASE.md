@@ -20,8 +20,10 @@ For the person who publishes a GovMonitor version. Every step is required.
 3. Re-generate the API reference if routes changed: `cd backend && .venv/bin/python ../tools/api_docs.py`
    (the test suite fails otherwise).
 4. Check `docs/THIRD_PARTY.md` against the lockfiles (licence rule, MASTERPLAN 5.2).
-5. If `docs/USER_GUIDE.md` changed, rebuild its PDF with `tools/user_guide_pdf.sh` (needs pandoc
-   and the frontend's Playwright Chromium) and commit `docs/user-guide/USER_GUIDE.pdf`.
+5. If `docs/USER_GUIDE.md` or `docs/USER_GUIDE_WITH_SAMPLE_DATA.md` changed, rebuild the PDFs with
+   `tools/user_guide_pdf.sh` (needs pandoc and the frontend's Playwright Chromium) and commit
+   `docs/user-guide/*.pdf`. If the screens or the scoring changed, redo the practice run in the
+   sample-data guide and check that its expected results still match.
 6. Commit, then tag and push the tag: `git tag -a v1.0.0 -m "GovMonitor 1.0.0"` and
    `git push origin v1.0.0`. The **release** workflow builds the image `govmonitor:<version>` and
    the offline bundle `govmonitor-offline-<version>.tar.gz` and attaches both to the run.

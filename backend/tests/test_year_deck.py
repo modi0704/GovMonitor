@@ -82,3 +82,53 @@ def test_indicator_ranking_shares_ranks_on_ties():
     )
     rows = deck.indicator_ranking_rows(offices)
     assert [(r[0], r[1]) for r in rows] == [(1, "B B"), (2, "A A"), (2, "C C"), ("—", "D D")]
+
+
+@pytest.mark.django_db(databases=["default", "owner"], transaction=True)
+def test_output_indicators_are_compared_with_the_plan_so_far():
+    """February: 105 of 600 reached (17.50%) against 100 planned so far (16.67%) → ahead, not −82%."""
+    from tests.reporting_helpers import client, reporting_world
+
+    w = reporting_world()
+    boss = client(w, "boss")
+    plan = boss.post(
+        "/api/v1/plans", {"office_id": str(w["other"].id), "fiscal_year_id": w["fy"]["id"]}
+    ).json()
+    saved = boss.post(
+        f"/api/v1/plans/{plan['id']}/save",
+        {
+            "rows": [
+                {"client_key": "a", "row_kind": "activity", "code": "X", "title": "Visits", "sort_order": 0,
+                 "measure_type": "quantity", "unit": "visit", "annual_target": "12", "total_cost": "1200",
+                 "targets": ["1"] * 12}
+            ],
+            "indicators": [
+                {"client_key": "i", "code": "IND-01", "name": "People reached", "kind": "output",
+                 "unit": "person", "annual_target": "600", "aggregation": "sum", "sort_order": 0,
+                 "targets": ["50"] * 12}
+            ],
+        },
+    ).json()["plan"]  # fmt: skip
+    boss.post(f"/api/v1/plans/{plan['id']}/submit")
+    boss.post(f"/api/v1/plans/{plan['id']}/approve")
+    ind = saved["indicators"][0]["lineage_id"]
+    for month, value in ((1, "45"), (2, "60")):
+        boss.post(
+            "/api/v1/reports/save",
+            {"office": str(w["other"].id), "period": w["periods"][month]["id"],
+             "indicators": [{"lineage_id": ind, "actual": value}]},
+        )  # fmt: skip
+    with context.agency_context(w["agency"].id):
+        sc = export_scope.resolve(
+            {
+                "scope": "office",
+                "office_id": str(w["other"].id),
+                "period_id": w["periods"][2]["id"],
+                "view": "owner",
+            }
+        )
+        data, _ = pptx_year.build(sc, title="Over-all")
+    overall = Presentation(io.BytesIO(data)).slides[1]
+    tiles = {s.name: s.text_frame.text for s in overall.shapes if s.name.startswith("indicators-")}
+    assert "16.67%" in tiles["indicators-plan"] and "17.50%" in tiles["indicators-achieved"]
+    assert "0.83%" in tiles["indicators-gap"] and "ADVANCED" in tiles["indicators-status"]

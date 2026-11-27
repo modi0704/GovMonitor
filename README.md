@@ -19,13 +19,17 @@ opens on **Step-by-step**, a progress bar with six steps:
 The app calculates everything else: plan versus actual, gap, status (ADVANCED / ON-TIME / DELAYED),
 funds, S-curves and rankings. It can be set up for any agency's offices.
 
-**Read the [User Guide](docs/USER_GUIDE.md)** ([PDF](docs/user-guide/USER_GUIDE.pdf)) — short and
-step by step.
+**Two guides:**
+
+* [User Guide](docs/USER_GUIDE.md) ([PDF](docs/user-guide/USER_GUIDE.pdf)) — short and step by step:
+  every screen of the six steps.
+* [User Guide with Sample Data](docs/USER_GUIDE_WITH_SAMPLE_DATA.md)
+  ([PDF](docs/user-guide/USER_GUIDE_WITH_SAMPLE_DATA.pdf)) — learn by doing: a practice center with
+  two offices, every figure to type, and the exact results to expect after each step.
 
 **Run it on your PC** (Docker Desktop open, in Git Bash inside this folder): `./run.sh start`, then
 open <http://localhost:8000/>. `./run.sh stop` closes it, `./run.sh update` gets the newest
-version, `./run.sh demo` loads practice data. Details: [docs/RUN_AND_CLOSE.txt](docs/RUN_AND_CLOSE.txt). To practise with invented figures, use
-[docs/SAMPLE_INPUT.txt](docs/SAMPLE_INPUT.txt) and [docs/INPUT_AND_METRICS.txt](docs/INPUT_AND_METRICS.txt).
+version, `./run.sh demo` loads practice data. Details: [docs/RUN_AND_CLOSE.txt](docs/RUN_AND_CLOSE.txt).
 
 ## For developers
 
@@ -78,8 +82,9 @@ created. The demo loader is available only under development/test settings.
 * [User guide](docs/USER_GUIDE.md) — the six steps in plain words, with screenshots.
   [Printable PDF](docs/user-guide/USER_GUIDE.pdf).
   The same guide is inside the app under **User guide** (searchable, works without internet).
-* [Practice figures](docs/SAMPLE_INPUT.txt), [how to type them in and the expected results](docs/INPUT_AND_METRICS.txt),
-  and [Windows start / update / close commands](docs/RUN_AND_CLOSE.txt).
+* [User guide with sample data](docs/USER_GUIDE_WITH_SAMPLE_DATA.md) — a full practice run with the
+  expected results. [Printable PDF](docs/user-guide/USER_GUIDE_WITH_SAMPLE_DATA.pdf).
+* [Windows start / update / close commands](docs/RUN_AND_CLOSE.txt).
 * [API reference](docs/API.md) · [Security review](docs/SECURITY.md) ·
   [Release checklist](docs/RELEASE.md) · [Changelog](CHANGELOG.md) ·
   [Third-party licences](docs/THIRD_PARTY.md)

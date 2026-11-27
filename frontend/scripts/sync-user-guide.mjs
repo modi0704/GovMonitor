@@ -36,10 +36,9 @@ for (const name of ['SAMPLE_INPUT.txt', 'INPUT_AND_METRICS.txt', 'RUN_AND_CLOSE.
   await rm(path.join(destination, name), { force: true });
 }
 await copyFile(path.join(docs, 'USER_GUIDE.md'), path.join(destination, 'USER_GUIDE.md'));
-await copyFile(
-  path.join(docs, 'user-guide/USER_GUIDE.pdf'),
-  path.join(destination, 'USER_GUIDE.pdf'),
-);
+for (const pdf of ['USER_GUIDE.pdf', 'USER_GUIDE_WITH_SAMPLE_DATA.pdf']) {
+  await copyFile(path.join(docs, 'user-guide', pdf), path.join(destination, pdf));
+}
 await writeFile(
   path.join(frontend, 'src/pages/help/userGuide.generated.json'),
   `${JSON.stringify({ sections }, null, 2)}\n`,

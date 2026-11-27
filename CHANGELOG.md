@@ -14,6 +14,13 @@ step on update (described here); minor and patch versions update with `update.sh
 - `./run.sh start | stop | update | demo | setup | status | logs | fix-db` replaces the long Docker
   commands. It always uses the same settings, waits until the app answers, and `fix-db` repairs a
   saved database created with other passwords without losing data.
+- **User Guide with Sample Data** (`docs/USER_GUIDE_WITH_SAMPLE_DATA.md`, PDF, and a download on
+  the in-app User guide page): a practice center with two offices, every figure to type, and the
+  results to expect after each step, checked against the app. Replaces `SAMPLE_INPUT.txt` and
+  `INPUT_AND_METRICS.txt`.
+- Over-all performance deck: the output-indicator panel compares what was reached with what was
+  planned by that month (100% only in December), not with the whole year's target; long status
+  words fit their box; the title bar no longer repeats the office name.
 - `./run.sh reset-password [email]` (management command `reset_password`): lists the administrator
   accounts, or gives one a new temporary password — for installs without email.
 

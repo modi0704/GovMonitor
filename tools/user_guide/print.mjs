@@ -19,7 +19,7 @@ await page.pdf({
   displayHeaderFooter: true,
   headerTemplate: '<span></span>',
   footerTemplate:
-    '<div style="font-size:8px;width:100%;text-align:center;color:#657068">GovMonitor User Guide · page <span class="pageNumber"></span> of <span class="totalPages"></span></div>',
+    '<div style="font-size:8px;width:100%;text-align:center;color:#657068">GovMonitor · page <span class="pageNumber"></span> of <span class="totalPages"></span></div>',
   margin: { top: '16mm', bottom: '18mm', left: '14mm', right: '14mm' },
 });
 await browser.close();

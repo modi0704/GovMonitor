@@ -25,6 +25,9 @@ export default function UserGuidePage() {
           <a className="btn btn-primary" href="/user-guide/USER_GUIDE.pdf" download>
             Download PDF
           </a>
+          <a className="btn" href="/user-guide/USER_GUIDE_WITH_SAMPLE_DATA.pdf" download>
+            Practice guide with sample data (PDF)
+          </a>
           <button type="button" className="btn" onClick={() => window.print()}>
             Print section
           </button>

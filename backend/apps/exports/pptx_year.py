@@ -37,8 +37,8 @@ from apps.exports.pptx_writer import (
     ranking_sets,
     rgb,
 )
-from apps.exports.text_fit import fit
-from apps.planning.models import Plan
+from apps.exports.text_fit import fit, text_width
+from apps.planning.models import Indicator, Plan
 from apps.reporting.models import ActivityActual
 from apps.results import read
 from apps.results.agency import IMPLEMENTING, OWNER
@@ -56,6 +56,8 @@ class YearData:
     """Per-month indicator scores and per-office monthly activity grids, on top of DeckData."""
 
     indicator_series: dict = field(default_factory=dict)  # office id -> [score or None] months 1..m
+    # office id -> [planned share of the year's output targets, months 1..12] (None: no indicators)
+    indicator_plan: dict = field(default_factory=dict)
     grids: dict = field(default_factory=dict)  # office id -> [(title, target, [(plan, actual)] * 12)]
 
 
@@ -84,6 +86,7 @@ class YearDeck(Deck):
                 if rv is not None and rv.indicator_score is not None:
                     series[oid][m - 1] = Decimal(str(rv.indicator_score))
         self.year.indicator_series = series
+        self.read_indicator_plan()
         plans = Plan.objects.filter(
             fiscal_year=data.period.fiscal_year,
             status=Plan.Status.APPROVED,
@@ -112,6 +115,48 @@ class YearDeck(Deck):
                 grid.append((f"{r.code} {r.title}".strip(), r.annual_target, cells))
             self.year.grids[str(plan.office_id)] = grid
 
+    def read_indicator_plan(self):
+        """Planned share of the year's output targets by each month: for every indicator of the
+        office and the offices beneath it, the monthly targets so far over the yearly target, then the
+        plain average (the same set of indicators as the score). December is 100%."""
+        fy = self.data.period.fiscal_year
+        shares = []  # (office path, [share per month])
+        for ind in (
+            Indicator.objects.filter(plan__fiscal_year=fy, plan__status=Plan.Status.APPROVED)
+            .select_related("plan__office")
+            .prefetch_related("targets__period")
+        ):
+            annual = Decimal(str(ind.annual_target or 0))
+            if annual <= 0:
+                continue
+            planned = {t.period.month_index: Decimal(str(t.planned_value)) for t in ind.targets.all()}
+            row, total, last = [], Decimal(0), Decimal(0)
+            for m in range(1, 13):
+                value = planned.get(m, Decimal(0))
+                total += value
+                last = value or last
+                row.append((last if ind.aggregation == "last" else total) / annual)
+            shares.append((ind.plan.office.path, row))
+        for office in self.data.scope_offices:
+            mine = [row for path, row in shares if path.startswith(office.path)]
+            self.year.indicator_plan[str(office.id)] = (
+                [sum((r[m] for r in mine), Decimal(0)) / len(mine) for m in range(12)] if mine else None
+            )
+
+    def indicator_line(self, office, score) -> str:
+        if score is None:
+            return "Output indicators —"
+        planned = self.indicator_planned(office)
+        return f"Output indicators {pct(score)}" + (f" (plan {pct(planned)})" if planned is not None else "")
+
+    def indicator_planned(self, office) -> Decimal | None:
+        row = self.year.indicator_plan.get(str(office.id))
+        return row[self.data.period.month_index - 1] if row else None
+
+    def indicator_gap(self, office) -> Decimal | None:
+        score, planned = self.score(office), self.indicator_planned(office)
+        return None if score is None or planned is None else score - planned
+
     def score(self, office) -> Decimal | None:
         values = self.year.indicator_series.get(str(office.id)) or []
         return values[-1] if values else None
@@ -128,11 +173,14 @@ class YearDeck(Deck):
     def tile(self, slide, x, y, w, h, label, value, kind, name):
         colors = {**self.L.tile_colors, **self.L.status_colors}
         bg, fg = colors.get(kind, colors["on_time"])
+        size = 18  # smaller type for long words (ADVANCED) so they are never cut
+        while size > 10 and text_width(value, size, bold=True) > w * 72 - 14:
+            size -= 1
         self.text(
             slide,
             (Inches(x), Inches(y), Inches(w), Inches(h)),
             [(label, Pt(10)), value],
-            Pt(18),
+            Pt(size),
             bold=True,
             color=fg,
             fill=bg,
@@ -237,7 +285,7 @@ class YearDeck(Deck):
                 f"Funds remaining {pct(share)} ({money(remaining, self.s['currency_symbol'])})",
                 Pt(12 if big else 10),
             ),
-            (f"Output indicators {pct(score) if score is not None else '—'}", Pt(12 if big else 10)),
+            (self.indicator_line(office, score), Pt(12 if big else 10)),
         ]
         bg, fg = self.L.status_colors.get(kind, self.L.status_colors["on_time"])
         self.text(
@@ -284,7 +332,7 @@ class YearDeck(Deck):
     def overall_slide(self, office):
         rv = self.data.rv(office)
         slide = self.new_slide("year_overall", str(office.id))
-        self.header(slide, self.title if office.parent_id is None else f"{office.name} · {self.title}")
+        self.header(slide, self.title)
         left, right, top, w = 0.4, 6.78, 1.05, 6.15
         # Activities (PPAs)
         self.panel_title(slide, left, top, w, "Based on activities (PPAs)", "panel-activities")
@@ -326,11 +374,10 @@ class YearDeck(Deck):
         self.curve(slide, box, "S-curve based on activities", self.activity_series(rv), "chart-activities")
         # Output indicators
         self.panel_title(slide, right, top, w, "Based on output indicators", "panel-indicators")
-        score = self.score(office)
-        gap = (score - 1) if score is not None else None
+        score, planned, gap = self.score(office), self.indicator_planned(office), self.indicator_gap(office)
         label, kind = self.status_of(gap) if gap is not None else ("—", "on_time")
         tiles = [
-            ("TARGET", "100.00%", "plan"),
+            ("PLAN", pct(planned), "plan"),
             ("ACHIEVED", pct(score), "actual"),
             ("GAP", pct(gap), "variance"),
             ("STATUS", label, kind),
@@ -342,7 +389,7 @@ class YearDeck(Deck):
         self.text(
             slide,
             (Inches(right), Inches(top + 1.3), Inches(w), Inches(0.36)),
-            "Share of the year's output targets reached so far",
+            "Share of the year's output targets: planned and reached so far",
             Pt(12),
             color="1B2430",
             fill="F4F6F9",
@@ -350,6 +397,7 @@ class YearDeck(Deck):
             name="indicators-note",
         )
         values = self.year.indicator_series.get(str(office.id)) or []
+        plan_line = self.year.indicator_plan.get(str(office.id)) or []
         box = (Inches(right), Inches(top + 1.72), Inches(w), Inches(2.85))
         if all(v is None for v in values):
             self.text(
@@ -367,8 +415,11 @@ class YearDeck(Deck):
             self.curve(
                 slide,
                 box,
-                "Output indicators reached, month by month",
-                [("Reached (share of year target)", values, self.s["actual_color"])],
+                "S-curve based on output indicators",
+                [
+                    ("Plan (share of year target)", plan_line, self.s["primary_color"]),
+                    ("Reached (share of year target)", values, self.s["actual_color"]),
+                ],
                 "chart-indicators",
             )
         # One small panel per office directly beneath
@@ -490,7 +541,8 @@ class YearDeck(Deck):
                 continue
             if s != prev:
                 rank, prev = i, s
-            label, _ = self.status_of(s - 1)
+            gap = self.indicator_gap(m)
+            label, _ = self.status_of(gap) if gap is not None else ("—", "on_time")
             rows.append([rank, f"{m.code} {m.name}", pct(s), label])
         return rows
 

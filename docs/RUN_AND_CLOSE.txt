@@ -58,6 +58,9 @@ shows a temporary password ONE time. Sign in with it and choose your own.
 The practice agencies are switched off; nothing official is deleted.
 
 
-THE USER GUIDE
-In the app: "User guide" in the left menu (search it, or download the PDF).
-On paper: docs/user-guide/USER_GUIDE.pdf
+THE USER GUIDES
+In the app: "User guide" in the left menu (search it, or download the PDFs).
+On paper:
+   docs/user-guide/USER_GUIDE.pdf                    every screen, step by step
+   docs/user-guide/USER_GUIDE_WITH_SAMPLE_DATA.pdf   practice run with figures to type
+                                                     and the results to expect

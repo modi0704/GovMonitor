@@ -10,6 +10,11 @@ urlpatterns = [
     path("offices/import", api.OfficeImportView.as_view(), name="offices-import"),
     path("offices/reorder", api.OfficeReorderView.as_view(), name="offices-reorder"),
     path("offices/<uuid:office_id>", api.OfficeDetailView.as_view(), name="office"),
+    path(
+        "offices/<uuid:office_id>/delete-preview",
+        api.OfficeDeletePreviewView.as_view(),
+        name="office-delete-preview",
+    ),
     path("offices/<uuid:office_id>/move", api.OfficeMoveView.as_view(), name="office-move"),
     path("groups", api.GroupListView.as_view(), name="groups"),
     path("groups/<uuid:group_id>", api.GroupDetailView.as_view(), name="group"),

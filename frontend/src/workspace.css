@@ -1514,3 +1514,10 @@ label.check {
   font-size: 0.85rem;
   font-weight: 600;
 }
+.delete-list {
+  margin: 0;
+  padding-left: 20px;
+}
+.delete-list li {
+  margin: 2px 0;
+}

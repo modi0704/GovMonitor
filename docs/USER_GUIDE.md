@@ -114,7 +114,9 @@ The menu is on the left. On a small screen, press **Menu** to open it.
 
 **Later (Offices page)**
 
-Open **Step-by-step** → step 1 → **Open the offices**. Select an office to rename it, add an office under it, or move it.
+Open **Step-by-step** → step 1 → **Open the offices**. Select an office to rename it, add an office under it, move it, or delete it.
+
+**Delete an office** (for example one you added by mistake, or the practice offices): select it and press **Delete**. The app lists everything that goes with it — the offices beneath it, their plans, monthly results and files. Tick *I understand this cannot be undone* and press **Delete permanently**. The top office cannot be deleted. To keep an office's history instead, press **Deactivate**.
 
 **Tip: office groups.** To rank offices from different parts of the agency together (for example *Island provinces* and *Mainland provinces*), open **Settings → Office groups**, press **New group** and tick the offices.
 
@@ -279,6 +281,7 @@ The file opens in PowerPoint and every chart can be edited.
 | Wrong number in a closed month | Open **Who has reported**, choose the month and press **Reopen [month]**. Type the reason. Correct the figure, then close the month again. Reopen months from the latest one backwards. |
 | A final plan must change | Open the plan and press **Revise plan**. Make the changes, save, and mark it as final again. Closed months keep their results. |
 | Wrong office name or place | **Settings → Offices**, select the office, and rename or move it. |
+| An office that should not be there | **Settings → Offices**, select it, **Delete**. Everything recorded for it and the offices beneath it is removed; totals above are recalculated. |
 
 Every change is recorded under **Settings → Change history**: who changed what and when.
 

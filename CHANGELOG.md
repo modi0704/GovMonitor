@@ -10,6 +10,13 @@ step on update (described here); minor and patch versions update with `update.sh
 - When the app cannot open its database, it now says why (for example "password authentication
   failed") and how to fix it, instead of only "database not reachable".
 
+### Offices
+- **Delete an office** (Settings → Offices → Delete): works for any office except the top one, also
+  when it has offices beneath it, plans and monthly results. A window first lists everything that
+  goes; after confirming, the office, the offices beneath it and everything recorded for them are
+  removed, and closed months are recalculated so the totals above stay right. Deactivate remains
+  for keeping the history.
+
 ### Running on one PC
 - **Testing mode without sign-in** (`LOGIN_DISABLED`, on by default in `run.sh`): the app opens
   straight away as the agency administrator (`LOGIN_AS` can name another account), with a notice

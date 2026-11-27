@@ -80,7 +80,8 @@ Generated from the code by `tools/api_docs.py`; do not edit by hand.
 | POST | `/api/v1/offices/reorder` | `offices-reorder` | Order siblings: `{"parent_id", "order": [office ids]}`. |
 | GET | `/api/v1/offices/{office_id}` | `office` | One office with its place in the tree. |
 | PATCH | `/api/v1/offices/{office_id}` | `office` | Rename or recode an office, or set `{"is_active"}`. |
-| DELETE | `/api/v1/offices/{office_id}` | `office` | Delete an office that has no history (otherwise deactivate it). |
+| DELETE | `/api/v1/offices/{office_id}` | `office` | Delete an unused office; with ``?everything=1``, the office, every office beneath it and everything recorded for them (see ``delete-preview``). |
+| GET | `/api/v1/offices/{office_id}/delete-preview` | `office-delete-preview` | GET — what deleting this office with everything recorded for it would remove. |
 | POST | `/api/v1/offices/{office_id}/move` | `office-move` | Move an office and everything beneath it: `{"parent_id"}`. |
 | GET | `/api/v1/groups` | `groups` | Office groups (sets of offices compared in rankings). |
 | POST | `/api/v1/groups` | `groups` | Create a group: `{"name"}`. |

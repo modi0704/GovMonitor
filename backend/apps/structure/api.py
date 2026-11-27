@@ -188,12 +188,28 @@ class OfficeDetailView(APIView):
         return Response(office_payload(office, request.user))
 
     def delete(self, request, office_id):
+        """Delete an unused office; with ``?everything=1``, the office, every office beneath it and
+        everything recorded for them (see ``delete-preview``)."""
         office = scoped_office(request, office_id, edit=True)
         try:
+            if request.query_params.get("everything") == "1":
+                return Response(svc.delete_office_and_contents(office))
             svc.delete_office(office)
         except svc.StructureError as err:
             return error(err)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class OfficeDeletePreviewView(APIView):
+    """GET — what deleting this office with everything recorded for it would remove."""
+
+    permission_classes = [IsAgencyAdmin]
+
+    def get(self, request, office_id):
+        office = scoped_office(request, office_id, edit=True)
+        if office.parent_id is None:
+            return error(svc.StructureError("cannot_delete_root", "The top office cannot be deleted."))
+        return Response(svc.deletion_preview(office))
 
 
 class OfficeMoveView(APIView):

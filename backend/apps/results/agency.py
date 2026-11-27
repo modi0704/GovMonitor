@@ -57,9 +57,10 @@ class AgencyResults:
         return self.entries.get((office_id, view))
 
 
-def compute_agency(period: ReportingPeriod) -> AgencyResults:
+def compute_agency(period: ReportingPeriod, profile=None) -> AgencyResults:
+    """``profile``: the engine profile to judge by (default: the year's current settings)."""
     fy = period.fiscal_year
-    profile = fy.profile.to_engine()
+    profile = profile or fy.profile.to_engine()
     month = period.month_index
     offices = {o.id: o for o in Office.objects.select_related("level").order_by("path")}
 

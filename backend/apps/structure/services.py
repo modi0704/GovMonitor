@@ -6,11 +6,15 @@ All functions run under the caller's agency context; every office they read goes
 RLS-scoped manager, so an id from another agency is simply "not found".
 """
 
+import logging
+
 from django.db import IntegrityError, connection, transaction
 from django.db.models import Max, ProtectedError
 
 from apps.audit import services as audit
 from apps.structure.models import Office, OfficeGroup, OfficeGroupMember, OrgLevel
+
+log = logging.getLogger(__name__)
 
 
 class StructureError(Exception):
@@ -293,3 +297,105 @@ def run_import(base_parent: Office, rows: list[dict]) -> list[Office]:
         by_code[office.code.upper()] = office
         created.append(office)
     return created
+
+
+# ---- Deleting an office with everything recorded for it ----------------------------------------
+
+
+def deletion_preview(office: Office) -> dict:
+    """What deleting ``office`` removes: the office and every office beneath it, their plans (all
+    years and versions), monthly results, supporting files and frozen results; other offices'
+    activities they carried out go back to the owning office."""
+    from apps.accounts.models import RoleAssignment
+    from apps.planning.models import Activity, Plan, ReportingPeriod
+    from apps.reporting.models import ActivityActual, Attachment, IndicatorActual
+    from apps.results.models import PeriodResult
+
+    subtree = Office.objects.filter(path__startswith=office.path)
+    ids = list(subtree.values_list("id", flat=True))
+    plans = Plan.objects.filter(office_id__in=ids)
+    locked_periods = set(
+        PeriodResult.objects.filter(office_id__in=ids, period__status=ReportingPeriod.Status.LOCKED)
+        .values_list("period_id", flat=True)
+        .distinct()
+    )
+    return {
+        "office": {"id": str(office.id), "code": office.code, "name": office.name},
+        "offices": len(ids),
+        "offices_beneath": [
+            {"code": o.code, "name": o.name} for o in subtree.exclude(pk=office.pk).order_by("path")[:50]
+        ],
+        "plans": plans.count(),
+        "activities": Activity.objects.filter(plan__in=plans, row_kind=Activity.RowKind.ACTIVITY).count(),
+        "results": ActivityActual.objects.filter(office_id__in=ids).count()
+        + IndicatorActual.objects.filter(office_id__in=ids).count(),
+        "files": Attachment.objects.filter(office_id__in=ids).count(),
+        "closed_months": len(locked_periods),
+        "users_losing_access": RoleAssignment.objects.filter(office_id__in=ids)
+        .values("user")
+        .distinct()
+        .count(),
+        "activities_carried_out_for_others": Activity.objects.filter(implementing_office_id__in=ids)
+        .exclude(plan__office_id__in=ids)
+        .count(),
+    }
+
+
+def delete_office_and_contents(office: Office) -> dict:
+    """Delete ``office``, every office beneath it and everything recorded for them, in one
+    transaction. Closed months lose their rows too (the locked-month guard lets this deletion
+    through, D48) and are recalculated with the scoring settings they were closed with, so every
+    total above stays right. Supporting files are removed from storage once the deletion commits.
+    The top office cannot be deleted. One audit row records what was deleted."""
+    from django.core.files.storage import default_storage
+
+    from apps.planning.models import Activity, Plan, ReportingPeriod
+    from apps.reporting.models import ActivityActual, Attachment, IndicatorActual, OfficeSubmission
+    from apps.results.locking import refreeze_period
+    from apps.results.models import PeriodResult
+
+    if office.parent_id is None:
+        raise StructureError("cannot_delete_root", "The top office cannot be deleted.")
+    with transaction.atomic():
+        summary = deletion_preview(office)
+        subtree = list(Office.objects.filter(path__startswith=office.path))
+        ids = [o.id for o in subtree]
+        closed = set(
+            PeriodResult.objects.filter(office_id__in=ids, period__status=ReportingPeriod.Status.LOCKED)
+            .values_list("period_id", flat=True)
+            .distinct()
+        )
+        files = list(Attachment.objects.filter(office_id__in=ids).values_list("storage_key", flat=True))
+        audit.record(
+            "delete",
+            office,
+            before={**summary, "offices_beneath": [o["code"] for o in summary["offices_beneath"]]},
+        )
+        with connection.cursor() as cur:
+            cur.execute("SET LOCAL app.office_delete = 'on'")
+        with audit.suppressed():  # the one row above describes the whole deletion
+            Activity.objects.filter(implementing_office_id__in=ids).exclude(plan__office_id__in=ids).update(
+                implementing_office=None
+            )
+            Attachment.objects.filter(office_id__in=ids).delete()
+            ActivityActual.objects.filter(office_id__in=ids).delete()
+            IndicatorActual.objects.filter(office_id__in=ids).delete()
+            OfficeSubmission.objects.filter(office_id__in=ids).delete()
+            PeriodResult.objects.filter(office_id__in=ids).delete()
+            Plan.objects.filter(office_id__in=ids).delete()
+            for o in sorted(subtree, key=lambda o: o.depth, reverse=True):
+                o.delete()
+        with connection.cursor() as cur:
+            cur.execute("SET LOCAL app.office_delete = 'off'")
+        for period in ReportingPeriod.objects.filter(pk__in=closed).select_related("fiscal_year__profile"):
+            refreeze_period(period)
+
+        def remove_files():
+            for key in files:
+                try:
+                    default_storage.delete(key)
+                except Exception:  # noqa: BLE001 — a missing file must not undo the deletion
+                    log.warning("could not remove a deleted office's file", exc_info=True)
+
+        transaction.on_commit(remove_files)
+    return summary

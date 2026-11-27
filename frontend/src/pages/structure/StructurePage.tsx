@@ -14,6 +14,7 @@ type Dialog =
   | { kind: 'move'; office: OfficeRow }
   | { kind: 'import'; parent: OfficeRow }
   | { kind: 'levels' }
+  | { kind: 'delete'; office: OfficeRow }
   | null;
 
 export default function StructurePage() {
@@ -172,26 +173,13 @@ export default function StructurePage() {
                     >
                       {selected.is_active ? 'Deactivate' : 'Reactivate'}
                     </button>
-                    {childCount === 0 && (
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              `Delete ${selected.name}? This cannot be undone. Offices with plans or reports cannot be deleted; deactivate them instead.`,
-                            )
-                          ) {
-                            act(async () => {
-                              await api.del(`offices/${selected.id}`);
-                              setSelectedId(null);
-                            });
-                          }
-                        }}
-                      >
-                        Delete
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => setDialog({ kind: 'delete', office: selected })}
+                    >
+                      Delete
+                    </button>
                   </>
                 )}
               </div>
@@ -222,6 +210,16 @@ export default function StructurePage() {
       )}
       {dialog?.kind === 'import' && (
         <ImportDialog parent={dialog.parent} onClose={() => setDialog(null)} onDone={reloadAll} />
+      )}
+      {dialog?.kind === 'delete' && (
+        <DeleteDialog
+          office={dialog.office}
+          onClose={() => setDialog(null)}
+          onDone={() => {
+            setSelectedId(null);
+            reloadAll();
+          }}
+        />
       )}
       {dialog?.kind === 'levels' && (
         <LevelsDialog
@@ -533,6 +531,120 @@ function LevelsDialog({ levels, onClose, onDone }: DialogProps & { levels: Level
           </button>
         </div>
       </form>
+    </Modal>
+  );
+}
+
+interface DeletePreview {
+  offices: number;
+  offices_beneath: { code: string; name: string }[];
+  plans: number;
+  activities: number;
+  results: number;
+  files: number;
+  closed_months: number;
+  users_losing_access: number;
+  activities_carried_out_for_others: number;
+}
+
+/** Delete an office with everything recorded for it, after showing exactly what goes. */
+function DeleteDialog({ office, onClose, onDone }: DialogProps & { office: OfficeRow }) {
+  const preview = useResource<DeletePreview>(`offices/${office.id}/delete-preview`);
+  const [sure, setSure] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const p = preview.data;
+  async function remove() {
+    setBusy(true);
+    setError(null);
+    try {
+      await api.del(`offices/${office.id}?everything=1`);
+      onDone();
+      onClose();
+    } catch (err) {
+      setError(errorMessage(err));
+      setBusy(false);
+    }
+  }
+  const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+  return (
+    <Modal title={`Delete ${office.code} ${office.name}?`} onClose={onClose}>
+      <div className="stack">
+        {!p ? (
+          preview.error ? (
+            <FormError message={preview.error} />
+          ) : (
+            <p>Checking what belongs to this office…</p>
+          )
+        ) : (
+          <>
+            <p>This permanently deletes:</p>
+            <ul className="delete-list">
+              <li>
+                <strong>{office.name}</strong>
+                {p.offices > 1 &&
+                  ` and ${plural(p.offices - 1, 'office', 'offices')} beneath it (${p.offices_beneath
+                    .map((o) => o.code)
+                    .join(', ')}${p.offices - 1 > p.offices_beneath.length ? ', …' : ''})`}
+              </li>
+              {p.plans > 0 && (
+                <li>
+                  {plural(p.plans, 'plan', 'plans')} with{' '}
+                  {plural(p.activities, 'activity', 'activities')}
+                </li>
+              )}
+              {p.results > 0 && <li>{plural(p.results, 'monthly result', 'monthly results')}</li>}
+              {p.files > 0 && <li>{plural(p.files, 'supporting file', 'supporting files')}</li>}
+            </ul>
+            {(p.closed_months > 0 ||
+              p.users_losing_access > 0 ||
+              p.activities_carried_out_for_others > 0) && (
+              <ul className="muted small">
+                {p.closed_months > 0 && (
+                  <li>
+                    {plural(p.closed_months, 'closed month is', 'closed months are')} recalculated,
+                    so the totals of the offices above stay right.
+                  </li>
+                )}
+                {p.users_losing_access > 0 && (
+                  <li>
+                    {plural(p.users_losing_access, 'user loses', 'users lose')} access given at
+                    these offices (the accounts stay).
+                  </li>
+                )}
+                {p.activities_carried_out_for_others > 0 && (
+                  <li>
+                    {plural(p.activities_carried_out_for_others, 'activity', 'activities')} that
+                    these offices carried out for other offices go back to the office that owns the
+                    plan.
+                  </li>
+                )}
+              </ul>
+            )}
+            <p className="muted small">
+              To keep the history instead, close this window and press <strong>Deactivate</strong>.
+            </p>
+            <label className="check">
+              <input type="checkbox" checked={sure} onChange={(e) => setSure(e.target.checked)} />I
+              understand this cannot be undone.
+            </label>
+          </>
+        )}
+        <FormError message={error} />
+        <div className="row">
+          <button
+            type="button"
+            className="btn btn-danger"
+            disabled={!p || !sure || busy}
+            onClick={remove}
+          >
+            {busy ? 'Deleting…' : 'Delete permanently'}
+          </button>
+          <button type="button" className="btn" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      </div>
     </Modal>
   );
 }

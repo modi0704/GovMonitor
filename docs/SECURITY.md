@@ -35,6 +35,15 @@ stopped. CSRF, agency isolation (RLS), permissions and the audit trail still app
 recorded under that administrator). The platform area keeps its own sign-in. Proof:
 `apps/accounts/tests/test_no_login.py`. Never enable it on a server.
 
+**Deleting an office (added 2026-11-27).** An agency administrator can delete an office with every
+office beneath it and everything recorded for them (plans, monthly results, files, frozen results),
+after a preview of what goes (`GET offices/<id>/delete-preview`, `DELETE offices/<id>?everything=1`;
+`apps/structure/services.py` `delete_office_and_contents`). The locked-month guard (P7.5) lets only
+this deletion remove closed-month rows: it sets the transaction-local `app.office_delete`, and the
+trigger then allows DELETE only, never INSERT or UPDATE; the setting is switched off again inside the
+same transaction. Affected closed months are recalculated with the scoring snapshot they were closed
+with. One audit row records the whole deletion. Proof: `apps/structure/tests/test_delete_everything.py`.
+
 ## 3. Sessions and CSRF
 
 * Session cookie `gm_session`: HttpOnly, SameSite=Lax, Secure when served over HTTPS

@@ -131,9 +131,40 @@ def lock_period(period: ReportingPeriod, user) -> int:
         first = earlier_open.first()
         raise LockError("earlier_open", f"Lock {first.start_date:%B %Y} first: months are locked in order.")
 
-    month = period.month_index
-    agency = compute_agency(period)
     snapshot = period.fiscal_year.profile.snapshot()
+    rows = frozen_rows(period, snapshot)
+    month = period.month_index
+    with audit.suppressed():  # one "lock" event below, not one per row
+        PeriodResult.objects.bulk_create(rows)
+        planned_offices = set(
+            Plan.objects.filter(fiscal_year=period.fiscal_year, status=Plan.Status.APPROVED).values_list(
+                "office_id", flat=True
+            )
+        )
+        existing = set(OfficeSubmission.objects.filter(period=period).values_list("office_id", flat=True))
+        OfficeSubmission.objects.bulk_create(
+            [OfficeSubmission(office_id=o, period=period) for o in planned_offices - existing]
+        )
+        OfficeSubmission.objects.filter(period=period).update(status=OfficeSubmission.Status.LOCKED)
+        period.status = ReportingPeriod.Status.LOCKED
+        period.locked_by = user
+        period.locked_at = timezone.now()
+        period.save(update_fields=["status", "locked_by", "locked_at"])
+    audit.record(
+        "lock",
+        period,
+        after={"month": month, "results": len(rows), "profile_version": snapshot["version"]},
+    )
+    from apps.alerts import services as alerts
+
+    alerts.period_locked(period)
+    return len(rows)
+
+
+def frozen_rows(period: ReportingPeriod, snapshot: dict, profile=None) -> list:
+    """One period_result row per office and view for ``period``, judged by ``snapshot``."""
+    month = period.month_index
+    agency = compute_agency(period, profile=profile)
     rows = []
     for (office_id, view), entry in agency.entries.items():
         if entry.result is None:
@@ -160,30 +191,20 @@ def lock_period(period: ReportingPeriod, user) -> int:
                 profile_snapshot=snapshot,
             )
         )
-    with audit.suppressed():  # one "lock" event below, not one per row
-        PeriodResult.objects.bulk_create(rows)
-        planned_offices = set(
-            Plan.objects.filter(fiscal_year=period.fiscal_year, status=Plan.Status.APPROVED).values_list(
-                "office_id", flat=True
-            )
-        )
-        existing = set(OfficeSubmission.objects.filter(period=period).values_list("office_id", flat=True))
-        OfficeSubmission.objects.bulk_create(
-            [OfficeSubmission(office_id=o, period=period) for o in planned_offices - existing]
-        )
-        OfficeSubmission.objects.filter(period=period).update(status=OfficeSubmission.Status.LOCKED)
-        period.status = ReportingPeriod.Status.LOCKED
-        period.locked_by = user
-        period.locked_at = timezone.now()
-        period.save(update_fields=["status", "locked_by", "locked_at"])
-    audit.record(
-        "lock",
-        period,
-        after={"month": month, "results": len(rows), "profile_version": snapshot["version"]},
-    )
-    from apps.alerts import services as alerts
+    return rows
 
-    alerts.period_locked(period)
+
+def refreeze_period(period: ReportingPeriod) -> int:
+    """Recompute a closed month's frozen results after offices were deleted, judged by the scoring
+    settings the month was closed with (the stored snapshot), so every total above them stays right."""
+    from apps.results.read import _engine_profile
+
+    first = PeriodResult.objects.filter(period=period).first()
+    snapshot = first.profile_snapshot if first else period.fiscal_year.profile.snapshot()
+    rows = frozen_rows(period, snapshot, profile=_engine_profile(snapshot))
+    with audit.suppressed():
+        PeriodResult.objects.filter(period=period).delete()
+        PeriodResult.objects.bulk_create(rows)
     return len(rows)
 
 

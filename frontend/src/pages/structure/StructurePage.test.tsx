@@ -52,6 +52,20 @@ function renderStructure(me = { ...ME, is_agency_admin: true }) {
     'GET /api/v1/offices': { body: OFFICES },
     'GET /api/v1/levels': { body: [] },
     'POST /api/v1/offices': { status: 201, body: {} },
+    'GET /api/v1/offices/s1/delete-preview': {
+      body: {
+        offices: 2,
+        offices_beneath: [{ code: 'DIV1', name: 'Division One' }],
+        plans: 1,
+        activities: 6,
+        results: 12,
+        files: 0,
+        closed_months: 3,
+        users_losing_access: 1,
+        activities_carried_out_for_others: 0,
+      },
+    },
+    'DELETE /api/v1/offices/s1': { body: {} },
     'POST /api/v1/offices/import': (body) => ({
       body: {
         rows: (body as { rows: { code: string; name: string }[] }).rows.map((r, i) => ({
@@ -119,4 +133,20 @@ it('hides editing actions from users who are not the agency administrator', asyn
     screen.getByText('Only the agency administrator can change the structure.'),
   ).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Add an office beneath' })).not.toBeInTheDocument();
+});
+
+it('deletes an office with everything beneath it after showing what goes', async () => {
+  const calls = renderStructure();
+  const user = userEvent.setup();
+  await user.click(await screen.findByText('Service One'));
+  await user.click(screen.getByRole('button', { name: 'Delete' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Delete SVC1 Service One?' });
+  expect(await within(dialog).findByText(/and 1 office beneath it \(DIV1\)/)).toBeInTheDocument();
+  expect(within(dialog).getByText('1 plan with 6 activities')).toBeInTheDocument();
+  expect(within(dialog).getByText(/3 closed months are recalculated/)).toBeInTheDocument();
+  const button = within(dialog).getByRole('button', { name: 'Delete permanently' });
+  expect(button).toBeDisabled();
+  await user.click(within(dialog).getByLabelText('I understand this cannot be undone.'));
+  await user.click(button);
+  expect(calls.some((c) => c.method === 'DELETE' && c.path === '/api/v1/offices/s1')).toBe(true);
 });

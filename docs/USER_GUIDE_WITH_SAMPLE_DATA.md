@@ -334,5 +334,6 @@ To fix a figure in a closed month: **Who has reported** → choose the month →
 ## When You Are Done Practising
 
 - You can keep the practice data: it stays in the Sample Ministry and **Practice 2026** and does not mix with a real year.
+- Or remove it: **Settings → Offices**, select **Practice Center**, press **Delete**, tick *I understand this cannot be undone* and press **Delete permanently**. The Practice Center, both offices, their plans and all their results are deleted. The same works for the Sample Ministry's other offices if you want to start from an empty list.
 - To start your real work, type `./run.sh setup` in Git Bash. It creates your real agency and administrator and switches the practice agencies off. Nothing is deleted.
 - Then follow the general **User Guide**: the same six steps, with your own offices and figures.

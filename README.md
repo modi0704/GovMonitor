@@ -38,7 +38,7 @@ current status.
 | `frontend/` | React + TypeScript single-page app (Vite) |
 | `deploy/` | Dockerfile, Compose files, database init, backup/restore scripts |
 | `docs/` | Third-party licences, admin and user guides, security notes, API |
-| `tools/` | Fixture extraction, vendor licence tool, API reference generator |
+| `tools/` | Fixture extraction, vendor licence tool, API reference generator, user-guide PDF builder |
 | `reference/` | The customer's original workbooks — git-ignored, read-only |
 
 ### Running locally

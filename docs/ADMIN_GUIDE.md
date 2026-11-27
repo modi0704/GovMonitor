@@ -99,8 +99,11 @@ sudo docker compose --env-file .env exec web entrypoint.sh manage bootstrap_sing
 ```
 
 It prints a temporary password, shown once. Sign in at `https://<SITE_ADDRESS>/` with that email
-and password, choose a new password, and the setup wizard walks through levels, offices, users and
-the first fiscal year. The **Help** page in the application explains each role's work.
+and password and choose a new password. The application then opens on **Step-by-step**: six steps
+with a progress bar that take the administrator through adding the offices (with a setup wizard),
+the year, each office's plan, the monthly results, closing each month and downloading the reports.
+Give the administrator the user guide (`docs/USER_GUIDE.md`, also under **User guide** in the
+application and as a PDF).
 
 ## 6. Certificates and addresses
 

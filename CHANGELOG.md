@@ -18,6 +18,9 @@ step on update (described here); minor and patch versions update with `update.sh
   Rarely used settings are folded away. A word list on the Help page.
 - A new, short user guide (edition 3.0, in the app and as a PDF) built around the six steps, with
   new screenshots; simpler practice and Windows start/update/close instructions.
+- `tools/user_guide_pdf.sh` rebuilds the user guide PDF from `docs/USER_GUIDE.md`; the administrator
+  guide, release checklist, security review and design notes follow the new flow. Duplicate and
+  placeholder files removed from `docs/`.
 
 ### Reporting
 - **Over-all performance for the year**: a PowerPoint deck modelled on the year-end presentation —

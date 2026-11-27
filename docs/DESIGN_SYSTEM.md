@@ -26,18 +26,10 @@ The reference's dashboard uses a four-card KPI row above a wide trend chart and 
 
 `frontend/src/workspace.css` defines the shared visual layer after the existing component styles. `AppShell.tsx` and `layout/nav.ts` define the grouped navigation, account summary, and mobile menu; `lib/steps.ts`, `components/StepProgress.tsx`, `layout/GuideBar.tsx` and `pages/guide/GuidedStepsPage.tsx` the guided steps. `AuthCard.tsx` supplies the shared sign-in/password-page layout. `ResultTiles.tsx` and `Sparkline.tsx` render the KPI row; `DashboardPage.tsx` defines the chart layout and visual summaries. `chartTheme.ts` supplies the shared chart palette.
 
-## Validation and local review
+## Validation
 
-Completed: production build, lint/formatting, 87 tests across 33 files, and browser checks of the running frontend against the existing local backend. The checks cover navigation, dialog focus, actual-data badges, missing/future history, zero budgets, and decimal rounding. The suite bounds jsdom startup concurrency to avoid lazy-page timeouts on Windows.
-
-Browser verification includes desktop, tablet, and phone layouts; fixed desktop navigation; phone menu and horizontal overflow checks; chart/table toggling; and successful Excel report preparation. The development frontend runs on localhost:5173, with its local API proxy forwarding to the backend on port 8000. CSRF tokens are still required. Production Docker images still require rebuilding to serve the new frontend from port 8000.
-
-Current screenshots are embedded in `USER_GUIDE.md` and `user-guide/USER_GUIDE.pdf` (edition 3.0, built around the six guided steps). The app has a searchable 16-section guide at `/user-guide`, with PDF download and section printing. Operator commands and practice text files remain separate documents and are excluded from the shipped guide assets. Guide text is rendered as React nodes, with no injected HTML.
-
-Screen descriptions, tooltips, status messages, and help use plain language for monitoring and finance. Scoring methods have readable display names; office-access and audit labels describe what users can see and what changed. Stored setting keys, audit filter values, permissions, and calculations are unchanged.
-
-Production settings exclude the demo seed command. `initialize_workspace` creates a real agency and its first administrator, then suspends recognizable built-in training agencies and disables their demo accounts. It retains records and skips renamed agencies or agencies with other users. Existing administrator passwords remain unchanged when setup is repeated. No practice figures are loaded automatically.
-
-Browser verification covers guide search and section navigation. The production build includes every guide download. Docker access was unavailable in the editing session, so rebuilding port 8000 and applying real-agency setup remain local operator steps in `RUN_AND_CLOSE.txt`.
-
-From the project directory, run `docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build web worker` to rebuild and start the updated app using the existing local settings and data.
+`make check` (lint, formatting, backend and frontend tests, production build) and `make smoke`
+(browser tests of the user flows and accessibility checks with axe, desktop and phone) cover the
+workspace, including the guided steps, the guide bar, the folded Settings group and the export
+dialog. The CI `image` job also opens every page of an offline install in a browser and downloads
+each export.

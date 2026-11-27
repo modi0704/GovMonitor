@@ -61,6 +61,10 @@ Report vulnerabilities to the vendor's security contact; do not open public issu
   scope answer **404**, never revealing existence. Read-only users get 403 on writes.
 * Agency-wide settings (structure, users, fiscal years, scoring, approvals, locking, audit log,
   alert rules, report template) need an admin assignment at the root office (`IsAgencyAdmin`).
+* The Step-by-step progress endpoint (`GET progress`, added 2026-11-21) is agency-administrator only
+  and read-only; the over-all performance deck for the year is an ordinary PowerPoint export
+  (`exports/pptx` with `style=year`) with the same scope checks and rate limits as every export.
+  Both are covered by the cross-agency route test.
 * Proof: `tests/test_scope_enforcement.py`, per-feature API tests, and the route-walking audit test.
 
 ## 6. Audit trail

@@ -20,15 +20,17 @@ For the person who publishes a GovMonitor version. Every step is required.
 3. Re-generate the API reference if routes changed: `cd backend && .venv/bin/python ../tools/api_docs.py`
    (the test suite fails otherwise).
 4. Check `docs/THIRD_PARTY.md` against the lockfiles (licence rule, MASTERPLAN 5.2).
-5. Commit, then tag and push the tag: `git tag -a v1.0.0 -m "GovMonitor 1.0.0"` and
+5. If `docs/USER_GUIDE.md` changed, rebuild its PDF with `tools/user_guide_pdf.sh` (needs pandoc
+   and the frontend's Playwright Chromium) and commit `docs/user-guide/USER_GUIDE.pdf`.
+6. Commit, then tag and push the tag: `git tag -a v1.0.0 -m "GovMonitor 1.0.0"` and
    `git push origin v1.0.0`. The **release** workflow builds the image `govmonitor:<version>` and
    the offline bundle `govmonitor-offline-<version>.tar.gz` and attaches both to the run.
    (Locally: `make release`.)
-6. Smoke-test the bundle on a clean machine: `install.sh`, sign in, one export (ADMIN_GUIDE §3, §5).
-7. Update a copy of the previous version with `update.sh` and confirm the dashboard figures are
+7. Smoke-test the bundle on a clean machine: `install.sh`, sign in, one export (ADMIN_GUIDE §3, §5).
+8. Update a copy of the previous version with `update.sh` and confirm the dashboard figures are
    unchanged.
-8. Publish the bundle and its SHA-256 to customers with the changelog entry and the ADMIN_GUIDE.
+9. Publish the bundle and its SHA-256 to customers with the changelog entry and the ADMIN_GUIDE.
 
 ## Hotfixes
 
-Branch from the release tag, fix, bump the patch number, and follow steps 1–8.
+Branch from the release tag, fix, bump the patch number, and follow steps 1–9.

@@ -15,6 +15,9 @@
 # always the same way, so the saved database and the app agree on their passwords.
 set -euo pipefail
 cd "$(dirname "$0")"
+# Git Bash on Windows rewrites arguments that look like Linux paths (/docker-entrypoint-initdb.d/…
+# becomes C:/Program Files/Git/…) before Docker sees them; container paths must stay as written.
+export MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*'
 
 URL="http://localhost:${WEB_PORT:-8000}"
 

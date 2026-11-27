@@ -57,9 +57,10 @@ When you sign in, the app opens on **Step-by-step**. It shows a progress bar wit
 
 ## Sign In
 
-1. Open the address your IT person gave you, for example `http://localhost:8000`.
-2. Type your **Email** and **Password**, then press **Sign in**.
-3. The first time, the app asks you to choose a new password. Use at least 12 characters.
+1. Make sure the app is running. On your own PC: open Docker Desktop, then in Git Bash, inside the GovMonitor folder, type `./run.sh start` and wait for *GovMonitor is running* (see `docs/RUN_AND_CLOSE.txt`).
+2. Open the address your IT person gave you, or `http://localhost:8000` on your own PC.
+3. Type your **Email** and **Password**, then press **Sign in**.
+4. The first time, the app asks you to choose a new password. Use at least 12 characters.
 
 **Forgot your password?** Press the **Forgot your password?** link on the sign-in page and follow the email. If your office has no email set up, ask your IT person to reset it.
 

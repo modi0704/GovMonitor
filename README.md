@@ -20,8 +20,11 @@ The app calculates everything else: plan versus actual, gap, status (ADVANCED / 
 funds, S-curves and rankings. It can be set up for any agency's offices.
 
 **Read the [User Guide](docs/USER_GUIDE.md)** ([PDF](docs/user-guide/USER_GUIDE.pdf)) — short and
-step by step. To start, update or close the app on Windows, follow
-[docs/RUN_AND_CLOSE.txt](docs/RUN_AND_CLOSE.txt). To practise with invented figures, use
+step by step.
+
+**Run it on your PC** (Docker Desktop open, in Git Bash inside this folder): `./run.sh start`, then
+open <http://localhost:8000/>. `./run.sh stop` closes it, `./run.sh update` gets the newest
+version, `./run.sh demo` loads practice data. Details: [docs/RUN_AND_CLOSE.txt](docs/RUN_AND_CLOSE.txt). To practise with invented figures, use
 [docs/SAMPLE_INPUT.txt](docs/SAMPLE_INPUT.txt) and [docs/INPUT_AND_METRICS.txt](docs/INPUT_AND_METRICS.txt).
 
 ## For developers

@@ -1,63 +1,52 @@
-GOVMONITOR - START, UPDATE AND CLOSE THE APP ON A WINDOWS PC
-===========================================================
-Do these steps in order. Copy one command at a time.
-
-BEFORE YOU START
+GOVMONITOR - START, UPDATE AND CLOSE THE APP ON YOUR PC
+======================================================
 1. Open Docker Desktop. Wait until it says "Engine running".
-2. Open "Git Bash" (or PowerShell).
-3. Go to the GovMonitor folder. Change the path if you put it somewhere else:
+2. Open Git Bash.
+3. Go to your GovMonitor folder (use your own folder; keep the quotes):
 
-   cd /d/BARMM/govmonitor
+   cd "/d/BARMM PROJECT/GovMonitor"
 
-   (In PowerShell: cd D:\BARMM\govmonitor)
+Then use ONE of these commands:
 
+   ./run.sh start     Start the app. Wait for "GovMonitor is running",
+                      then open http://localhost:8000/ in your browser.
 
-A. START THE APP (EVERY DAY)
-   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d
+   ./run.sh stop      Close the app. Your data is kept.
 
-   Then open your browser at:  http://localhost:8000/
-   Sign in. The app opens on "Step-by-step". Follow the steps.
+   ./run.sh update    Get the newest version and start it.
 
+   ./run.sh demo      Load the practice data. Sign in as
+                      admin@sample-ministry.demo  /  demo-password-2026
 
-B. GET THE NEWEST VERSION (WHEN YOU ARE TOLD THERE IS AN UPDATE)
-   git pull
-   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
+   ./run.sh status    See whether the app is running.
 
-   Your saved data is kept. The update can take a few minutes.
+   ./run.sh logs      Show the last messages (send these when asking for help).
 
-
-C. SET UP YOUR REAL AGENCY (ONLY ONCE)
-   docker compose -f deploy/docker-compose.yml --env-file deploy/.env exec web entrypoint.sh manage initialize_workspace
-
-   It asks for your agency's name, a short code, your name and your email.
-   It shows a temporary password ONE time. Write it down privately.
-   Sign in with it and choose your own password when asked.
-   The practice (demo) agencies are switched off. Nothing official is deleted.
-   Do not use the demo email addresses after this.
+Closing the browser does NOT stop the app. Use ./run.sh stop.
 
 
-D. CLOSE THE APP (YOUR DATA IS KEPT)
-   Press Save in the app, sign out, then run:
-
-   docker compose -f deploy/docker-compose.yml --env-file deploy/.env stop
-
-   Closing the browser alone does NOT stop the app.
-   Start it again later with step A.
+IF IT SAYS "the database ... refused its password" OR "run ./run.sh fix-db"
+   ./run.sh fix-db
+This makes the saved database use the same passwords as your settings.
+All your data is kept. It happens when the app was started before with
+other settings (for example from another copy of the folder).
 
 
-IF SOMETHING GOES WRONG
-Is the app running?
-   docker compose -f deploy/docker-compose.yml --env-file deploy/.env ps
+IMPORTANT
+- Use only ONE GovMonitor folder on this PC. Every copy shares the same
+  saved data in Docker, so starting another copy can cause the error above.
+- Never delete Docker "volumes" and never add "-v" to a docker command:
+  that erases all saved data.
 
-Show the last error messages (send these to your IT person):
-   docker compose -f deploy/docker-compose.yml --env-file deploy/.env logs --tail 80 web worker db
 
-"Access is denied": make sure Docker Desktop is open and running, then try again.
+SET UP YOUR REAL AGENCY (ONLY ONCE, WHEN YOU STOP PRACTISING)
+   ./run.sh setup
 
-NEVER add "-v" to a docker command and never delete Docker "volumes":
-that erases all saved data.
+It asks for your agency's name, a short code, your name and your email, and
+shows a temporary password ONE time. Sign in with it and choose your own.
+The practice agencies are switched off; nothing official is deleted.
 
 
 THE USER GUIDE
-In the app: press "User guide" in the left menu (you can search it or download the PDF).
+In the app: "User guide" in the left menu (search it, or download the PDF).
 On paper: docs/user-guide/USER_GUIDE.pdf

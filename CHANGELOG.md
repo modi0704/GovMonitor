@@ -7,6 +7,13 @@ step on update (described here); minor and patch versions update with `update.sh
 
 ### Fixed
 - A backend test needed the built frontend and failed in CI.
+- When the app cannot open its database, it now says why (for example "password authentication
+  failed") and how to fix it, instead of only "database not reachable".
+
+### Running on one PC
+- `./run.sh start | stop | update | demo | setup | status | logs | fix-db` replaces the long Docker
+  commands. It always uses the same settings, waits until the app answers, and `fix-db` repairs a
+  saved database created with other passwords without losing data.
 
 ### Easier to use
 - **Step-by-step** start page for the monitoring administrator: six steps (offices, year, plans,

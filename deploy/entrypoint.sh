@@ -4,15 +4,27 @@ set -euo pipefail
 cd /app/backend
 
 wait_for_db() {
+  local err=""
   for _ in $(seq 1 60); do
-    if python - <<'PY' 2>/dev/null
-import os, psycopg
-psycopg.connect(os.environ["DATABASE_ADMIN_URL"], connect_timeout=2).close()
+    # The error text names the problem (wrong password, host not found …); it never contains a password.
+    if err=$(python - 2>&1 <<'PY'
+import os, sys, psycopg
+try:
+    psycopg.connect(os.environ["DATABASE_ADMIN_URL"], connect_timeout=2).close()
+except Exception as exc:  # noqa: BLE001
+    sys.exit(str(exc).strip().splitlines()[-1] if str(exc).strip() else type(exc).__name__)
 PY
-    then return 0; fi
+    ); then return 0; fi
     sleep 1
   done
-  echo "entrypoint: database not reachable" >&2
+  echo "entrypoint: database not reachable: ${err}" >&2
+  if grep -qi "password authentication failed" <<<"$err"; then
+    cat >&2 <<'MSG'
+entrypoint: the saved database was created with other passwords than the ones used now
+            (deploy/.env, or the built-in defaults when there is no deploy/.env).
+            On one PC, run:  ./run.sh fix-db   — it keeps all data (docs/RUN_AND_CLOSE.txt).
+MSG
+  fi
   return 1
 }
 

@@ -62,7 +62,9 @@ When you sign in, the app opens on **Step-by-step**. It shows a progress bar wit
 3. Type your **Email** and **Password**, then press **Sign in**.
 4. The first time, the app asks you to choose a new password. Use at least 12 characters.
 
-**Forgot your password?** Press the **Forgot your password?** link on the sign-in page and follow the email. If your office has no email set up, ask your IT person to reset it.
+**Forgot your password?** Press the **Forgot your password?** link on the sign-in page and follow the email. If your office has no email set up: on the PC that runs the app, type `./run.sh reset-password` in Git Bash to see the administrator emails, then `./run.sh reset-password your-email` to get a new temporary password.
+
+**Just practising?** After `./run.sh demo`, sign in as `admin@sample-ministry.demo` with the password `demo-password-2026`.
 
 **Signed out by itself?** For safety, the app signs you out after one hour without use. Sign in again. Press **Save** often so you never lose work.
 

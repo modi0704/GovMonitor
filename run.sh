@@ -8,6 +8,8 @@
 #   ./run.sh setup    set up your real agency (once; asks a few questions)
 #   ./run.sh status   show what is running
 #   ./run.sh logs     show the last messages (send these when asking for help)
+#   ./run.sh reset-password [email]   forgot the sign-in? without an email: list the administrator
+#                     accounts; with one: give it a new temporary password
 #   ./run.sh fix-db   the app says the database refused its password: set the database's
 #                     passwords to the current settings (all data is kept), then start
 #
@@ -90,6 +92,14 @@ case "${1:-}" in
     need_docker
     compose exec web entrypoint.sh manage initialize_workspace
     ;;
+  reset-password)
+    need_docker
+    if [ -n "${2:-}" ]; then
+      compose exec -T web entrypoint.sh manage reset_password --email "$2"
+    else
+      compose exec -T web entrypoint.sh manage reset_password
+    fi
+    ;;
   status)
     need_docker
     compose ps
@@ -113,7 +123,7 @@ case "${1:-}" in
     wait_until_up
     ;;
   *)
-    sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'
     exit 1
     ;;
 esac

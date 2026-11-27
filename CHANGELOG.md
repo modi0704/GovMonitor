@@ -14,6 +14,8 @@ step on update (described here); minor and patch versions update with `update.sh
 - `./run.sh start | stop | update | demo | setup | status | logs | fix-db` replaces the long Docker
   commands. It always uses the same settings, waits until the app answers, and `fix-db` repairs a
   saved database created with other passwords without losing data.
+- `./run.sh reset-password [email]` (management command `reset_password`): lists the administrator
+  accounts, or gives one a new temporary password — for installs without email.
 
 ### Easier to use
 - **Step-by-step** start page for the monitoring administrator: six steps (offices, year, plans,

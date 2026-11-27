@@ -25,6 +25,17 @@ Then use ONE of these commands:
 Closing the browser does NOT stop the app. Use ./run.sh stop.
 
 
+SIGNING IN
+Practice account (after ./run.sh demo):
+   Email:     admin@sample-ministry.demo
+   Password:  demo-password-2026
+
+Forgot the email or password?
+   ./run.sh reset-password              lists the administrator emails
+   ./run.sh reset-password YOUR-EMAIL   gives that account a new temporary password
+Sign in with the temporary password; the app asks you to choose your own.
+
+
 IF IT SAYS "the database ... refused its password" OR "run ./run.sh fix-db"
    ./run.sh fix-db
 This makes the saved database use the same passwords as your settings.

@@ -1,5 +1,6 @@
 """Authentication API (MASTERPLAN 13: auth/login, auth/logout, auth/2fa, auth/password, me)."""
 
+from django.conf import settings
 from django.contrib.auth import logout
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.decorators import method_decorator
@@ -45,7 +46,9 @@ def me_payload(user: User) -> dict:
         "id": str(user.id),
         "email": user.email,
         "full_name": user.full_name,
-        "must_change_password": user.must_change_password,
+        # Testing mode never asks for a new password: nobody signs in.
+        "must_change_password": user.must_change_password and not settings.LOGIN_DISABLED,
+        "login_disabled": settings.LOGIN_DISABLED,
         "has_2fa": user.has_2fa,
         "email_opt_out": user.email_opt_out,
         "is_agency_admin": is_agency_admin(user),

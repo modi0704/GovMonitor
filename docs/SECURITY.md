@@ -26,6 +26,15 @@ Report vulnerabilities to the vendor's security contact; do not open public issu
 | Password reset by email: signed, expiring token; silent on unknown emails; nothing sent without SMTP | `request_password_reset_email` | `test_auth_api.py` |
 | Platform owners (vendor staff) are a separate table, separate sign-in and separate cookie (`gm_platform`, path `/platform/`), refused entirely in single-agency mode | `apps/tenancy/platform_api.py` | `test_platform.py` |
 
+**Testing mode (`LOGIN_DISABLED=1`, added 2026-11-27).** For trying the system on one PC, sign-in
+can be switched off: a request with nobody signed in then acts as an agency administrator
+(`apps/accounts/middleware.py` `NoLoginMiddleware`; `LOGIN_AS` picks the account). It is **off by
+default**; `run.sh` switches it on for local use and then starts only the database, app and worker,
+so the app listens on 127.0.0.1 alone and the HTTPS front door that other computers could reach is
+stopped. CSRF, agency isolation (RLS), permissions and the audit trail still apply (changes are
+recorded under that administrator). The platform area keeps its own sign-in. Proof:
+`apps/accounts/tests/test_no_login.py`. Never enable it on a server.
+
 ## 3. Sessions and CSRF
 
 * Session cookie `gm_session`: HttpOnly, SameSite=Lax, Secure when served over HTTPS

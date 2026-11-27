@@ -244,6 +244,8 @@ status. Logs: `docker compose logs --tail 200 web worker` (one JSON object per l
 | `EMAIL_URL` | empty | Section 8. |
 | `MAX_UPLOAD_MB` / `MAX_BODY_MB` | 25 / 30 | Largest supporting file / largest request at the proxy. |
 | `SESSION_IDLE_MINUTES` | 60 | Sign-out after inactivity. |
+| `LOGIN_DISABLED` | 0 | **Testing on one PC only.** 1 = no sign-in: every visitor works as an agency administrator. Never set it on a server others can reach. `run.sh` sets it for local testing and then publishes the app on 127.0.0.1 only. |
+| `LOGIN_AS` | (empty) | With `LOGIN_DISABLED=1`: the account to work as (default: the first agency administrator). |
 | `LICENCE_FILE` | `/licence/licence.json` | Section 11. |
 | `LOG_FORMAT` | `json` | `plain` for reading logs by eye. |
 | `HTTP_PORT`, `HTTPS_PORT`, `WEB_PORT` | 80, 443, 8000 | Ports on the host (`WEB_PORT` is reachable from the host only). |

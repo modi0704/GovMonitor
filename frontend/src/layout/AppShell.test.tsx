@@ -116,3 +116,20 @@ it.each([
   expect(banner).toHaveTextContent(message);
   expect(banner).toHaveTextContent(hint);
 });
+
+it('testing mode: no sign-out button, and a notice that sign-in is off', async () => {
+  mockApi({
+    'GET /api/v1/auth/csrf': { body: {} },
+    'GET /api/v1/me': { body: { ...ME, login_disabled: true } },
+  });
+  render(
+    <MemoryRouter initialEntries={['/help']}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </MemoryRouter>,
+  );
+  await screen.findByRole('heading', { name: 'Help' });
+  expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument();
+  expect(screen.getByText(/Testing mode: sign-in is switched off/)).toBeInTheDocument();
+});

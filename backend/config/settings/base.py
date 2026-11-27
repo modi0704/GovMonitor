@@ -22,6 +22,11 @@ DEPLOYMENT_MODE = env("DEPLOYMENT_MODE", "multi")
 if DEPLOYMENT_MODE not in {"single", "multi"}:
     raise ValueError("DEPLOYMENT_MODE must be 'single' or 'multi'")
 SESSION_IDLE_MINUTES = env_int("SESSION_IDLE_MINUTES", 60)
+# Testing mode: no sign-in. Every visitor acts as an agency administrator (LOGIN_AS, or the first
+# active one). For trying the system on one PC only — ./run.sh switches it on and publishes the
+# app on this PC alone (127.0.0.1). Never enable it on a server that others can reach.
+LOGIN_DISABLED = env_bool("LOGIN_DISABLED", False)
+LOGIN_AS = env("LOGIN_AS", "").strip().lower()
 MAX_UPLOAD_MB = env_int("MAX_UPLOAD_MB", 25)
 LICENCE_FILE = env("LICENCE_FILE", "")  # office installs (DEPLOYMENT_MODE=single), P13.5
 LICENCE_PUBLIC_KEY = env("LICENCE_PUBLIC_KEY", "")  # override of the key shipped in the image (tests)
@@ -64,6 +69,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.accounts.middleware.SessionIdleMiddleware",
+    "apps.accounts.middleware.NoLoginMiddleware",
     "apps.tenancy.licence.LicenceMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

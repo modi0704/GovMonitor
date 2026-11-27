@@ -9,6 +9,8 @@ export interface Me {
   email: string;
   full_name: string;
   must_change_password: boolean;
+  /** Testing mode: the server opens the app without sign-in. */
+  login_disabled?: boolean;
   has_2fa: boolean;
   email_opt_out?: boolean;
   licence?: {

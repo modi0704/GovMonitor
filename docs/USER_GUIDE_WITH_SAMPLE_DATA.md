@@ -30,10 +30,9 @@ For the short reference of every screen, read the general **User Guide**. Use th
 
 1. Open Docker Desktop and wait until it says *Engine running*.
 2. In Git Bash, inside your GovMonitor folder, type `./run.sh start` and wait for *GovMonitor is running*.
-3. If you have not loaded the practice data yet, type `./run.sh demo`.
-4. Open `http://localhost:8000/` and sign in:
-   - **Email:** `admin@sample-ministry.demo`
-   - **Password:** `demo-password-2026`
+3. Open `http://localhost:8000/`. No sign-in is needed: the app opens as the Sample Ministry's administrator. (The practice data loads by itself the first time; otherwise type `./run.sh demo`.)
+
+If sign-in has been switched on (`./run.sh login on`), sign in with **Email** `admin@sample-ministry.demo` and **Password** `demo-password-2026`.
 
 The app opens on **Step-by-step**. You will build a small **Practice Center** with two offices, plan the year **Practice 2026**, report **January** and **February**, and download the presentation.
 

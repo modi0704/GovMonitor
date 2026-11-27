@@ -10,13 +10,14 @@ Then use ONE of these commands:
 
    ./run.sh start     Start the app. Wait for "GovMonitor is running",
                       then open http://localhost:8000/ in your browser.
+                      No sign-in needed: the app opens straight away.
 
    ./run.sh stop      Close the app. Your data is kept.
 
    ./run.sh update    Get the newest version and start it.
 
-   ./run.sh demo      Load the practice data. Sign in as
-                      admin@sample-ministry.demo  /  demo-password-2026
+   ./run.sh demo      Load the practice data (done for you automatically
+                      the first time, when the database is empty).
 
    ./run.sh status    See whether the app is running.
 
@@ -25,15 +26,21 @@ Then use ONE of these commands:
 Closing the browser does NOT stop the app. Use ./run.sh stop.
 
 
-SIGNING IN
-Practice account (after ./run.sh demo):
-   Email:     admin@sample-ministry.demo
-   Password:  demo-password-2026
+NO SIGN-IN (TESTING MODE) - THE DEFAULT FOR NOW
+The app opens without a sign-in page and you work as the agency
+administrator. A yellow bar at the top reminds you. Only this PC can open
+it: other computers on the network cannot.
 
-Forgot the email or password?
-   ./run.sh reset-password              lists the administrator emails
-   ./run.sh reset-password YOUR-EMAIL   gives that account a new temporary password
-Sign in with the temporary password; the app asks you to choose your own.
+Bring the sign-in page back later (when the system is ready):
+   ./run.sh login on
+Switch it off again:
+   ./run.sh login off
+
+With sign-in ON:
+   Practice account:  admin@sample-ministry.demo  /  demo-password-2026
+   Forgot the email or password?
+      ./run.sh reset-password              lists the administrator emails
+      ./run.sh reset-password YOUR-EMAIL   gives that account a new temporary password
 
 
 IF IT SAYS "the database ... refused its password" OR "run ./run.sh fix-db"
@@ -54,8 +61,9 @@ SET UP YOUR REAL AGENCY (ONLY ONCE, WHEN YOU STOP PRACTISING)
    ./run.sh setup
 
 It asks for your agency's name, a short code, your name and your email, and
-shows a temporary password ONE time. Sign in with it and choose your own.
+shows a temporary password ONE time (you need it only when sign-in is on).
 The practice agencies are switched off; nothing official is deleted.
+In testing mode the app then opens as your real agency's administrator.
 
 
 THE USER GUIDES

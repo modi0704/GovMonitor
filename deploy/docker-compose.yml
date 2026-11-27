@@ -22,6 +22,9 @@ x-app-env: &app-env
   SECURE_SSL: ${SECURE_SSL:-1}
   TRUST_X_FORWARDED_FOR: "1"
   LOG_FORMAT: ${LOG_FORMAT:-json}
+  # Testing mode without sign-in (./run.sh switches it on, for one PC only). Off by default.
+  LOGIN_DISABLED: ${LOGIN_DISABLED:-0}
+  LOGIN_AS: ${LOGIN_AS:-}
 
 services:
   db:

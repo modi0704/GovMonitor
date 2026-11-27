@@ -11,6 +11,12 @@ step on update (described here); minor and patch versions update with `update.sh
   failed") and how to fix it, instead of only "database not reachable".
 
 ### Running on one PC
+- **Testing mode without sign-in** (`LOGIN_DISABLED`, on by default in `run.sh`): the app opens
+  straight away as the agency administrator (`LOGIN_AS` can name another account), with a notice
+  at the top and no Sign out button. `run.sh` then starts only the database, the app and the worker,
+  so the app is reachable from this PC alone (the HTTPS front door stays stopped), and loads the
+  practice data when the database is empty. `./run.sh login on|off` switches the sign-in page back
+  on or off. The sign-in code is unchanged; servers keep sign-in (the setting is off by default).
 - `./run.sh start | stop | update | demo | setup | status | logs | fix-db` replaces the long Docker
   commands. It always uses the same settings, waits until the app answers, and `fix-db` repairs a
   saved database created with other passwords without losing data.

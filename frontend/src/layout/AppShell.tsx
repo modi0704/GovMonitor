@@ -150,18 +150,25 @@ export default function AppShell() {
                 <span>{role}</span>
               </span>
             </NavLink>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={async () => {
-                await signOut();
-                navigate('/sign-in', { replace: true });
-              }}
-            >
-              Sign out
-            </button>
+            {!me?.login_disabled && (
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={async () => {
+                  await signOut();
+                  navigate('/sign-in', { replace: true });
+                }}
+              >
+                Sign out
+              </button>
+            )}
           </nav>
         </header>
+        {me?.login_disabled && (
+          <div className="testing-banner" role="status">
+            Testing mode: sign-in is switched off. Anyone using this PC works as {accountName}.
+          </div>
+        )}
         {me?.licence?.message && (
           <div
             className={`licence-banner ${me.licence.read_only ? 'is-blocking' : ''}`}

@@ -28,7 +28,8 @@ funds, S-curves and rankings. It can be set up for any agency's offices.
   two offices, every figure to type, and the exact results to expect after each step.
 
 **Run it on your PC** (Docker Desktop open, in Git Bash inside this folder): `./run.sh start`, then
-open <http://localhost:8000/>. `./run.sh stop` closes it, `./run.sh update` gets the newest
+open <http://localhost:8000/>. For now it opens **without sign-in** (testing mode, this PC only);
+`./run.sh login on` brings the sign-in page back. `./run.sh stop` closes it, `./run.sh update` gets the newest
 version, `./run.sh demo` loads practice data. Details: [docs/RUN_AND_CLOSE.txt](docs/RUN_AND_CLOSE.txt).
 
 ## For developers

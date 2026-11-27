@@ -58,15 +58,18 @@ When you sign in, the app opens on **Step-by-step**. It shows a progress bar wit
 ## Sign In
 
 1. Make sure the app is running. On your own PC: open Docker Desktop, then in Git Bash, inside the GovMonitor folder, type `./run.sh start` and wait for *GovMonitor is running* (see `docs/RUN_AND_CLOSE.txt`).
-2. Open the address your IT person gave you, or `http://localhost:8000` on your own PC.
+2. Open `http://localhost:8000` on your own PC (or the address your IT person gave you).
+
+**For now there is no sign-in (testing mode).** The app opens straight away and you work as the agency administrator; a yellow bar at the top says so. Only the PC that runs the app can open it. When the system is ready, `./run.sh login on` brings the sign-in page back, and then:
+
 3. Type your **Email** and **Password**, then press **Sign in**.
 4. The first time, the app asks you to choose a new password. Use at least 12 characters.
 
 **Forgot your password?** Press the **Forgot your password?** link on the sign-in page and follow the email. If your office has no email set up: on the PC that runs the app, type `./run.sh reset-password` in Git Bash to see the administrator emails, then `./run.sh reset-password your-email` to get a new temporary password.
 
-**Just practising?** After `./run.sh demo`, sign in as `admin@sample-ministry.demo` with the password `demo-password-2026`, and follow the **User Guide with Sample Data**: every figure to type and the results to expect.
+**Just practising?** Follow the **User Guide with Sample Data**: every figure to type and the results to expect. (With sign-in on, the practice account is `admin@sample-ministry.demo`, password `demo-password-2026`.)
 
-**Signed out by itself?** For safety, the app signs you out after one hour without use. Sign in again. Press **Save** often so you never lose work.
+**Signed out by itself?** With sign-in on, the app signs you out after one hour without use, for safety. Sign in again. Press **Save** often so you never lose work.
 
 <!-- page -->
 

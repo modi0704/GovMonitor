@@ -10,7 +10,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 const months = (...v: string[]) => [...v, ...Array(12 - v.length).fill('0')];
 const PLAN = {
-  id: 'p1',
+  id: '5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11',
   office: { id: 'o1', code: 'PME', name: 'Planning' },
   fiscal_year: { id: 'fy1', label: '2026' },
   version: 1,
@@ -68,17 +68,19 @@ function renderEditor() {
   const calls = mockApi({
     'GET /api/v1/auth/csrf': { body: {} },
     'GET /api/v1/me': { body: ME },
-    'GET /api/v1/plans/p1': { body: PLAN },
+    'GET /api/v1/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11': { body: PLAN },
     'GET /api/v1/offices/directory': {
       body: [{ id: 'o1', code: 'PME', name: 'Planning', depth: 1 }],
     },
     'POST /api/v1/results/preview': {
       body: { weights: { a: '1' }, cum_plan: months('0.2', '0.5', '1'), funds_total: '600000' },
     },
-    'POST /api/v1/plans/p1/save': { body: { plan: PLAN, created: {} } },
+    'POST /api/v1/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11/save': {
+      body: { plan: PLAN, created: {} },
+    },
   });
   render(
-    <MemoryRouter initialEntries={['/plans/p1']}>
+    <MemoryRouter initialEntries={['/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11']}>
       <AuthProvider>
         <App />
       </AuthProvider>
@@ -100,7 +102,9 @@ it('edits cells, pastes a block and saves only the changed rows', async () => {
   fireEvent.paste(feb, { clipboardData: { getData: () => '4\t5\t6' } });
   expect(screen.getByLabelText('APR, row 2')).toHaveValue('6');
   await user.click(screen.getByRole('button', { name: 'Save' }));
-  const save = calls.find((c) => c.path === '/api/v1/plans/p1/save')!.body as {
+  const save = calls.find(
+    (c) => c.path === '/api/v1/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11/save',
+  )!.body as {
     rows: Record<string, unknown>[];
   };
   expect(save.rows).toHaveLength(1);
@@ -141,7 +145,9 @@ it('adds an indicator with monthly targets and saves it with the plan', async ()
   await user.type(screen.getByLabelText('MAR, indicator 1'), '1');
   await user.selectOptions(screen.getByLabelText('Counted as, indicator 1'), 'last');
   await user.click(screen.getByRole('button', { name: 'Save' }));
-  const save = calls.find((c) => c.path === '/api/v1/plans/p1/save')!.body as {
+  const save = calls.find(
+    (c) => c.path === '/api/v1/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11/save',
+  )!.body as {
     indicators: Record<string, unknown>[];
   };
   expect(save.indicators).toHaveLength(1);
@@ -170,7 +176,9 @@ it('calculates the total cost from the target and the unit cost and does not let
   await user.type(total, '9');
   expect(total).toHaveValue('60000');
   await user.click(screen.getByRole('button', { name: 'Save' }));
-  const save = calls.find((c) => c.path === '/api/v1/plans/p1/save')!.body as {
+  const save = calls.find(
+    (c) => c.path === '/api/v1/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11/save',
+  )!.body as {
     rows: Record<string, unknown>[];
   };
   expect(save.rows[0]).toMatchObject({

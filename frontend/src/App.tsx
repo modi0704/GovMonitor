@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactNode } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useParams } from 'react-router-dom';
 import RequireAuth from './auth/RequireAuth';
 import DesktopOnly from './components/DesktopOnly';
 import AppShell from './layout/AppShell';
@@ -12,31 +12,25 @@ import SignInPage from './pages/SignInPage';
 
 // Pages beyond sign-in load on demand, so field offices on slow links download only what they open
 // (the charting library in particular).
-const AuditPage = lazy(() => import('./pages/AuditPage'));
-const GroupsPage = lazy(() => import('./pages/GroupsPage'));
-const SecurityPage = lazy(() => import('./pages/SecurityPage'));
 const SetupWizardPage = lazy(() => import('./pages/SetupWizardPage'));
 const StructurePage = lazy(() => import('./pages/structure/StructurePage'));
-const UsersPage = lazy(() => import('./pages/UsersPage'));
 const FiscalYearsPage = lazy(() => import('./pages/planning/FiscalYearsPage'));
-const ScoringProfilePage = lazy(() => import('./pages/planning/ScoringProfilePage'));
 const FiscalYearPage = lazy(() => import('./pages/planning/FiscalYearPage'));
 const PlansPage = lazy(() => import('./pages/planning/PlansPage'));
 const PlanEditorPage = lazy(() => import('./pages/planning/PlanEditorPage'));
-const PlanVersionsPage = lazy(() => import('./pages/planning/PlanVersionsPage'));
-const ApprovalsPage = lazy(() => import('./pages/planning/ApprovalsPage'));
 const MonthlyReportPage = lazy(() => import('./pages/reporting/MonthlyReportPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const RankingsPage = lazy(() => import('./pages/dashboard/RankingsPage'));
-const SubmissionBoardPage = lazy(() => import('./pages/reporting/SubmissionBoardPage'));
-const HelpPage = lazy(() => import('./pages/help/HelpPage'));
 const UserGuidePage = lazy(() => import('./pages/help/UserGuidePage'));
-const NotificationsPage = lazy(() => import('./pages/alerts/NotificationsPage'));
-const AlertSettingsPage = lazy(() => import('./pages/alerts/AlertSettingsPage'));
-const ReportTemplatePage = lazy(() => import('./pages/exports/ReportTemplatePage'));
 const MyExportsPage = lazy(() => import('./pages/exports/MyExportsPage'));
-const PlatformAgenciesPage = lazy(() => import('./platform/PlatformAgenciesPage'));
-const PlatformSignInPage = lazy(() => import('./platform/PlatformSignInPage'));
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Only a real plan id opens the editor: old addresses such as /plans/approvals are Not found. */
+function PlanRoute({ children }: { children: ReactNode }) {
+  const { planId } = useParams();
+  return UUID.test(planId ?? '') ? <>{children}</> : <NotFoundPage />;
+}
 
 function Page({ children }: { children: ReactNode }) {
   return <Suspense fallback={<div className="page-loading">Loading…</div>}>{children}</Suspense>;
@@ -65,14 +59,6 @@ export default function App() {
       >
         <Route index element={<HomePage />} />
         <Route
-          path="account/security"
-          element={
-            <Page>
-              <SecurityPage />
-            </Page>
-          }
-        />
-        <Route
           path="structure"
           element={
             <Page>
@@ -83,41 +69,11 @@ export default function App() {
           }
         />
         <Route
-          path="groups"
-          element={
-            <Page>
-              <DesktopOnly what="Editing office groups">
-                <GroupsPage />
-              </DesktopOnly>
-            </Page>
-          }
-        />
-        <Route
-          path="users"
-          element={
-            <Page>
-              <DesktopOnly what="User management">
-                <UsersPage />
-              </DesktopOnly>
-            </Page>
-          }
-        />
-        <Route
           path="setup"
           element={
             <Page>
               <DesktopOnly what="The setup wizard">
                 <SetupWizardPage />
-              </DesktopOnly>
-            </Page>
-          }
-        />
-        <Route
-          path="audit"
-          element={
-            <Page>
-              <DesktopOnly what="The audit log">
-                <AuditPage />
               </DesktopOnly>
             </Page>
           }
@@ -141,16 +97,6 @@ export default function App() {
           }
         />
         <Route
-          path="fiscal-years/:fyId/scoring"
-          element={
-            <Page>
-              <DesktopOnly what="Scoring settings">
-                <ScoringProfilePage />
-              </DesktopOnly>
-            </Page>
-          }
-        />
-        <Route
           path="plans"
           element={
             <Page>
@@ -162,17 +108,11 @@ export default function App() {
           path="plans/:planId"
           element={
             <Page>
-              <DesktopOnly what="The plan editor">
-                <PlanEditorPage />
-              </DesktopOnly>
-            </Page>
-          }
-        />
-        <Route
-          path="help"
-          element={
-            <Page>
-              <HelpPage />
+              <PlanRoute>
+                <DesktopOnly what="The plan editor">
+                  <PlanEditorPage />
+                </DesktopOnly>
+              </PlanRoute>
             </Page>
           }
         />
@@ -181,34 +121,6 @@ export default function App() {
           element={
             <Page>
               <UserGuidePage />
-            </Page>
-          }
-        />
-        <Route
-          path="notifications"
-          element={
-            <Page>
-              <NotificationsPage />
-            </Page>
-          }
-        />
-        <Route
-          path="settings/alerts"
-          element={
-            <Page>
-              <DesktopOnly what="Alert settings">
-                <AlertSettingsPage />
-              </DesktopOnly>
-            </Page>
-          }
-        />
-        <Route
-          path="settings/report-template"
-          element={
-            <Page>
-              <DesktopOnly what="The report template">
-                <ReportTemplatePage />
-              </DesktopOnly>
             </Page>
           }
         />
@@ -237,14 +149,6 @@ export default function App() {
           }
         />
         <Route
-          path="submissions"
-          element={
-            <Page>
-              <SubmissionBoardPage />
-            </Page>
-          }
-        />
-        <Route
           path="reports"
           element={
             <Page>
@@ -254,41 +158,7 @@ export default function App() {
             </Page>
           }
         />
-        <Route
-          path="plans/approvals"
-          element={
-            <Page>
-              <ApprovalsPage />
-            </Page>
-          }
-        />
-        <Route
-          path="plans/:planId/versions"
-          element={
-            <Page>
-              <DesktopOnly what="Comparing plan versions">
-                <PlanVersionsPage />
-              </DesktopOnly>
-            </Page>
-          }
-        />
       </Route>
-      <Route
-        path="/platform/sign-in"
-        element={
-          <Page>
-            <PlatformSignInPage />
-          </Page>
-        }
-      />
-      <Route
-        path="/platform"
-        element={
-          <Page>
-            <PlatformAgenciesPage />
-          </Page>
-        }
-      />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

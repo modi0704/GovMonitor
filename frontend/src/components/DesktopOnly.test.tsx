@@ -23,11 +23,8 @@ function renderAt(path: string) {
   mockApi({
     'GET /api/v1/auth/csrf': { body: {} },
     'GET /api/v1/me': { body: { ...ME, is_agency_admin: true } },
-    'GET /api/v1/users': { body: [] },
     'GET /api/v1/offices': { body: [] },
-    'GET /api/v1/audit-log': {
-      body: { results: [], next_before: null, actions: [], entity_types: [] },
-    },
+    'GET /api/v1/levels': { body: [] },
   });
   render(
     <MemoryRouter initialEntries={[path]}>
@@ -38,7 +35,9 @@ function renderAt(path: string) {
   );
 }
 
-it.each(['/structure', '/users', '/audit', '/reports', '/plans/p1', '/settings/alerts'])(
+const PLAN = '5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11';
+
+it.each(['/structure', '/reports', `/plans/${PLAN}`, '/setup'])(
   'on a phone, %s says to open it on a computer and hides editing links',
   async (path) => {
     phone(true);
@@ -46,14 +45,14 @@ it.each(['/structure', '/users', '/audit', '/reports', '/plans/p1', '/settings/a
     expect(
       await screen.findByRole('heading', { name: 'Open on a computer to edit' }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Users' })).toHaveClass('desktop-only');
+    expect(screen.getByRole('link', { name: 'Offices' })).toHaveClass('desktop-only');
     expect(screen.getByRole('link', { name: 'Rankings' })).not.toHaveClass('desktop-only');
   },
 );
 
 it('on a computer the page itself is shown', async () => {
   phone(false);
-  renderAt('/audit');
-  expect(await screen.findByRole('heading', { name: 'Change history' })).toBeInTheDocument();
+  renderAt('/structure');
+  expect(await screen.findByRole('heading', { name: 'Offices' })).toBeInTheDocument();
   expect(screen.queryByText('Open on a computer to edit')).not.toBeInTheDocument();
 });

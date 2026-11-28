@@ -75,7 +75,7 @@ it('forces a password change before anything else', async () => {
     'GET /api/v1/auth/csrf': { body: { ok: true } },
     'GET /api/v1/me': { body: { ...ME, must_change_password: true } },
   });
-  renderAt('/account/security');
+  renderAt('/rankings');
   expect(await screen.findByRole('heading', { name: 'Choose a new password' })).toBeInTheDocument();
 });
 
@@ -110,4 +110,28 @@ it('shows a not-found page for unknown routes', () => {
   mockApi({});
   renderAt('/nope');
   expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
+});
+
+it.each([
+  '/users',
+  '/account/security',
+  '/plans/approvals',
+  '/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11/versions',
+  '/fiscal-years/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11/scoring',
+  '/submissions',
+  '/settings/alerts',
+  '/notifications',
+  '/groups',
+  '/settings/report-template',
+  '/help',
+  '/audit',
+  '/platform',
+  '/platform/sign-in',
+])('the removed page %s is Not found', async (path) => {
+  mockApi({
+    'GET /api/v1/auth/csrf': { body: { ok: true } },
+    'GET /api/v1/me': { body: { ...ME, is_agency_admin: true, login_disabled: true } },
+  });
+  renderAt(path);
+  expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
 });

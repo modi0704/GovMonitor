@@ -14,13 +14,13 @@ it('opens the compact menu, focuses navigation, and returns focus on Escape', as
     'GET /api/v1/me': { body: ME },
   });
   render(
-    <MemoryRouter initialEntries={['/help']}>
+    <MemoryRouter initialEntries={['/user-guide']}>
       <AuthProvider>
         <App />
       </AuthProvider>
     </MemoryRouter>,
   );
-  await screen.findByRole('heading', { name: 'Help' });
+  await screen.findByRole('heading', { name: 'User guide' });
   const user = userEvent.setup();
   const menu = screen.getByRole('button', { name: 'Menu' });
   await user.click(menu);
@@ -31,19 +31,19 @@ it('opens the compact menu, focuses navigation, and returns focus on Escape', as
   expect(menu).toHaveFocus();
 });
 
-it('keeps agency management destinations out of a read-only user navigation', async () => {
+it('removed pages never appear in the menu', async () => {
   mockApi({
     'GET /api/v1/auth/csrf': { body: {} },
     'GET /api/v1/me': { body: ME },
   });
   render(
-    <MemoryRouter initialEntries={['/help']}>
+    <MemoryRouter initialEntries={['/user-guide']}>
       <AuthProvider>
         <App />
       </AuthProvider>
     </MemoryRouter>,
   );
-  await screen.findByRole('heading', { name: 'Help' });
+  await screen.findByRole('heading', { name: 'User guide' });
   expect(screen.queryByRole('link', { name: 'Users' })).not.toBeInTheDocument();
   expect(screen.queryByRole('link', { name: 'Plans to approve' })).not.toBeInTheDocument();
   expect(screen.queryByRole('link', { name: 'Who has reported' })).not.toBeInTheDocument();
@@ -57,13 +57,13 @@ it('the first Tab reaches a skip link that leads to the page content', async () 
     'GET /api/v1/fiscal-years': { body: [] },
   });
   render(
-    <MemoryRouter initialEntries={['/notifications']}>
+    <MemoryRouter initialEntries={['/user-guide']}>
       <AuthProvider>
         <App />
       </AuthProvider>
     </MemoryRouter>,
   );
-  await screen.findByRole('heading', { name: 'Notifications' });
+  await screen.findByRole('heading', { name: 'User guide' });
   await userEvent.setup().tab();
   const skip = screen.getByRole('link', { name: 'Skip to content' });
   expect(skip).toHaveFocus();
@@ -71,65 +71,65 @@ it('the first Tab reaches a skip link that leads to the page content', async () 
   expect(document.getElementById('main-content')?.tagName).toBe('MAIN');
 });
 
-it.each([
-  [
-    'expiring',
-    false,
-    'The licence expires on 25 November 2026 (10 days left).',
-    'Ask your administrator to renew it.',
-  ],
-  [
-    'expired',
-    true,
-    'The licence expired on 1 November 2026: the system is read-only.',
-    'You can still sign in',
-  ],
-])('shows the licence banner when %s', async (status, readOnly, message, hint) => {
-  mockApi({
-    'GET /api/v1/auth/csrf': { body: {} },
-    'GET /api/v1/me': {
-      body: {
-        ...ME,
-        licence: {
-          status,
-          read_only: readOnly,
-          expires: null,
-          days_left: null,
-          seats: 10,
-          seats_used: 3,
-          message,
-        },
-      },
-    },
-  });
-  render(
-    <MemoryRouter initialEntries={['/notifications']}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </MemoryRouter>,
-  );
-  const banner = (await screen.findByText(new RegExp(message.slice(0, 20)))).closest(
-    '.licence-banner',
-  )!;
-  expect(banner).toHaveAttribute('role', readOnly ? 'alert' : 'status');
-  expect(banner).toHaveTextContent(message);
-  expect(banner).toHaveTextContent(hint);
-});
-
-it('testing mode: no sign-out button, and a notice that sign-in is off', async () => {
+it('without sign-in there is no account menu or sign-out; with sign-in on there is', async () => {
   mockApi({
     'GET /api/v1/auth/csrf': { body: {} },
     'GET /api/v1/me': { body: { ...ME, login_disabled: true } },
   });
-  render(
-    <MemoryRouter initialEntries={['/help']}>
+  const { unmount } = render(
+    <MemoryRouter initialEntries={['/user-guide']}>
       <AuthProvider>
         <App />
       </AuthProvider>
     </MemoryRouter>,
   );
-  await screen.findByRole('heading', { name: 'Help' });
+  await screen.findByRole('heading', { name: 'User guide' });
   expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument();
-  expect(screen.getByText(/Testing mode: sign-in is switched off/)).toBeInTheDocument();
+  expect(screen.queryByRole('navigation', { name: 'Account' })).not.toBeInTheDocument();
+  unmount();
+  vi.unstubAllGlobals();
+  mockApi({
+    'GET /api/v1/auth/csrf': { body: {} },
+    'GET /api/v1/me': { body: { ...ME, login_disabled: false } },
+  });
+  render(
+    <MemoryRouter initialEntries={['/user-guide']}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </MemoryRouter>,
+  );
+  await screen.findByRole('heading', { name: 'User guide' });
+  expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
+});
+
+it('the menu has only the pages a single officer needs', async () => {
+  mockApi({
+    'GET /api/v1/auth/csrf': { body: {} },
+    'GET /api/v1/me': { body: { ...ME, is_agency_admin: true, login_disabled: true } },
+    'GET /api/v1/progress': { status: 404, body: {} },
+  });
+  render(
+    <MemoryRouter initialEntries={['/user-guide']}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </MemoryRouter>,
+  );
+  await screen.findByRole('heading', { name: 'User guide' });
+  const links = screen
+    .getAllByRole('link')
+    .filter((a) => a.closest('nav[aria-label="Main"]'))
+    .map((a) => a.textContent);
+  expect(links).toEqual([
+    'Step-by-step',
+    'Dashboard',
+    'Rankings',
+    'Downloads',
+    'Office plans',
+    'Monthly results',
+    'Offices',
+    'Years',
+    'User guide',
+  ]);
 });

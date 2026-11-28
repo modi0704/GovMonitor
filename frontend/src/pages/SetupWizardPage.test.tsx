@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach } from 'vitest';
@@ -20,7 +20,7 @@ const ROOT = {
   can_edit: true,
 };
 
-it('walks through levels, top office, offices and finishes', async () => {
+it('walks through levels, top office and offices, then finishes', async () => {
   const me = { ...ME, is_agency_admin: true, agency: { ...ME.agency, setup_complete: false } };
   const calls = mockApi({
     'GET /api/v1/auth/csrf': { body: {} },
@@ -66,8 +66,12 @@ it('walks through levels, top office, offices and finishes', async () => {
   await user.type(name, 'Ministry of Things');
   await user.click(screen.getByRole('button', { name: 'Next' }));
   await user.type(await screen.findByLabelText('Offices'), 'PME - Planning');
-  await user.click(screen.getByRole('button', { name: 'Add offices and continue' }));
-  await user.click(await screen.findByRole('button', { name: 'Finish setup' }));
+  await user.click(screen.getByRole('button', { name: 'Add offices and finish' }));
+  // No "first users" step: one officer enters everything (D49).
+  await waitFor(() =>
+    expect(calls.some((c) => c.path === '/api/v1/agency' && c.method === 'PATCH')).toBe(true),
+  );
+  expect(calls.some((c) => c.path === '/api/v1/users')).toBe(false);
   expect(calls.filter((c) => c.path === '/api/v1/agency').map((c) => c.body)).toEqual([
     { name: 'Ministry of Things' },
     { setup_complete: true },

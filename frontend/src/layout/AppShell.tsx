@@ -4,7 +4,6 @@ import { useAuth } from '../auth/useAuth';
 import { useLeaveGuard } from '../lib/unsaved';
 import { useFocusableScrollRegions } from './useFocusableScrollRegions';
 import LoadingBar from './LoadingBar';
-import NotificationBell from './NotificationBell';
 import GuideBar from './GuideBar';
 import { NAV_GROUPS, NAV_ITEMS } from './nav';
 import NavIcon from './NavIcon';
@@ -35,23 +34,10 @@ export default function AppShell() {
     [...visible]
       .sort((a, b) => b.to.length - a.to.length)
       .find((item) => item.to !== '/' && location.pathname.startsWith(item.to))?.label ??
-    (location.pathname === '/account/security'
-      ? 'Account security'
-      : location.pathname === '/setup'
-        ? 'Agency setup'
-        : (visible.find((item) => item.to === '/')?.label ?? 'Dashboard'));
-  const role = me?.is_agency_admin
-    ? 'Agency administrator'
-    : me?.roles.some((r) => r.level === 'admin')
-      ? 'Office administrator'
-      : 'Read-only user';
+    (location.pathname === '/setup'
+      ? 'Agency setup'
+      : (visible.find((item) => item.to === '/')?.label ?? 'Dashboard'));
   const accountName = me?.full_name || me?.email || 'Account';
-  const initials = accountName
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase();
   function closeMenu() {
     setMenuOpen(false);
     if (menuOpen) requestAnimationFrame(() => mainElement()?.focus());
@@ -120,7 +106,6 @@ export default function AppShell() {
         <div className="sidebar-footer">
           <span className="workspace-dot" />
           {me?.agency.name}
-          <p>{role}</p>
         </div>
       </aside>
       <div className="workspace-body">
@@ -139,18 +124,12 @@ export default function AppShell() {
             <span className="agency-name">{me?.agency.name}</span>
             <span className="workspace-page">{activePage}</span>
           </div>
-          <nav className="topnav" aria-label="Account">
-            <NotificationBell />
-            <NavLink to="/account/security" className="account-link">
-              <span className="account-avatar" aria-hidden="true">
-                {initials}
-              </span>
+          {!me?.login_disabled && (
+            // Only when sign-in is switched on ('./run.sh login on'): who is signed in, and sign out.
+            <nav className="topnav" aria-label="Account">
               <span className="account-copy">
                 <strong>{accountName}</strong>
-                <span>{role}</span>
               </span>
-            </NavLink>
-            {!me?.login_disabled && (
               <button
                 type="button"
                 className="btn btn-ghost"
@@ -161,25 +140,9 @@ export default function AppShell() {
               >
                 Sign out
               </button>
-            )}
-          </nav>
+            </nav>
+          )}
         </header>
-        {me?.login_disabled && (
-          <div className="testing-banner" role="status">
-            Testing mode: sign-in is switched off. Anyone using this PC works as {accountName}.
-          </div>
-        )}
-        {me?.licence?.message && (
-          <div
-            className={`licence-banner ${me.licence.read_only ? 'is-blocking' : ''}`}
-            role={me.licence.read_only ? 'alert' : 'status'}
-          >
-            {me.licence.message}{' '}
-            {me.licence.read_only
-              ? 'You can still sign in, read everything and export it. Ask your administrator to install a valid licence.'
-              : 'Ask your administrator to renew it.'}
-          </div>
-        )}
         <LoadingBar />
         <main className="content" id="main-content" tabIndex={-1}>
           {me?.is_agency_admin && <GuideBar />}

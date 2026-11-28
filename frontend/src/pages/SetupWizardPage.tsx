@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import type { Level, OfficeRow, UserRow } from '../api/types';
+import type { Level, OfficeRow } from '../api/types';
 import { errorMessage } from '../api/useResource';
 import FormError from '../components/FormError';
 import { useAuth } from '../auth/useAuth';
 import { parseOfficeList } from './structure/parseOfficeList';
 
-const STEPS = ['Level names', 'Top office', 'Offices', 'First users'] as const;
+const STEPS = ['Level names', 'Top office', 'Offices'] as const;
 
-/** First-run setup (P2.7): level names → top office → offices → first users. */
+/** First-run setup (P2.7): level names → top office → offices. One officer enters everything, so
+ * there is no step for other users (D49). */
 export default function SetupWizardPage() {
   const { me, refresh } = useAuth();
   const navigate = useNavigate();
@@ -20,15 +21,7 @@ export default function SetupWizardPage() {
   const [rootName, setRootName] = useState('');
   const [rootCode, setRootCode] = useState('');
   const [officeText, setOfficeText] = useState('');
-  const [offices, setOffices] = useState<OfficeRow[]>([]);
   const [importErrors, setImportErrors] = useState<{ row: number; message: string }[]>([]);
-  const [newUser, setNewUser] = useState({
-    email: '',
-    full_name: '',
-    office_id: '',
-    level: 'admin',
-  });
-  const [created, setCreated] = useState<{ email: string; password: string }[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -40,7 +33,6 @@ export default function SetupWizardPage() {
         setRoot(top);
         setRootName(top?.name ?? '');
         setRootCode(top?.code ?? '');
-        setOffices(of);
       })
       .catch((err: unknown) => active && setError(errorMessage(err)));
     return () => {
@@ -103,25 +95,6 @@ export default function SetupWizardPage() {
         await api.post('offices/import', { parent_id: root.id, rows });
         setOfficeText('');
       }
-      setOffices(await api.get<OfficeRow[]>('offices'));
-      setStep(3);
-    });
-
-  const addUser = () =>
-    run(async () => {
-      const u = await api.post<UserRow>('users', {
-        email: newUser.email,
-        full_name: newUser.full_name,
-        assignments: newUser.office_id
-          ? [{ office_id: newUser.office_id, level: newUser.level }]
-          : [],
-      });
-      setCreated([...created, { email: u.email, password: u.temporary_password ?? '' }]);
-      setNewUser({ email: '', full_name: '', office_id: '', level: 'admin' });
-    });
-
-  const finish = () =>
-    run(async () => {
       await api.patch('agency', { setup_complete: true });
       await refresh();
       navigate('/', { replace: true });
@@ -217,8 +190,8 @@ export default function SetupWizardPage() {
             <h2>Offices</h2>
             <p className="muted">
               Paste your offices, one per line: code, a tab (or “ - ”), name. Indent a line to put
-              it beneath the one above. You can also skip this and build the structure later on the
-              Structure page.
+              it beneath the one above. You can also leave it empty and add offices later on the
+              Offices page.
             </p>
             <textarea
               rows={10}
@@ -242,83 +215,7 @@ export default function SetupWizardPage() {
                 Back
               </button>
               <button type="button" className="btn btn-primary" onClick={saveOffices}>
-                {officeText.trim() ? 'Add offices and continue' : 'Skip'}
-              </button>
-            </div>
-          </>
-        )}
-        {step === 3 && (
-          <>
-            <h2>First users</h2>
-            <p className="muted">
-              Give each office at least one person who enters its data (Admin).
-            </p>
-            {created.length > 0 && (
-              <div className="notice">
-                <p>
-                  Temporary passwords are shown once. Give each password privately to its account
-                  holder:
-                </p>
-                <ul className="plain-list">
-                  {created.map((c) => (
-                    <li key={c.email}>
-                      {c.email}: <code>{c.password}</code>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <label>
-              Email
-              <input
-                type="email"
-                value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-              />
-            </label>
-            <label>
-              Full name
-              <input
-                value={newUser.full_name}
-                onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
-              />
-            </label>
-            <label>
-              Office
-              <select
-                value={newUser.office_id}
-                onChange={(e) => setNewUser({ ...newUser, office_id: e.target.value })}
-              >
-                <option value="">Choose an office…</option>
-                {offices.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {'  '.repeat(o.depth)}
-                    {o.code} {o.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Level
-              <select
-                value={newUser.level}
-                onChange={(e) => setNewUser({ ...newUser, level: e.target.value })}
-              >
-                <option value="admin">Admin — enters and changes data</option>
-                <option value="read_only">Read-only — views and exports</option>
-              </select>
-            </label>
-            <div className="row">
-              <button type="button" className="btn" onClick={addUser} disabled={!newUser.email}>
-                Add user
-              </button>
-            </div>
-            <div className="row">
-              <button type="button" className="btn" onClick={() => setStep(2)}>
-                Back
-              </button>
-              <button type="button" className="btn btn-primary" onClick={finish}>
-                Finish setup
+                {officeText.trim() ? 'Add offices and finish' : 'Finish setup'}
               </button>
             </div>
           </>

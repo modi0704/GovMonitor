@@ -90,9 +90,9 @@ test: test-backend test-frontend ## Backend (pytest) and frontend (Vitest) tests
 build-frontend:
 	cd frontend && npm run build
 
-# Playwright smoke + accessibility tests (P12.5, P12.7) against a running server with the demo data,
-# a worker and a platform owner (see .github/workflows/ci.yml, job "smoke"). SMOKE_BASE_URL sets it.
-smoke: ## Browser smoke tests of the five user flows, desktop and phone
+# Playwright smoke + accessibility tests (P12.5, P12.7) against a running server with the demo data
+# and a worker, as shipped: no sign-in (see .github/workflows/ci.yml, job "smoke"). SMOKE_BASE_URL sets it.
+smoke: ## Browser smoke tests of the monitoring routine, desktop and phone
 	cd frontend && SMOKE_BASE_URL=$(or $(SMOKE_BASE_URL),http://127.0.0.1:$(WEB_PORT)) npm run smoke
 
 audit: ## Known-vulnerability audit of dependencies (runtime must be clean; docs/SECURITY.md)

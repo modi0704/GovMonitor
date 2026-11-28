@@ -13,20 +13,11 @@ const PAGES = [
   '/dashboard',
   '/rankings',
   '/reports',
-  '/submissions',
   '/plans',
-  '/plans/approvals',
   '/fiscal-years',
   '/structure',
-  '/groups',
-  '/users',
   '/exports',
-  '/settings/alerts',
-  '/settings/report-template',
-  '/audit',
-  '/help',
-  '/notifications',
-  '/account/security',
+  '/user-guide',
 ];
 
 test('every page and every export stays on the site', async ({ page, baseURL }, info) => {

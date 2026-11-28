@@ -56,7 +56,7 @@ jobs:
         run: make audit
 
   smoke:
-    # P12.7: the five user flows (desktop and phone) and the accessibility checks in a browser,
+    # P12.7, D49: the monitoring routine (desktop and phone) and the accessibility checks in a browser,
     # against a freshly migrated and seeded database with the web server and a worker running.
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -74,8 +74,8 @@ jobs:
       DATABASE_ADMIN_URL: postgres://app_owner:app_owner@localhost:5432/govmonitor
       DJANGO_SETTINGS_MODULE: config.settings.dev
       SMOKE_BASE_URL: http://127.0.0.1:8000
-      PLATFORM_EMAIL: ops@govmonitor.test
-      PLATFORM_PASSWORD: platform-smoke-pass-2026
+      # D49: smoke runs as the app ships — no sign-in, the demo agency's administrator.
+      LOGIN_AS: admin@sample-ministry.demo
     steps:
       - uses: actions/checkout@v4
       - name: Create database roles (app_owner, app_user)
@@ -99,10 +99,8 @@ jobs:
         run: |
           make install
           cd frontend && npx playwright install --with-deps chromium
-      - name: Database, demo data, platform owner, frontend build
-        run: |
-          make migrate-local seed-demo-local build-frontend
-          cd backend && .venv/bin/python manage.py create_platform_admin --email "$PLATFORM_EMAIL" --password "$PLATFORM_PASSWORD"
+      - name: Database, demo data, frontend build
+        run: make migrate-local seed-demo-local build-frontend
       - name: Start the web server and a worker
         run: |
           cd backend

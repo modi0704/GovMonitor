@@ -1,17 +1,9 @@
 import { expect, type Page } from '@playwright/test';
 
-export const ADMIN = {
-  email: 'admin@sample-ministry.demo',
-  password: process.env.DEMO_PASSWORD ?? 'demo-password-2026',
-};
-
-export async function signIn(page: Page, who = ADMIN) {
-  await page.goto('/sign-in');
-  await page.getByLabel('Email').fill(who.email);
-  await page.getByLabel('Password').fill(who.password);
-  await page.getByRole('button', { name: /sign in/i }).click();
-  await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+/** D49: the app opens straight away — there is no sign-in as shipped. */
+export async function openApp(page: Page, path = '/') {
+  await page.goto(path);
+  await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
 }
 
 export async function officeId(page: Page, code: string): Promise<string> {

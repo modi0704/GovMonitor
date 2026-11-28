@@ -64,7 +64,7 @@ const PLAN = {
   issues: [],
 };
 
-function renderEditor() {
+function renderEditor(extra = {}) {
   const calls = mockApi({
     'GET /api/v1/auth/csrf': { body: {} },
     'GET /api/v1/me': { body: ME },
@@ -78,6 +78,7 @@ function renderEditor() {
     'POST /api/v1/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11/save': {
       body: { plan: PLAN, created: {} },
     },
+    ...extra,
   });
   render(
     <MemoryRouter initialEntries={['/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11']}>
@@ -186,4 +187,44 @@ it('calculates the total cost from the target and the unit cost and does not let
     unit_cost: '5000',
     total_cost: '60000',
   });
+});
+
+const ID = '5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11';
+const NEW_ID = '7a1d3b63-9e4f-4c70-8b62-1e7a3d8f2f22';
+
+it('saves a plan as final in one step — no approval, no version wording', async () => {
+  const calls = renderEditor({
+    [`POST /api/v1/plans/${ID}/finalize`]: { body: { ...PLAN, status: 'approved' } },
+  });
+  vi.spyOn(window, 'confirm').mockReturnValue(true);
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('button', { name: 'Save as final' }));
+  expect(
+    calls
+      .filter((c) => c.method === 'POST' && c.path.startsWith(`/api/v1/plans/${ID}/`))
+      .map((c) => c.path),
+  ).toEqual([`/api/v1/plans/${ID}/finalize`]);
+  expect(await screen.findByText('Final — used for the monthly results')).toBeInTheDocument();
+  for (const name of ['Approve', 'Submit for approval', 'Return for correction', 'Versions']) {
+    expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+  }
+  expect(screen.queryByText(/version/i)).not.toBeInTheDocument();
+  expect(screen.queryByRole('columnheader', { name: /Implementing/ })).not.toBeInTheDocument();
+});
+
+it('changes a final plan by opening the editable copy', async () => {
+  const final = { ...PLAN, status: 'approved', can_edit: false };
+  const calls = renderEditor({
+    [`GET /api/v1/plans/${ID}`]: { body: final },
+    [`POST /api/v1/plans/${ID}/change`]: { body: { ...PLAN, id: NEW_ID, version: 2 } },
+    [`GET /api/v1/plans/${NEW_ID}`]: { body: { ...PLAN, id: NEW_ID, version: 2 } },
+  });
+  vi.spyOn(window, 'confirm').mockReturnValue(true);
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('button', { name: 'Change plan' }));
+  expect(calls.some((c) => c.method === 'POST' && c.path === `/api/v1/plans/${ID}/change`)).toBe(
+    true,
+  );
+  expect(await screen.findByRole('button', { name: 'Save as final' })).toBeInTheDocument();
+  expect(calls.some((c) => c.path === `/api/v1/plans/${NEW_ID}`)).toBe(true);
 });

@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ApiError, api } from '../../api/client';
-import { errorMessage, useResource } from '../../api/useResource';
+import { errorMessage } from '../../api/useResource';
 import Chart from '../../components/Chart';
 import { CHART_COLORS } from '../../components/chartTheme';
 import FormError from '../../components/FormError';
@@ -74,13 +74,6 @@ interface Preview {
   funds_total: string;
 }
 
-interface DirectoryOffice {
-  id: string;
-  code: string;
-  name: string;
-  depth: number;
-}
-
 const COLUMN_LABEL: Record<string, string> = {
   code: 'Code',
   title: 'Title',
@@ -92,10 +85,10 @@ const COLUMN_LABEL: Record<string, string> = {
 };
 
 const STATUS_TEXT = {
-  draft: 'Draft — being prepared',
-  submitted: 'Submitted — waiting for approval',
-  approved: 'Approved - used to compare monthly progress',
-  superseded: 'Replaced by a newer approved plan',
+  draft: 'Being entered',
+  submitted: 'Being entered',
+  approved: 'Final — used for the monthly results',
+  superseded: 'Earlier plan — replaced when the plan was changed',
 };
 
 export default function PlanEditorPage() {
@@ -114,7 +107,6 @@ export default function PlanEditorPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [newKind, setNewKind] = useState<RowKind>('activity');
-  const offices = useResource<DirectoryOffice[]>('offices/directory');
   const gridRef = useRef<HTMLTableElement>(null);
 
   const load = useCallback((data: PlanDetail) => {
@@ -222,7 +214,7 @@ export default function PlanEditorPage() {
     try {
       if (dirty && !(await save())) return;
       const res = await api.post<PlanDetail>(`plans/${plan.id}/${path}`, body);
-      if (path === 'revise') navigate(`/plans/${res.id}`);
+      if (path === 'change') navigate(`/plans/${res.id}`);
       else load(res);
     } catch (err) {
       if (err instanceof ApiError && (err.body as { issues?: Issue[] })?.issues) {
@@ -306,7 +298,7 @@ export default function PlanEditorPage() {
       </p>
       <div className="page-header">
         <h1>
-          {plan.office.name} · {plan.fiscal_year.label} plan, version {plan.version}
+          {plan.office.name} · {plan.fiscal_year.label} plan
         </h1>
         <span className={`chip chip-plan-${plan.status}`}>{STATUS_TEXT[plan.status]}</span>
       </div>
@@ -328,43 +320,24 @@ export default function PlanEditorPage() {
               disabled={busy}
               onClick={() =>
                 action(
-                  'submit',
-                  'Submit this plan for approval? It cannot be edited while it waits.',
+                  'finalize',
+                  'Save this plan as final? Its targets are then used for the monthly results. You can still change it later.',
                 )
               }
             >
-              Submit for approval
+              Save as final
             </button>
           </>
         )}
-        {isAdmin && plan.status === 'submitted' && (
-          <>
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={busy}
-              onClick={() =>
-                action(
-                  'approve',
-                  'Approve this plan? Monthly reports will be compared with its targets.',
-                )
-              }
-            >
-              Approve
-            </button>
-            <button
-              type="button"
-              className="btn"
-              disabled={busy}
-              onClick={() => {
-                const note = window.prompt('Why is it returned? The office sees this note.') ?? '';
-                if (note)
-                  action('return', 'Return the plan to the office for correction?', { note });
-              }}
-            >
-              Return for correction
-            </button>
-          </>
+        {readOnly && isAdmin && plan.status === 'submitted' && (
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={busy}
+            onClick={() => action('finalize', 'Save this plan as final?')}
+          >
+            Save as final
+          </button>
         )}
         {plan.status === 'approved' && plan.office_editable && (
           <button
@@ -373,30 +346,27 @@ export default function PlanEditorPage() {
             disabled={busy}
             onClick={() =>
               action(
-                'revise',
-                'Create a new draft of this plan? The current approved plan remains in use until the new draft is approved.',
+                'change',
+                'Change this plan? You get an editable copy; press Save as final when you are done. Closed months keep their results.',
               )
             }
           >
-            Revise plan
+            Change plan
           </button>
         )}
-        <Link className="btn" to={`/plans/${plan.id}/versions`}>
-          Versions
-        </Link>
         <span className="toolbar-spacer" />
         <span className="muted small">
           Planned cost{' '}
           {Number(plan.planned_cost).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
           {plan.approved_budget &&
-            ` · approved budget ${Number(plan.approved_budget).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`}
+            ` · budget ${Number(plan.approved_budget).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`}
         </span>
       </div>
 
       <FormError message={error} />
       {errors.length > 0 && (
         <details className="issues" open>
-          <summary>{errors.length} problem(s) must be fixed before submitting</summary>
+          <summary>{errors.length} problem(s) must be fixed before saving as final</summary>
           <ul>
             {errors.map((i, n) => (
               <li key={n}>{i.message}</li>
@@ -544,7 +514,6 @@ export default function PlanEditorPage() {
                         Weight
                       </th>
                       <th>Measure</th>
-                      <th>Implementing office</th>
                       {months.map((m) => (
                         <th key={m}>{m}</th>
                       ))}
@@ -672,39 +641,6 @@ export default function PlanEditorPage() {
                                 <option value="quantity">Quantity</option>
                                 <option value="money">Money</option>
                                 <option value="recurring">Recurring</option>
-                              </select>
-                            )}
-                          </td>
-                          <td>
-                            {isAct && (
-                              <select
-                                aria-label={`Implementing office, row ${r + 1}`}
-                                value={row.implementing_office_id ?? plan.office.id}
-                                disabled={readOnly}
-                                onChange={(e) =>
-                                  update(
-                                    rows.map((x, i) =>
-                                      i === r
-                                        ? { ...x, implementing_office_id: e.target.value }
-                                        : x,
-                                    ),
-                                  )
-                                }
-                              >
-                                {(
-                                  offices.data ?? [
-                                    {
-                                      id: plan.office.id,
-                                      code: plan.office.code,
-                                      name: plan.office.name,
-                                      depth: 0,
-                                    },
-                                  ]
-                                ).map((o) => (
-                                  <option key={o.id} value={o.id}>
-                                    {o.code}
-                                  </option>
-                                ))}
                               </select>
                             )}
                           </td>

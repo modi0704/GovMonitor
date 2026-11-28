@@ -9,9 +9,9 @@ import { money } from '../../lib/format';
 const ImportPlanDialog = lazy(() => import('../exports/ImportPlanDialog'));
 
 const STATUS_LABEL = {
-  draft: 'Draft',
-  submitted: 'Waiting for approval',
-  approved: 'Approved',
+  draft: 'Being entered',
+  submitted: 'Being entered',
+  approved: 'Final',
   superseded: 'Replaced',
 };
 
@@ -92,8 +92,7 @@ export default function PlansPage() {
       <FormError message={error ?? plans.error ?? years.error} />
       {years.data?.length === 0 && (
         <p className="notice">
-          There is no fiscal year yet. The agency administrator creates one on the{' '}
-          <Link to="/fiscal-years">Years</Link> page.
+          There is no year yet. Add one on the <Link to="/fiscal-years">Years</Link> page.
         </p>
       )}
       {fyId && offices.data && (
@@ -102,9 +101,7 @@ export default function PlansPage() {
             <tr>
               <th>Office</th>
               <th>Plan</th>
-              <th>Status</th>
               <th>Planned cost</th>
-              <th>Approved budget</th>
               <th aria-label="Actions" />
             </tr>
           </thead>
@@ -119,18 +116,19 @@ export default function PlansPage() {
                   <td style={{ paddingLeft: `${0.75 + o.depth * 1}rem` }}>
                     <span className="code">{o.code}</span> {o.name}
                   </td>
-                  <td>{current ? `Version ${current.version}` : '—'}</td>
                   <td>
                     {current ? (
                       <span className={`chip chip-plan-${current.status}`}>
-                        {STATUS_LABEL[current.status]}
+                        {current.status !== 'approved' &&
+                        versions.some((p) => p.status === 'approved')
+                          ? 'Final — being changed'
+                          : STATUS_LABEL[current.status]}
                       </span>
                     ) : (
                       <span className="muted small">No plan</span>
                     )}
                   </td>
                   <td>{current ? money(current.planned_cost) : ''}</td>
-                  <td>{current?.approved_budget ? money(current.approved_budget) : ''}</td>
                   <td className="actions">
                     {current ? (
                       <Link className="btn btn-small" to={`/plans/${current.id}`}>

@@ -194,7 +194,11 @@ it('shows the final figures and drills down to an office, its activities and the
   await user.click(screen.getByRole('button', { name: /AST AST office/ }));
   expect(await screen.findByRole('heading', { name: 'AST office' })).toBeInTheDocument();
   expect(calls.filter((c) => c.path === '/api/v1/dashboard')).toHaveLength(2);
-  expect(screen.getByLabelText('Scores of')).toBeInTheDocument(); // both views available
+  // D49: always the office's own plan, even when it also carries out work for others.
+  expect(screen.queryByLabelText('Scores of')).not.toBeInTheDocument();
+  expect(
+    calls.filter((c) => c.path === '/api/v1/dashboard').every((c) => !c.query.includes('view')),
+  ).toBe(true);
   await user.click(screen.getByRole('tab', { name: 'Activities' }));
   expect(await screen.findByText('Late delivery')).toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: /AST-1 Fabrication/ }));

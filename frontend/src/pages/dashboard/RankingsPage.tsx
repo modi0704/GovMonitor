@@ -40,7 +40,7 @@ function Change({ change }: { change: number | null }) {
   );
 }
 
-/** Rankings (P8.4): offices under one office, or an office group; change against last month. */
+/** Rankings (P8.4): offices under the same office; change against last month. */
 export default function RankingsPage() {
   const [params, setParams] = useSearchParams();
   const years = useResource<FiscalYear[]>('fiscal-years');
@@ -108,7 +108,7 @@ export default function RankingsPage() {
           <select value={d?.set?.key ?? setKey} onChange={(e) => go({ set: e.target.value })}>
             {d?.sets.map((s) => (
               <option key={s.key} value={s.key}>
-                {s.kind === 'group' ? `Group: ${s.name}` : s.name}
+                {s.name}
               </option>
             ))}
           </select>
@@ -117,8 +117,8 @@ export default function RankingsPage() {
       <FormError message={data.error} />
       {d && d.sets.length === 0 && (
         <p className="notice">
-          There are no offices to compare yet. Rankings need at least two offices reporting to the
-          same office, or a comparison group you can access.
+          There are no offices to compare yet. Rankings need at least two offices under the same
+          office.
         </p>
       )}
       {d && d.set && (

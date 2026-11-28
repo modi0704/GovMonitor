@@ -40,7 +40,6 @@ export default function DashboardPage() {
   }, [offices.data]);
   const officeId = params.get('office') ?? topOffice;
   const periodId = params.get('period') ?? defaultPeriod(fy.data);
-  const view = params.get('view') === 'implementing' ? 'implementing' : 'owner';
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<'overview' | 'activities'>('overview');
@@ -50,7 +49,7 @@ export default function DashboardPage() {
     if (!officeId || !periodId) return;
     let active = true;
     api
-      .get<Dashboard>('dashboard', { office: officeId, period: periodId, view })
+      .get<Dashboard>('dashboard', { office: officeId, period: periodId })
       .then((d) => {
         if (!active) return;
         setData(d);
@@ -60,7 +59,7 @@ export default function DashboardPage() {
     return () => {
       active = false;
     };
-  }, [officeId, periodId, view]);
+  }, [officeId, periodId]);
 
   function go(next: Record<string, string | null>) {
     const merged: Record<string, string> = {};
@@ -68,11 +67,10 @@ export default function DashboardPage() {
       fy: fyId,
       office: officeId,
       period: periodId,
-      view,
       ...next,
     };
     Object.entries(current).forEach(([k, v]) => {
-      if (v && !(k === 'view' && v === 'owner')) merged[k] = v;
+      if (v) merged[k] = v;
     });
     setParams(merged);
   }
@@ -91,7 +89,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     className="btn-link-plain"
-                    onClick={() => go({ office: a.id, view: null })}
+                    onClick={() => go({ office: a.id })}
                   >
                     {a.code}
                   </button>{' '}
@@ -137,7 +135,6 @@ export default function DashboardPage() {
             officeLabel={`${data.office.code} ${data.office.name}`}
             periods={fy.data?.periods ?? []}
             periodId={data.period.id}
-            view={view}
             canExportAgency={(offices.data ?? []).some((o) => o.depth === 0)}
             onClose={() => setExporting(false)}
           />
@@ -167,10 +164,7 @@ export default function DashboardPage() {
         </label>
         <label>
           Office
-          <select
-            value={officeId ?? ''}
-            onChange={(e) => go({ office: e.target.value, view: null })}
-          >
+          <select value={officeId ?? ''} onChange={(e) => go({ office: e.target.value })}>
             {offices.data?.map((o) => (
               <option key={o.id} value={o.id}>
                 {'  '.repeat(o.depth)}
@@ -179,27 +173,18 @@ export default function DashboardPage() {
             ))}
           </select>
         </label>
-        {data && data.views.length > 1 && (
-          <label>
-            Scores of
-            <select value={view} onChange={(e) => go({ view: e.target.value })}>
-              <option value="owner">Its own plan (with offices beneath)</option>
-              <option value="implementing">Activities it carries out</option>
-            </select>
-          </label>
-        )}
       </div>
       <FormError message={error ?? years.error} />
       {years.data?.length === 0 && (
         <p className="notice">
-          There is no year yet. The agency administrator adds one on the Years page, offices enter
-          their plans, and results appear here once plans are approved.
+          There is no year yet. Add one on the Years page, enter the office plans, and results
+          appear here once the plans are saved as final.
         </p>
       )}
       {data && !data.has_result && (
         <p className="notice">
-          {data.office.name} has no results for {monthYear(data.period.start_date)}: no approved
-          plan covers it yet. {data.children.length > 0 && 'Choose one of its offices below.'}
+          {data.office.name} has no results for {monthYear(data.period.start_date)}: no final plan
+          covers it yet. {data.children.length > 0 && 'Choose one of its offices below.'}
         </p>
       )}
       {data && h && data.series && (
@@ -238,7 +223,7 @@ export default function DashboardPage() {
         </>
       )}
       {data && h && data.series && tab === 'activities' && (
-        <ActivitiesPanel officeId={data.office.id} periodId={data.period.id} view={view} />
+        <ActivitiesPanel officeId={data.office.id} periodId={data.period.id} />
       )}
       {data && h && data.series && tab === 'overview' && (
         <div className="dash-grid">
@@ -402,7 +387,7 @@ export default function DashboardPage() {
                         <button
                           type="button"
                           className="btn-link-plain"
-                          onClick={() => go({ office: c.office.id, view: null })}
+                          onClick={() => go({ office: c.office.id })}
                         >
                           <span className="code">{c.office.code}</span> {c.office.name}
                         </button>
@@ -429,7 +414,7 @@ export default function DashboardPage() {
                         </>
                       ) : (
                         <td colSpan={6} className="muted">
-                          No approved plan
+                          No final plan
                         </td>
                       )}
                     </tr>
@@ -442,7 +427,7 @@ export default function DashboardPage() {
             <RankingCard
               key={`${r.set.kind}-${r.set.id}`}
               ranking={r}
-              onOpen={(id) => go({ office: id, view: null })}
+              onOpen={(id) => go({ office: id })}
             />
           ))}
           {data.indicators.length > 0 && (

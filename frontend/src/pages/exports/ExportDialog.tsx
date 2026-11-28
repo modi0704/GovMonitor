@@ -13,14 +13,13 @@ export const JOB_POLL_MS = 2000;
 type Scope = 'office' | 'subtree' | 'agency';
 type Format = 'xlsx' | 'pptx' | 'year';
 
-/** Export dialog (P9.4, P10.3): format, scope, month, view (and slide groups for a deck); queues
- * the export and follows the job. */
+/** Export dialog (P9.4, P10.3): format, scope, month (and slide groups for a deck); queues the
+ * export and follows the job. Scores are always each office's own plan (D49). */
 export default function ExportDialog({
   officeId,
   officeLabel,
   periods,
   periodId,
-  view,
   canExportAgency,
   initialFormat = 'xlsx',
   defaultTitle = 'Over-all performance',
@@ -30,7 +29,6 @@ export default function ExportDialog({
   officeLabel: string;
   periods: Period[];
   periodId: string;
-  view: 'owner' | 'implementing';
   canExportAgency: boolean;
   initialFormat?: Format;
   defaultTitle?: string;
@@ -43,7 +41,6 @@ export default function ExportDialog({
     initialFormat === 'year' && canExportAgency ? 'agency' : 'office',
   );
   const [month, setMonth] = useState(periodId);
-  const [chosenView, setChosenView] = useState(view);
   const [job, setJob] = useState<Job | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -66,7 +63,7 @@ export default function ExportDialog({
     setBusy(true);
     setError(null);
     try {
-      const body = { scope, office_id: officeId, period_id: month, view: chosenView };
+      const body = { scope, office_id: officeId, period_id: month };
       setJob(
         format === 'year'
           ? await api.post<Job>('exports/pptx', { ...body, style: 'year', title })
@@ -190,18 +187,6 @@ export default function ExportDialog({
               ))}
             </select>
           </label>
-          {format !== 'year' && (
-            <label>
-              Scores of
-              <select
-                value={chosenView}
-                onChange={(e) => setChosenView(e.target.value as 'owner' | 'implementing')}
-              >
-                <option value="owner">Each office's own plan (with offices beneath)</option>
-                <option value="implementing">Activities each office carries out</option>
-              </select>
-            </label>
-          )}
           {format === 'pptx' && (
             <fieldset className="stack">
               <legend>Slides</legend>

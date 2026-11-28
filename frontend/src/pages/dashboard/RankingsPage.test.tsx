@@ -51,7 +51,7 @@ it('shows a ranking with changes and switches set', async () => {
       body: {
         sets: [
           { key: 'children:x', kind: 'children', name: 'Offices under RDS' },
-          { key: 'group:g', kind: 'group', name: 'Island centers' },
+          { key: 'children:y', kind: 'children', name: 'Offices under AST' },
         ],
         set: { key: 'children:x', name: 'Offices under RDS' },
         metric: 'cumulative_actual',
@@ -78,6 +78,8 @@ it('shows a ranking with changes and switches set', async () => {
   expect(screen.getByText('▼ 1')).toBeInTheDocument();
   expect(screen.getByText('No result')).toBeInTheDocument();
   expect(screen.getByText(/Change is against November 2023/)).toBeInTheDocument();
-  await userEvent.selectOptions(screen.getByLabelText('Ranking'), 'group:g');
-  expect(calls.some((c) => c.path === '/api/v1/rankings')).toBe(true);
+  await userEvent.selectOptions(screen.getByLabelText('Ranking'), 'children:y');
+  expect(calls.some((c) => c.path === '/api/v1/rankings' && c.query.includes('children%3Ay'))).toBe(
+    true,
+  );
 });

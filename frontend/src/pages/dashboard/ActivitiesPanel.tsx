@@ -35,14 +35,12 @@ interface History {
 export default function ActivitiesPanel({
   officeId,
   periodId,
-  view,
 }: {
   officeId: string;
   periodId: string;
-  view: string;
 }) {
   const list = useResource<{ activities: DashActivity[] }>(
-    `dashboard/activities?office=${officeId}&period=${periodId}&view=${view}`,
+    `dashboard/activities?office=${officeId}&period=${periodId}`,
   );
   const [open, setOpen] = useState<DashActivity | null>(null);
   const rows = list.data?.activities ?? [];
@@ -52,7 +50,7 @@ export default function ActivitiesPanel({
       <FormError message={list.error} />
       {list.loading && <p>Loading…</p>}
       {!list.loading && rows.length === 0 && (
-        <p className="muted">No activities for this office and view.</p>
+        <p className="muted">No activities for this office.</p>
       )}
       {rows.length > 0 && (
         <div className="table-scroll">
@@ -60,7 +58,7 @@ export default function ActivitiesPanel({
             <thead>
               <tr>
                 <th>Activity</th>
-                <th>{view === 'implementing' ? 'For office' : 'Carried out by'}</th>
+                <th>Office</th>
                 <th>Weight</th>
                 <th>Target to date</th>
                 <th>Done to date</th>
@@ -77,9 +75,7 @@ export default function ActivitiesPanel({
                       <span className="code">{a.code}</span> {a.title}
                     </button>
                   </td>
-                  <td>
-                    {view === 'implementing' ? a.owner_office_code : a.implementing_office_code}
-                  </td>
+                  <td>{a.owner_office_code}</td>
                   <td>{percent(a.weight)}</td>
                   <td>
                     {a.cum_target} {a.unit}
@@ -129,8 +125,7 @@ function HistoryDialog({
       <FormError message={h.error} />
       {a && (
         <p className="muted small">
-          Year target {a.annual_target} {a.unit} · plan of {a.owner_office.code} · carried out by{' '}
-          {a.implementing_office.code}
+          Year target {a.annual_target} {a.unit} · plan of {a.owner_office.code}
         </p>
       )}
       {h.data && (

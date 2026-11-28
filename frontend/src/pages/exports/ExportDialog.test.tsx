@@ -30,7 +30,7 @@ const job = (status: string, extra = {}) => ({
   ...extra,
 });
 
-it('queues an export with the chosen scope, month and view, then offers the file', async () => {
+it('queues an export with the chosen scope and month (own plan only), then offers the file', async () => {
   let polls = 0;
   const calls = mockApi({
     'POST /api/v1/exports/xlsx': { status: 202, body: job('queued') },
@@ -54,7 +54,6 @@ it('queues an export with the chosen scope, month and view, then offers the file
           officeLabel="RDS Research"
           periods={PERIODS}
           periodId="dec"
-          view="owner"
           canExportAgency={false}
           onClose={() => {}}
         />
@@ -63,13 +62,12 @@ it('queues an export with the chosen scope, month and view, then offers the file
     expect(screen.queryByLabelText('The whole agency')).not.toBeInTheDocument();
     await user.click(screen.getByLabelText('RDS Research and every office beneath it'));
     await user.selectOptions(screen.getByLabelText('Month'), 'nov');
-    await user.selectOptions(screen.getByLabelText('Scores of'), 'implementing');
+    expect(screen.queryByLabelText('Scores of')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Prepare workbook' }));
     expect(calls.find((c) => c.method === 'POST')?.body).toEqual({
       scope: 'subtree',
       office_id: 'rds',
       period_id: 'nov',
-      view: 'implementing',
     });
     expect(await screen.findByText('Waiting')).toBeInTheDocument();
     await vi.advanceTimersByTimeAsync(4100);
@@ -93,7 +91,6 @@ it('asks for slide groups when exporting a PowerPoint presentation', async () =>
         officeLabel="RDS Research"
         periods={PERIODS}
         periodId="dec"
-        view="owner"
         canExportAgency
         onClose={() => {}}
       />
@@ -110,7 +107,6 @@ it('asks for slide groups when exporting a PowerPoint presentation', async () =>
       scope: 'agency',
       office_id: 'rds',
       period_id: 'dec',
-      view: 'owner',
       groups: ['overall', 'offices', 'rankings'],
     },
   });
@@ -129,7 +125,6 @@ it('queues the over-all performance deck for the year with its title', async () 
         officeLabel="Ministry"
         periods={PERIODS}
         periodId="dec"
-        view="owner"
         canExportAgency
         initialFormat="year"
         defaultTitle="Over-all performance 2023"
@@ -146,7 +141,6 @@ it('queues the over-all performance deck for the year with its title', async () 
     scope: 'agency',
     office_id: 'root',
     period_id: 'dec',
-    view: 'owner',
     style: 'year',
     title: "Ministry's over-all performance",
   });

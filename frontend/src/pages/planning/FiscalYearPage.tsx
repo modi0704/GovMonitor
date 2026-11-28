@@ -4,117 +4,109 @@ import { api } from '../../api/client';
 import type { FiscalYear, Period } from '../../api/types';
 import { errorMessage, useResource } from '../../api/useResource';
 import FormError from '../../components/FormError';
-import { useAuth } from '../../auth/useAuth';
 import { dateTime, monthYear } from '../../lib/format';
 
-/** datetime-local value (browser time) for an ISO instant. */
-function toLocalInput(iso: string): string {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-/** A fiscal year's months: status and cutoff calendar (P7.2). */
+/** A year's months (P7.2, D49): close a month by hand when its figures are in, or reopen the
+ * latest closed month to correct it. There are no deadlines and nothing closes by itself. */
 export default function FiscalYearPage() {
   const { fyId } = useParams();
-  const { me } = useAuth();
   const fy = useResource<FiscalYear>(`fiscal-years/${fyId}`);
-  const [editing, setEditing] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
-  const isAdmin = me?.is_agency_admin ?? false;
+  const [notice, setNotice] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const periods = fy.data?.periods ?? [];
+  const firstOpen = periods.find((p) => p.status !== 'locked');
+  const lastClosed = [...periods].reverse().find((p) => p.status === 'locked');
 
-  async function save(p: Period) {
+  async function run(call: () => Promise<unknown>, done: string) {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
     try {
-      await api.patch(`periods/${p.id}`, { cutoff_at: new Date(editing[p.id]!).toISOString() });
-      const next = { ...editing };
-      delete next[p.id];
-      setEditing(next);
+      await call();
+      setNotice(done);
       fy.reload();
     } catch (err) {
       setError(errorMessage(err));
+    } finally {
+      setBusy(false);
     }
+  }
+
+  function close(p: Period) {
+    const month = monthYear(p.start_date);
+    if (!window.confirm(`Close ${month}? Its figures become final and can no longer be changed.`))
+      return;
+    void run(() => api.post(`periods/${p.id}/lock`), `${month} is closed. Its figures are final.`);
+  }
+
+  function reopen(p: Period) {
+    const month = monthYear(p.start_date);
+    const reason = window.prompt(`Why reopen ${month}? (kept in the change history)`);
+    if (!reason) return;
+    void run(
+      () => api.post(`periods/${p.id}/unlock`, { reason }),
+      `${month} is open again. Close it once the figures are corrected.`,
+    );
   }
 
   return (
     <section className="page">
       <p className="breadcrumb">
-        <Link to="/fiscal-years">Fiscal years</Link> › {fy.data?.label}
+        <Link to="/fiscal-years">Years</Link> › {fy.data?.label}
       </p>
       <div className="page-header">
-        <h1>Fiscal year {fy.data?.label}</h1>
-        {fy.data && <Link to={`/fiscal-years/${fy.data.id}/scoring`}>Scoring settings</Link>}
+        <h1>Year {fy.data?.label}</h1>
       </div>
       <p className="muted">
-        Reports are due on the date shown for each month. The starting date comes from the deadline
-        day in Scoring settings;
-        {isAdmin
-          ? ' you can move it for a single month here.'
-          : ' the agency administrator can move it for a single month.'}
+        Close each month when all its figures are in; closed figures are final. Months close only
+        when you close them, one at a time and in order.
       </p>
       <FormError message={error ?? fy.error} />
+      {notice && (
+        <p className="notice" role="status">
+          {notice}
+        </p>
+      )}
       <table className="table">
         <thead>
           <tr>
             <th>Month</th>
             <th>Status</th>
-            <th>Report deadline</th>
             <th aria-label="Actions" />
           </tr>
         </thead>
         <tbody>
-          {fy.data?.periods?.map((p) => (
+          {periods.map((p) => (
             <tr key={p.id}>
               <td>{monthYear(p.start_date)}</td>
               <td>
                 <span
                   className={`chip ${p.status === 'locked' ? 'chip-sub-locked' : 'chip-fy-open'}`}
                 >
-                  {p.status === 'locked' ? `locked ${dateTime(p.locked_at)}` : 'open'}
+                  {p.status === 'locked' ? `closed ${dateTime(p.locked_at)}` : 'open'}
                 </span>
               </td>
-              <td>
-                {editing[p.id] !== undefined ? (
-                  <input
-                    type="datetime-local"
-                    aria-label={`Deadline for ${monthYear(p.start_date)}`}
-                    value={editing[p.id]}
-                    onChange={(e) => setEditing({ ...editing, [p.id]: e.target.value })}
-                  />
-                ) : (
-                  dateTime(p.cutoff_at)
-                )}
-              </td>
               <td className="actions">
-                {isAdmin && p.status === 'open' && editing[p.id] === undefined && (
+                {fy.data?.status === 'open' && p.id === firstOpen?.id && (
                   <button
                     type="button"
                     className="btn btn-small"
-                    onClick={() => setEditing({ ...editing, [p.id]: toLocalInput(p.cutoff_at) })}
+                    onClick={() => close(p)}
+                    disabled={busy}
                   >
-                    Change deadline
+                    Close month
                   </button>
                 )}
-                {editing[p.id] !== undefined && (
-                  <>
-                    <button
-                      type="button"
-                      className="btn btn-small btn-primary"
-                      onClick={() => save(p)}
-                    >
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-small"
-                      onClick={() => {
-                        const next = { ...editing };
-                        delete next[p.id];
-                        setEditing(next);
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </>
+                {p.id === lastClosed?.id && (
+                  <button
+                    type="button"
+                    className="btn btn-small"
+                    onClick={() => reopen(p)}
+                    disabled={busy}
+                  >
+                    Reopen month
+                  </button>
                 )}
               </td>
             </tr>

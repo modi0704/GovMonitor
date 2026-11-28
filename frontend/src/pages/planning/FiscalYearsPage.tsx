@@ -1,24 +1,22 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
-import type { FiscalYear, Preset } from '../../api/types';
+import type { FiscalYear } from '../../api/types';
 import { errorMessage, useResource } from '../../api/useResource';
 import FormError from '../../components/FormError';
 import Modal from '../../components/Modal';
 import { useAuth } from '../../auth/useAuth';
 import { monthYear } from '../../lib/format';
-import { scoringMethodDescription, scoringMethodName } from './scoringMethodText';
 
 const STATUS_HELP = {
   draft: 'Being prepared: plans can be entered, nothing is reported yet.',
-  open: 'In use: plans are approved and months are reported.',
+  open: 'In use: plans are final and months are entered.',
   closed: 'Finished: kept for reference.',
 };
 
 export default function FiscalYearsPage() {
   const { me } = useAuth();
   const years = useResource<FiscalYear[]>('fiscal-years');
-  const presets = useResource<Preset[]>('scoring-presets');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isAdmin = me?.is_agency_admin ?? false;
@@ -26,7 +24,7 @@ export default function FiscalYearsPage() {
   async function setStatus(fy: FiscalYear, status: FiscalYear['status']) {
     const what =
       status === 'open'
-        ? `Open ${fy.label}? Offices can then report their monthly accomplishments.`
+        ? `Open ${fy.label}? You can then enter the monthly results.`
         : `Close ${fy.label}? It stays available for viewing and exports.`;
     if (!window.confirm(what)) return;
     try {
@@ -60,7 +58,6 @@ export default function FiscalYearsPage() {
               <th>Fiscal year</th>
               <th>Months</th>
               <th>Status</th>
-              <th>Scoring</th>
               <th aria-label="Actions" />
             </tr>
           </thead>
@@ -77,9 +74,6 @@ export default function FiscalYearsPage() {
                 </td>
                 <td title={STATUS_HELP[fy.status]}>
                   <span className={`chip chip-fy-${fy.status}`}>{fy.status}</span>
-                </td>
-                <td>
-                  <Link to={`/fiscal-years/${fy.id}/scoring`}>{scoringMethodName(fy.preset)}</Link>
                 </td>
                 <td className="actions">
                   {isAdmin && fy.status === 'draft' && (
@@ -117,7 +111,6 @@ export default function FiscalYearsPage() {
       )}
       {creating && (
         <CreateDialog
-          presets={presets.data ?? []}
           onClose={() => setCreating(false)}
           onDone={years.reload}
           startMonth={me?.agency.fiscal_year_start_month ?? 1}
@@ -128,12 +121,10 @@ export default function FiscalYearsPage() {
 }
 
 function CreateDialog({
-  presets,
   onClose,
   onDone,
   startMonth,
 }: {
-  presets: Preset[];
   onClose: () => void;
   onDone: () => void;
   startMonth: number;
@@ -141,14 +132,13 @@ function CreateDialog({
   const nextYear = new Date().getFullYear() + 1;
   const [label, setLabel] = useState(String(nextYear));
   const [startYear, setStartYear] = useState(nextYear);
-  const [preset, setPreset] = useState('workbook_compatible');
   const [error, setError] = useState<string | null>(null);
   const start = `${startYear}-${String(startMonth).padStart(2, '0')}-01`;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     try {
-      await api.post('fiscal-years', { label, start_year: startYear, preset });
+      await api.post('fiscal-years', { label, start_year: startYear });
       onDone();
       onClose();
     } catch (err) {
@@ -175,24 +165,7 @@ function CreateDialog({
           Runs for twelve months from {monthYear(start)} (your agency's fiscal year starts in that
           month).
         </p>
-        <fieldset className="stack">
-          <legend>Scoring method</legend>
-          {presets.map((p) => (
-            <label key={p.name} className="check">
-              <input
-                type="radio"
-                name="preset"
-                checked={preset === p.name}
-                onChange={() => setPreset(p.name)}
-              />
-              <span>
-                <strong>{scoringMethodName(p.name)}</strong>
-                <br />
-                <span className="muted small">{scoringMethodDescription(p.name)}</span>
-              </span>
-            </label>
-          ))}
-        </fieldset>
+        <p className="muted small">Scores are worked out the same way as the Excel workbook.</p>
         <FormError message={error} />
         <div className="row">
           <button type="submit" className="btn btn-primary">

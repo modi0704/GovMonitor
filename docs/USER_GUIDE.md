@@ -153,7 +153,7 @@ The app creates the twelve months for you. Each month's report is due on the 10t
    - **Code** and **Title**, for example `PME-1` and *Strategic Planning Workshop*.
    - **Unit**, for example *workshop* or *person*.
    - **Target**: the number for the whole year.
-   - **Unit cost** or **Total cost**: plain numbers, no ₱ sign.
+   - **Unit cost**: the cost of one unit, a plain number, no ₱ sign. **Total cost** then fills itself in (**Target × Unit cost**) and updates when you change either; it is greyed out and cannot be typed over. For a lump sum with no unit cost, leave **Unit cost** empty and type the **Total cost** yourself.
    - **Jan to Dec**: how many are planned in each month. The twelve months must add up to the Target.
 3. Optional headings: set **New row** to *Program* or *Output* to group activities under a heading.
 4. Open the **Indicators** tab and press **Add indicator** for each output target, for example *No. of STEM teachers trained*, with its **Annual target**.

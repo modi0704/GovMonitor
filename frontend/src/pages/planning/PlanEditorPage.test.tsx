@@ -152,3 +152,30 @@ it('adds an indicator with monthly targets and saves it with the plan', async ()
   });
   expect((save.indicators[0]!.targets as string[])[2]).toBe('1');
 });
+
+it('calculates the total cost from the target and the unit cost and does not let it be typed over', async () => {
+  const calls = renderEditor();
+  const user = userEvent.setup();
+  const target = await screen.findByLabelText('Target, row 2');
+  const unitCost = screen.getByLabelText('Unit cost, row 2');
+  const total = screen.getByLabelText('Total cost, row 2');
+  expect(total).toHaveValue('600000'); // saved lump sum: no unit cost, so it is typed in
+  expect(total).not.toHaveAttribute('readonly');
+  await user.type(unitCost, '5000');
+  expect(total).toHaveValue('50000'); // 10 × 5000
+  expect(total).toHaveAttribute('readonly');
+  await user.clear(target);
+  await user.type(target, '12');
+  expect(total).toHaveValue('60000');
+  await user.type(total, '9');
+  expect(total).toHaveValue('60000');
+  await user.click(screen.getByRole('button', { name: 'Save' }));
+  const save = calls.find((c) => c.path === '/api/v1/plans/p1/save')!.body as {
+    rows: Record<string, unknown>[];
+  };
+  expect(save.rows[0]).toMatchObject({
+    annual_target: '12',
+    unit_cost: '5000',
+    total_cost: '60000',
+  });
+});

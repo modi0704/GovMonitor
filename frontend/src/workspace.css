@@ -1521,3 +1521,8 @@ label.check {
 .delete-list li {
   margin: 2px 0;
 }
+.grid input.calculated-cell {
+  color: var(--text-muted);
+  background: var(--surface-2);
+  cursor: default;
+}

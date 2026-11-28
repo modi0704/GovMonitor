@@ -165,13 +165,41 @@ export function getCell(row: GridRow, col: Column): string {
   return (row as unknown as Record<string, string>)[col] ?? '';
 }
 
+/**
+ * Total cost is calculated (target × unit cost) whenever an activity has a unit cost. Without a
+ * unit cost (a lump sum) it is typed in.
+ */
+export function totalCostIsCalculated(row: GridRow): boolean {
+  return row.row_kind === 'activity' && cleanNumber(row.unit_cost).trim() !== '';
+}
+
+/** Target × unit cost, to two decimals, shown plainly; empty until the target is a number. */
+export function calculatedTotalCost(row: GridRow): string {
+  const target = cleanNumber(row.annual_target).trim();
+  const unit = cleanNumber(row.unit_cost).trim();
+  if (
+    target === '' ||
+    unit === '' ||
+    !Number.isFinite(Number(target)) ||
+    !Number.isFinite(Number(unit))
+  )
+    return '';
+  return String(Math.round(Number(target) * Number(unit) * 100) / 100);
+}
+
 export function setCell(row: GridRow, col: Column, value: string): GridRow {
   if (col.startsWith('m') && col !== 'manual_weight') {
     const targets = [...row.targets];
     targets[Number(col.slice(1)) - 1] = value;
     return { ...row, targets };
   }
-  return { ...row, [col]: value };
+  if (col === 'total_cost' && totalCostIsCalculated(row)) return row; // never typed over
+  const next = { ...row, [col]: value };
+  if (col === 'annual_target' || col === 'unit_cost') {
+    // Keep the total in step as the target or the unit cost is typed, pasted or cleared.
+    if (totalCostIsCalculated(next)) next.total_cost = calculatedTotalCost(next);
+  }
+  return next;
 }
 
 export function isNumberColumn(col: Column): boolean {

@@ -126,12 +126,12 @@ Go to **Step-by-step**, make sure **Year: Practice 2026** is chosen, and go to s
 2. Set **New row** to **Output** and press **Add at end**. Type **Code** `OUT-01` and **Title** `Community services delivered`. Leave the numbers empty on this heading row.
 3. Select the OUT-01 row. Set **New row** to **Activity** and press **Add below selected**. Fill in:
    - **Code** `ACT-01`, **Title** `Community consultation sessions`, **Unit** `session`
-   - **Target** `12`, **Unit cost** `5000`, **Total cost** `60000`
+   - **Target** `12`, **Unit cost** `5000` — **Total cost** fills itself in as `60000` (12 × 5000) and is greyed out
    - **Measure** Quantity, **Implementing office** PRA
    - **JAN** to **DEC**: `1` in every month (the **Total** column shows 12)
 4. Select ACT-01, keep **New row** on **Activity**, press **Add below selected** and fill in:
    - **Code** `ACT-02`, **Title** `Client assistance cases completed`, **Unit** `case`
-   - **Target** `120`, **Unit cost** empty, **Total cost** `40000`
+   - **Target** `120`, **Unit cost** empty (a lump sum), so type **Total cost** `40000` yourself
    - **Measure** Quantity, **Implementing office** PRA
    - **JAN** to **DEC**: `10` in every month (Total 120)
 5. Leave **Weight** empty: the app works it out from the costs (ACT-01 60%, ACT-02 40%).
@@ -149,7 +149,7 @@ Go to **Step-by-step**, make sure **Year: Practice 2026** is chosen, and go to s
 1. Back on **Step-by-step** (step 3), press **Start plan** next to **PRB Practice Office B**.
 2. Set **New row** to **Activity** and press **Add at end**:
    - **Code** `FV-01`, **Title** `Farm visits`, **Unit** `visit`
-   - **Target** `24`, **Unit cost** `1250`, **Total cost** `30000`
+   - **Target** `24`, **Unit cost** `1250` — **Total cost** fills itself in as `30000` (24 × 1250)
    - **Measure** Quantity, **Implementing office** PRB
    - **JAN** to **DEC**: `2` in every month (Total 24)
 3. Press **Save**. Planned cost: **30,000.00**. (No output indicator for this office.)

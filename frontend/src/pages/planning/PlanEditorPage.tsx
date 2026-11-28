@@ -31,6 +31,7 @@ import {
   rowTotal,
   setCell,
   shiftKind,
+  totalCostIsCalculated,
   type Column,
   type GridRow,
   type Measure,
@@ -600,7 +601,19 @@ export default function PlanEditorPage() {
                                   data-c={c}
                                   aria-label={`${COLUMN_LABEL[col]}, row ${r + 1}`}
                                   value={getCell(row, col)}
-                                  readOnly={readOnly}
+                                  readOnly={
+                                    readOnly || (col === 'total_cost' && totalCostIsCalculated(row))
+                                  }
+                                  className={
+                                    col === 'total_cost' && totalCostIsCalculated(row)
+                                      ? 'calculated-cell'
+                                      : undefined
+                                  }
+                                  title={
+                                    col === 'total_cost' && totalCostIsCalculated(row)
+                                      ? 'Calculated: target × unit cost. Clear the unit cost to type a lump sum instead.'
+                                      : undefined
+                                  }
                                   inputMode={isNumberColumn(col) ? 'decimal' : undefined}
                                   onChange={(e) =>
                                     update(

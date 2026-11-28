@@ -7,7 +7,9 @@ import {
   parents,
   pasteBlock,
   rowTotal,
+  setCell,
   shiftKind,
+  totalCostIsCalculated,
   type GridRow,
 } from './gridModel';
 
@@ -164,5 +166,51 @@ describe('save payload', () => {
       sort_order: 30,
     });
     expect((payload.rows[0]!.targets as string[])[1]).toBe('0');
+  });
+});
+
+describe('total cost', () => {
+  const act = () => row('activity', 'A');
+
+  it('is calculated from the target and the unit cost, in either order', () => {
+    let r = setCell(setCell(act(), 'annual_target', '12'), 'unit_cost', '5000');
+    expect(r.total_cost).toBe('60000');
+    r = setCell(r, 'annual_target', '24');
+    expect(r.total_cost).toBe('120000');
+    r = setCell(setCell(act(), 'unit_cost', '1,250.50'), 'annual_target', '3');
+    expect(r.total_cost).toBe('3751.5');
+    expect(setCell(setCell(act(), 'unit_cost', '0.1'), 'annual_target', '3').total_cost).toBe(
+      '0.3',
+    );
+  });
+
+  it('is empty until the target is a number, and cannot be typed over once calculated', () => {
+    let r = setCell(act(), 'unit_cost', '5000');
+    expect(r.total_cost).toBe('');
+    expect(totalCostIsCalculated(r)).toBe(true);
+    r = setCell(r, 'annual_target', '12');
+    expect(setCell(r, 'total_cost', '1').total_cost).toBe('60000');
+    expect(setCell(r, 'annual_target', 'abc').total_cost).toBe('');
+  });
+
+  it('is typed in for a lump sum, with no unit cost, and stays when the unit cost is cleared', () => {
+    let r = setCell(setCell(act(), 'annual_target', '120'), 'total_cost', '40000');
+    expect(totalCostIsCalculated(r)).toBe(false);
+    expect(r.total_cost).toBe('40000');
+    r = setCell(r, 'unit_cost', '10');
+    expect(r.total_cost).toBe('1200');
+    r = setCell(r, 'unit_cost', '');
+    expect(totalCostIsCalculated(r)).toBe(false);
+    expect(setCell(r, 'total_cost', '40000').total_cost).toBe('40000');
+  });
+
+  it('is not calculated on outline rows, and a pasted block cannot overwrite it', () => {
+    expect(totalCostIsCalculated(setCell(row('output', 'O'), 'unit_cost', '5'))).toBe(false);
+    const [pasted] = pasteBlock([act()], 0, 'annual_target', '12\t5000\t999');
+    expect([pasted!.annual_target, pasted!.unit_cost, pasted!.total_cost]).toEqual([
+      '12',
+      '5000',
+      '60000',
+    ]);
   });
 });

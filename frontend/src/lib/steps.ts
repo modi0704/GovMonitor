@@ -26,7 +26,7 @@ export const STEPS: StepInfo[] = [
       'The names of the offices you monitor',
       'Which office is under which (for example, divisions under a service)',
     ],
-    paths: ['/structure', '/groups', '/setup'],
+    paths: ['/structure', '/setup'],
   },
   {
     key: 'year',
@@ -58,13 +58,13 @@ export const STEPS: StepInfo[] = [
       'A short reason for any activity that is behind',
       'Proof such as photos or signed reports, if your agency asks for it',
     ],
-    paths: ['/reports', '/submissions'],
+    paths: ['/reports'],
   },
   {
     key: 'review',
     title: 'Check and close the month',
     short: 'Check & close',
-    why: 'Look over the dashboard. When the figures are right, close the month so they become final and cannot change by mistake.',
+    why: 'Look over the dashboard. When the figures are right, close the month so they become final and cannot change by mistake. You can reopen the latest closed month to correct it.',
     gather: [],
     paths: ['/dashboard', '/rankings'],
   },
@@ -88,14 +88,14 @@ export function stepForPath(pathname: string): StepInfo | undefined {
 export const PLAN_WORD: Record<string, string> = {
   none: 'Not started',
   draft: 'Being entered',
-  submitted: 'Waiting for approval',
+  submitted: 'Being entered',
   approved: 'Final',
 };
 
 export const MONTH_WORD: Record<string, string> = {
   not_started: 'Not started',
   draft: 'Being entered',
-  returned: 'Needs changes',
+  returned: 'Being entered',
   submitted: 'Done',
   locked: 'Closed',
 };

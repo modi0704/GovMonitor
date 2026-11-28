@@ -11,10 +11,9 @@ export default function DesktopOnly({ what, children }: { what: string; children
       <div className="card desktop-only-notice" role="status">
         <h1>Open on a computer to edit</h1>
         <p>
-          {what} needs a larger screen. On a phone you can follow the <Link to="/">dashboard</Link>,
-          the <Link to="/rankings">rankings</Link> and your{' '}
-          <Link to="/notifications">notifications</Link>, and attach photos to an activity from its
-          history on the dashboard.
+          {what} needs a larger screen. On a phone you can follow the{' '}
+          <Link to="/dashboard">dashboard</Link> and the <Link to="/rankings">rankings</Link>, and
+          attach photos to an activity from its history on the dashboard.
         </p>
       </div>
     </section>

@@ -99,20 +99,37 @@ it('opens on the current step with a progress bar and the office checklist', asy
   expect(within(pme).getByText('Final')).toBeInTheDocument();
 });
 
-it('marks a plan as final in one click (submit, then approve)', async () => {
+it('saves a plan as final in one click, with no approval step', async () => {
   const calls = renderHome(PROGRESS, {
-    'POST /api/v1/plans/p2/submit': { body: {} },
-    'POST /api/v1/plans/p2/approve': { body: {} },
+    'POST /api/v1/plans/p2/finalize': { body: {} },
   });
   vi.spyOn(window, 'confirm').mockReturnValue(true);
   const user = userEvent.setup();
   const hrm = await screen.findByRole('row', { name: /HRM/ });
-  await user.click(within(hrm).getByRole('button', { name: 'Mark as final' }));
+  await user.click(within(hrm).getByRole('button', { name: 'Save as final' }));
   expect(await screen.findByText('The plan of Human resources is final.')).toBeInTheDocument();
   expect(calls.filter((c) => c.method === 'POST').map((c) => c.path)).toEqual([
-    '/api/v1/plans/p2/submit',
-    '/api/v1/plans/p2/approve',
+    '/api/v1/plans/p2/finalize',
   ]);
+  expect(screen.queryByText('Waiting for approval')).not.toBeInTheDocument();
+});
+
+it('reopens the latest closed month from the check-and-close step', async () => {
+  const closed: Progress = {
+    ...PROGRESS,
+    current: 'review',
+    period: { ...PROGRESS.period!, status: 'locked' },
+    months: [{ ...PROGRESS.months[0]!, status: 'locked' }],
+    monthly: [{ office: office('pme', 'PME', 'Planning'), status: 'locked' }],
+  };
+  const calls = renderHome(closed, { 'POST /api/v1/periods/jan/unlock': { body: {} } });
+  vi.spyOn(window, 'prompt').mockReturnValue('A late correction');
+  const user = userEvent.setup();
+  expect(await screen.findByText('January 2026 is closed')).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'Reopen January 2026' }));
+  expect(calls.find((c) => c.path === '/api/v1/periods/jan/unlock')?.body).toEqual({
+    reason: 'A late correction',
+  });
 });
 
 it('moves to the next step and links each office to its monthly results', async () => {

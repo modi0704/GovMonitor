@@ -107,17 +107,23 @@ export default function GuidedStepsPage() {
     }
   }
 
-  function finishPlan(planId: string, status: string, office: string) {
+  function finishPlan(planId: string, office: string) {
     if (
       !window.confirm(
-        `Mark the plan of ${office} as final? Its figures will be used for the monthly results. You can still revise it later.`,
+        `Save the plan of ${office} as final? Its figures will be used for the monthly results. You can still change it later with Change plan.`,
       )
     )
       return;
-    void run(async () => {
-      if (status === 'draft') await api.post(`plans/${planId}/submit`);
-      await api.post(`plans/${planId}/approve`);
-    }, `The plan of ${office} is final.`);
+    void run(() => api.post(`plans/${planId}/finalize`), `The plan of ${office} is final.`);
+  }
+
+  function reopenMonth(id: string, month: string) {
+    const reason = window.prompt(`Why reopen ${month}? (kept in the change history)`);
+    if (!reason) return;
+    void run(
+      () => api.post(`periods/${id}/unlock`, { reason }),
+      `${month} is open again. Correct the figures in step 4, then close it again.`,
+    );
   }
 
   function closeMonth() {
@@ -161,6 +167,7 @@ export default function GuidedStepsPage() {
   const fyId = p.fiscal_year?.id;
   const periodId = p.period?.id;
   const month = p.period ? monthYear(p.period.start_date) : '';
+  const lastClosed = [...p.months].reverse().find((m) => m.status === 'locked');
   const periods: Period[] = p.months.map((m) => ({
     id: m.id,
     month_index: m.month_index,
@@ -329,9 +336,9 @@ export default function GuidedStepsPage() {
                               type="button"
                               className="btn btn-small btn-primary"
                               disabled={busy}
-                              onClick={() => finishPlan(r.plan_id!, r.status, r.office.name)}
+                              onClick={() => finishPlan(r.plan_id!, r.office.name)}
                             >
-                              Mark as final
+                              Save as final
                             </button>
                           )}
                         </td>
@@ -354,7 +361,7 @@ export default function GuidedStepsPage() {
               <>
                 <p>
                   Results for <strong>{month}</strong>. Open each office, type in what it did this
-                  month, save, then press <em>Submit report</em> to mark the office as done.
+                  month, save, then press <em>Mark as done</em>.
                 </p>
                 <table className="table step-table">
                   <thead>
@@ -418,7 +425,19 @@ export default function GuidedStepsPage() {
                     See the rankings
                   </Link>
                   {p.period.status === 'locked' ? (
-                    <span className="step-status is-done">{month} is closed</span>
+                    <>
+                      <span className="step-status is-done">{month} is closed</span>
+                      {lastClosed?.id === p.period.id && (
+                        <button
+                          type="button"
+                          className="btn"
+                          disabled={busy}
+                          onClick={() => reopenMonth(p.period!.id, month)}
+                        >
+                          Reopen {month}
+                        </button>
+                      )}
+                    </>
                   ) : (
                     <button
                       type="button"
@@ -493,7 +512,6 @@ export default function GuidedStepsPage() {
           officeLabel={p.root.name}
           periods={periods}
           periodId={periodId}
-          view="owner"
           canExportAgency
           initialFormat={exporting === 'year' ? 'year' : 'xlsx'}
           defaultTitle={`Over-all performance ${p.fiscal_year?.label ?? ''}`.trim()}

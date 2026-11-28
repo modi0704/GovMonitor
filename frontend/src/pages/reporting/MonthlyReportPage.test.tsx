@@ -174,8 +174,8 @@ it('lists what stops submission', async () => {
   renderPage();
   const user = userEvent.setup();
   vi.spyOn(window, 'confirm').mockReturnValue(true);
-  await user.click(await screen.findByRole('button', { name: 'Submit report' }));
-  expect(await screen.findByText(/stop the report from being submitted/)).toBeInTheDocument();
+  await user.click(await screen.findByRole('button', { name: 'Mark as done' }));
+  expect(await screen.findByText(/stop the month from being marked as done/)).toBeInTheDocument();
   expect(
     screen.getAllByText('A: behind plan — give the reason for the delay.').length,
   ).toBeGreaterThan(0);
@@ -192,12 +192,29 @@ it('opens the supporting files of a row', async () => {
   );
 });
 
-it('switches to the activities an office carries out for other offices', async () => {
+it('always shows the office plan — there is no view switch', async () => {
   const calls = renderPage();
-  const user = userEvent.setup();
   await screen.findByLabelText('Done this month, A');
-  await user.selectOptions(screen.getByLabelText('Show'), 'implementing');
-  await screen.findByRole('columnheader', { name: 'For office' });
-  expect(calls.some((c) => c.path === '/api/v1/reports' && c.method === 'GET')).toBe(true);
-  expect(screen.queryByRole('tab', { name: /Indicators/ })).not.toBeInTheDocument();
+  expect(screen.queryByLabelText('Show')).not.toBeInTheDocument();
+  expect(screen.getByRole('tab', { name: /Indicators/ })).toBeInTheDocument();
+  const get = calls.find((c) => c.path === '/api/v1/reports' && c.method === 'GET')!;
+  expect(get.query).not.toContain('view=');
+  expect(screen.queryByRole('button', { name: 'Return for correction' })).not.toBeInTheDocument();
+});
+
+it('reopens a month marked as done with Change results', async () => {
+  const doneReport = { ...REPORT, submission: { status: 'submitted' }, can_submit: false };
+  const calls = renderPage({
+    'GET /api/v1/reports': { body: doneReport },
+    'POST /api/v1/reports/reopen': { body: REPORT },
+  });
+  const user = userEvent.setup();
+  expect(await screen.findByText('Done')).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'Change results' }));
+  expect(calls.find((c) => c.path === '/api/v1/reports/reopen')?.body).toEqual({
+    office: 'o1',
+    period: 'm1',
+  });
+  expect(await screen.findByText('Not done yet')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Mark as done' })).toBeInTheDocument();
 });

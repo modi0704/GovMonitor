@@ -3,23 +3,14 @@ import { vi } from 'vitest';
 type Handler = (body: unknown) => { status?: number; body?: unknown };
 
 /** Route-table fetch mock: keys are "METHOD /path". Records every call. */
-// Answered for every page (the notification bell in the app shell); tests may override them.
-const DEFAULT_ROUTES = {
-  'GET /api/v1/notifications/unread-count': { body: { unread: 0 } },
-  'GET /api/v1/notifications': { body: { results: [], unread: 0 } },
-};
-
 export function mockApi(given: Record<string, Handler | { status?: number; body?: unknown }>) {
-  const routes: Record<string, Handler | { status?: number; body?: unknown }> = {
-    ...DEFAULT_ROUTES,
-    ...given,
-  };
-  const calls: { method: string; path: string; body: unknown }[] = [];
+  const routes: Record<string, Handler | { status?: number; body?: unknown }> = { ...given };
+  const calls: { method: string; path: string; query: string; body: unknown }[] = [];
   const fn = vi.fn(async (url: string, init: RequestInit = {}) => {
     const method = (init.method ?? 'GET').toUpperCase();
-    const path = url.split('?')[0]!;
+    const [path = '', query = ''] = url.split('?');
     const body = typeof init.body === 'string' ? JSON.parse(init.body) : undefined;
-    calls.push({ method, path, body });
+    calls.push({ method, path, query, body });
     const route = routes[`${method} ${path}`];
     if (!route) return new Response(JSON.stringify({ detail: 'Please sign in.' }), { status: 401 });
     const res = typeof route === 'function' ? route(body) : route;

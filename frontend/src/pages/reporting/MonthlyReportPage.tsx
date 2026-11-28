@@ -4,7 +4,6 @@ import { ApiError, api } from '../../api/client';
 import type { FiscalYear, Headline, MonthReport, OfficeRow, ReportActivity } from '../../api/types';
 import { errorMessage, useResource } from '../../api/useResource';
 import FormError from '../../components/FormError';
-import { useAuth } from '../../auth/useAuth';
 import { dateTime, monthYear, percent } from '../../lib/format';
 import ResultPanel from '../../components/ResultTiles';
 import MovDialog from './MovDialog';
@@ -25,10 +24,11 @@ interface Problem {
   message: string;
 }
 
+// D49: one officer enters everything, so a month is either still being entered or done.
 const SUBMISSION_TEXT = {
-  draft: 'Not submitted yet',
-  submitted: 'Submitted — waiting for review',
-  returned: 'Returned for correction',
+  draft: 'Not done yet',
+  submitted: 'Done',
+  returned: 'Not done yet',
   locked: 'Closed — final',
 };
 
@@ -39,7 +39,6 @@ function num(v: string | null | undefined): number {
 
 /** Monthly accomplishment entry (P6.5–P6.8). */
 export default function MonthlyReportPage() {
-  const { me } = useAuth();
   const [params, setParams] = useSearchParams();
   const years = useResource<FiscalYear[]>('fiscal-years');
   const offices = useResource<OfficeRow[]>('offices?include_inactive=0');
@@ -54,7 +53,6 @@ export default function MonthlyReportPage() {
     offices.data?.find((o) => o.can_edit)?.id ??
     offices.data?.[0]?.id ??
     null;
-  const view = params.get('view') === 'implementing' ? 'implementing' : 'owner';
   const periods = fy.data?.periods ?? [];
   const periodId =
     params.get('period') ??
@@ -74,8 +72,8 @@ export default function MonthlyReportPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const query = useMemo(
-    () => (officeId && periodId ? { office: officeId, period: periodId, view } : null),
-    [officeId, periodId, view],
+    () => (officeId && periodId ? { office: officeId, period: periodId } : null),
+    [officeId, periodId],
   );
 
   const [reloadKey, setReloadKey] = useState(0);
@@ -124,7 +122,7 @@ export default function MonthlyReportPage() {
 
   function choose(next: Record<string, string | null>) {
     const merged: Record<string, string> = {};
-    const current = { fy: fyId, office: officeId, period: periodId, view, ...next };
+    const current = { fy: fyId, office: officeId, period: periodId, ...next };
     Object.entries(current).forEach(([k, v]) => {
       if (v) merged[k] = v;
     });
@@ -161,7 +159,7 @@ export default function MonthlyReportPage() {
     if (!query || !report) return;
     if (
       !window.confirm(
-        `Submit the ${report.office.code} report for ${monthYear(report.period.start_date)}? It cannot be changed unless it is returned.`,
+        `Mark the ${report.office.code} results for ${monthYear(report.period.start_date)} as done? You can still change them until the month is closed.`,
       )
     )
       return;
@@ -171,7 +169,7 @@ export default function MonthlyReportPage() {
       const data = await api.post<MonthReport>('reports/submit', query);
       setReport(data);
       setProblems([]);
-      setNotice('Submitted.');
+      setNotice('Marked as done.');
     } catch (err) {
       if (err instanceof ApiError)
         setProblems((err.body as { problems?: Problem[] })?.problems ?? []);
@@ -181,15 +179,17 @@ export default function MonthlyReportPage() {
     }
   }
 
-  async function returnReport() {
+  async function reopen() {
     if (!query) return;
-    const note = window.prompt('What needs correcting? The office sees this note.');
-    if (!note) return;
+    setBusy(true);
     try {
-      setReport(await api.post<MonthReport>('reports/return', { ...query, note }));
-      setNotice('Returned to the office.');
+      setReport(await api.post<MonthReport>('reports/reopen', query));
+      setNotice('You can change the results again.');
+      setError(null);
     } catch (err) {
       setError(errorMessage(err));
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -216,13 +216,6 @@ export default function MonthlyReportPage() {
                 {o.code} {o.name}
               </option>
             ))}
-          </select>
-        </label>
-        <label>
-          Show
-          <select value={view} onChange={(e) => choose({ view: e.target.value })}>
-            <option value="owner">The office's own plan</option>
-            <option value="implementing">Activities it carries out for other offices</option>
           </select>
         </label>
         <label>
@@ -255,16 +248,14 @@ export default function MonthlyReportPage() {
       )}
       {years.data?.length === 0 && (
         <p className="notice">
-          There is no year yet. The agency administrator adds one on the Years page; then each
-          office&apos;s approved plan appears here for monthly reporting.
+          There is no year yet. Add one on the Years page; then each office&apos;s final plan
+          appears here for the monthly results.
         </p>
       )}
       {report && !report.has_plan && (
         <p className="notice">
-          {view === 'owner'
-            ? `${office?.name ?? 'This office'} has no approved plan for ${report.period.fiscal_year.label}. `
-            : `${office?.name ?? 'This office'} carries out no activities for other offices this year. `}
-          {view === 'owner' && <Link to="/plans">Go to plans</Link>}
+          {`${office?.name ?? 'This office'} has no final plan for ${report.period.fiscal_year.label}. `}
+          <Link to="/plans">Go to plans</Link>
         </p>
       )}
       {report && report.has_plan && (
@@ -274,11 +265,11 @@ export default function MonthlyReportPage() {
               <span className={`chip chip-sub-${report.submission.status}`}>
                 {SUBMISSION_TEXT[report.submission.status]}
               </span>{' '}
-              <span className="muted small">
-                Due {dateTime(report.period.cutoff_at)}
-                {report.submission.submitted_at &&
-                  ` · submitted ${dateTime(report.submission.submitted_at)} by ${report.submission.submitted_by}`}
-              </span>
+              {report.submission.status === 'submitted' && report.submission.submitted_at && (
+                <span className="muted small">
+                  Marked as done {dateTime(report.submission.submitted_at)}
+                </span>
+              )}
               {report.period.status === 'locked' && (
                 <p className="muted small">This month is closed; its figures are final.</p>
               )}
@@ -296,25 +287,21 @@ export default function MonthlyReportPage() {
               )}
               {report.can_submit && (
                 <button type="button" className="btn" onClick={submit} disabled={busy}>
-                  Submit report
+                  Mark as done
                 </button>
               )}
-              {report.can_return && me?.is_agency_admin && (
-                <button type="button" className="btn" onClick={returnReport}>
-                  Return for correction
+              {report.submission.status === 'submitted' && report.period.status === 'open' && (
+                <button type="button" className="btn" onClick={reopen} disabled={busy}>
+                  Change results
                 </button>
               )}
             </div>
           </div>
-          {report.submission.status === 'returned' && report.submission.return_note && (
-            <p className="form-message">
-              <strong>Returned by {report.submission.returned_by}:</strong>{' '}
-              {report.submission.return_note}
-            </p>
-          )}
           {problems.length > 0 && (
             <details className="issues" open>
-              <summary>{problems.length} problem(s) stop the report from being submitted</summary>
+              <summary>
+                {problems.length} problem(s) stop the month from being marked as done
+              </summary>
               <ul>
                 {problems.map((p, i) => (
                   <li key={i}>{p.message}</li>
@@ -338,16 +325,14 @@ export default function MonthlyReportPage() {
             >
               Activities ({report.activities.length})
             </button>
-            {view === 'owner' && (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tab === 'indicators'}
-                onClick={() => setTab('indicators')}
-              >
-                Indicators ({report.indicators.length})
-              </button>
-            )}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'indicators'}
+              onClick={() => setTab('indicators')}
+            >
+              Indicators ({report.indicators.length})
+            </button>
           </div>
           {tab === 'activities' ? (
             <div className="grid-scroll">
@@ -355,7 +340,6 @@ export default function MonthlyReportPage() {
                 <thead>
                   <tr>
                     <th>Activity</th>
-                    {view === 'implementing' ? <th>For office</th> : <th>Carried out by</th>}
                     <th>Target this month</th>
                     <th>Done this month</th>
                     {report.show_amounts && <th>Amount spent</th>}
@@ -378,11 +362,6 @@ export default function MonthlyReportPage() {
                             {a.unit} · year target {a.annual_target}
                           </div>
                           {problem && <div className="text-delayed small">{problem}</div>}
-                        </td>
-                        <td>
-                          {view === 'implementing'
-                            ? a.owner_office.code
-                            : a.implementing_office.code}
                         </td>
                         <td className="num pad">{a.target_month}</td>
                         <td className="num">

@@ -59,6 +59,13 @@ export default function IndicatorsTab({
 }) {
   const saved = useMemo(() => fromServer(plan.indicators), [plan.indicators]);
   const [rows, setRows] = useState<IndRow[]>(saved);
+  // After a save the plan comes back with the new indicators' ids: show those, or the new rows
+  // would stay "unsaved" and be sent (and created) again by the next save.
+  const [shown, setShown] = useState(saved);
+  if (shown !== saved) {
+    setShown(saved);
+    setRows(saved);
+  }
 
   useEffect(() => {
     const before = new Map(saved.map((r) => [r.key, JSON.stringify(r)]));

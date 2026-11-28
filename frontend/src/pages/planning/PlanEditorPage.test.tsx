@@ -160,6 +160,37 @@ it('adds an indicator with monthly targets and saves it with the plan', async ()
   expect((save.indicators[0]!.targets as string[])[2]).toBe('1');
 });
 
+it('treats a just-saved indicator as saved, so a second save does not add it again', async () => {
+  const savedIndicator = {
+    id: 'i1',
+    lineage_id: 'li1',
+    code: '',
+    name: 'Reports published',
+    kind: 'output',
+    unit: '',
+    annual_target: '4.0000',
+    weight: null,
+    aggregation: 'sum',
+    sort_order: 10,
+    targets: months('0', '0', '1'),
+  };
+  const calls = renderEditor({
+    'POST /api/v1/plans/5f0c2a52-8d3e-4b6f-9a51-0d6f2a7c1e11/save': {
+      body: { plan: { ...PLAN, indicators: [savedIndicator] }, created: {} },
+    },
+  });
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole('tab', { name: /Indicators/ }));
+  await user.click(screen.getByRole('button', { name: 'Add indicator' }));
+  await user.type(screen.getByLabelText('Indicator 1'), 'Reports published');
+  await user.type(screen.getByLabelText('Annual target, indicator 1'), '4');
+  await user.type(screen.getByLabelText('MAR, indicator 1'), '1');
+  await user.click(screen.getByRole('button', { name: 'Save' }));
+  expect(await screen.findByRole('button', { name: 'Saved' })).toBeDisabled();
+  expect(screen.getAllByLabelText(/^Indicator \d$/)).toHaveLength(1);
+  expect(calls.filter((c) => c.path.endsWith('/save'))).toHaveLength(1);
+});
+
 it('calculates the total cost from the target and the unit cost and does not let it be typed over', async () => {
   const calls = renderEditor();
   const user = userEvent.setup();

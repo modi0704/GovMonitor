@@ -1,7 +1,7 @@
 # GovMonitor
 ## User Guide with Sample Data
 
-Edition 1.0 | 27 November 2026
+Edition 1.1 | 28 November 2026
 
 Learn GovMonitor by doing. This guide walks you through the six steps with real practice figures: what to type in every box, and the exact results you should see after each step. It takes about 45 minutes.
 
@@ -87,7 +87,7 @@ Output indicator of Practice Office A: **IND-01 Community members reached**, uni
 
 ## Step 1: Add the Practice Offices
 
-1. Open **Settings → Offices** in the menu (or **Step-by-step** → step 1 → **Open the offices**).
+1. Open **Offices** in the menu (or **Step-by-step** → step 1 → **Open the offices**).
 2. Select **Sample Ministry** (the top office) and press **Add an office beneath**.
 3. **Name:** `Practice Center` — **Code:** `PRC`. Press **Add office**.
 4. Select **Practice Center** and press **Add an office beneath** again:
@@ -103,12 +103,11 @@ Output indicator of Practice Office A: **IND-01 Community members reached**, uni
 
 ## Step 2: Set Up the Practice Year
 
-1. Open **Settings → Years** and press **New fiscal year**.
+1. Open **Years** in the menu and press **New fiscal year**.
 2. **Label:** `Practice 2026`
 3. **Starts in the year:** `2026`
-4. **Scoring method:** choose **Excel method**.
-5. Press **Create**.
-6. In the list, press **Open** next to *Practice 2026* and confirm.
+4. Press **Create**. (The app scores every new year the Excel way; there is nothing to choose.)
+5. In the list, press **Open** next to *Practice 2026* and confirm.
 
 ![The new year form filled in](images/practice-02-new-year.jpg)
 
@@ -127,12 +126,12 @@ Go to **Step-by-step**, make sure **Year: Practice 2026** is chosen, and go to s
 3. Select the OUT-01 row. Set **New row** to **Activity** and press **Add below selected**. Fill in:
    - **Code** `ACT-01`, **Title** `Community consultation sessions`, **Unit** `session`
    - **Target** `12`, **Unit cost** `5000` — **Total cost** fills itself in as `60000` (12 × 5000) and is greyed out
-   - **Measure** Quantity, **Implementing office** PRA
+   - **Measure** Quantity
    - **JAN** to **DEC**: `1` in every month (the **Total** column shows 12)
 4. Select ACT-01, keep **New row** on **Activity**, press **Add below selected** and fill in:
    - **Code** `ACT-02`, **Title** `Client assistance cases completed`, **Unit** `case`
    - **Target** `120`, **Unit cost** empty (a lump sum), so type **Total cost** `40000` yourself
-   - **Measure** Quantity, **Implementing office** PRA
+   - **Measure** Quantity
    - **JAN** to **DEC**: `10` in every month (Total 120)
 5. Leave **Weight** empty: the app works it out from the costs (ACT-01 60%, ACT-02 40%).
 6. Open the **Indicators** tab and press **Add indicator**:
@@ -150,13 +149,13 @@ Go to **Step-by-step**, make sure **Year: Practice 2026** is chosen, and go to s
 2. Set **New row** to **Activity** and press **Add at end**:
    - **Code** `FV-01`, **Title** `Farm visits`, **Unit** `visit`
    - **Target** `24`, **Unit cost** `1250` — **Total cost** fills itself in as `30000` (24 × 1250)
-   - **Measure** Quantity, **Implementing office** PRB
+   - **Measure** Quantity
    - **JAN** to **DEC**: `2` in every month (Total 24)
 3. Press **Save**. Planned cost: **30,000.00**. (No output indicator for this office.)
 
 **Make both plans final**
 
-Back on **Step-by-step** (step 3), press **Mark as final** next to PRA, then next to PRB, and confirm each time.
+Back on **Step-by-step** (step 3), press **Save as final** next to PRA, then next to PRB, and confirm each time. (The same button is also on each plan page.)
 
 ![Both practice plans marked Final](images/practice-05-plans-final.jpg)
 
@@ -171,12 +170,12 @@ Back on **Step-by-step** (step 3), press **Mark as final** next to PRA, then nex
    - ACT-01 **Done this month** `1` — **Remarks** `Sessions held as planned.`
    - ACT-02 **Done this month** `8` — **Reason for delay** `Two clients had incomplete documents. Follow up in February.`
    - **Indicators** tab: IND-01 **Value this month** `45`
-3. Press **Save**, then **Submit report** and confirm.
+3. Press **Save**, then **Mark as done** and confirm.
 4. Press **Back to the steps**, then **Enter results** next to **PRB Practice Office B**:
    - FV-01 **Done this month** `2`
-5. Press **Save**, then **Submit report** and confirm.
+5. Press **Save**, then **Mark as done** and confirm.
 
-![Practice Office A, January, before submitting](images/practice-06-january-results.jpg)
+![Practice Office A, January, before marking it as done](images/practice-06-january-results.jpg)
 
 **What you should see on Practice Office A's page (January)**
 
@@ -227,8 +226,8 @@ Repeat steps 4 and 5 for February.
    - ACT-01 **Done this month** `1`
    - ACT-02 **Done this month** `12` (the 10 planned plus the 2 late January cases; no delay reason is needed now)
    - **Indicators** tab: IND-01 **Value this month** `60`
-   - **Save**, then **Submit report**.
-3. **PRB Practice Office B** → **Enter results**: FV-01 **Done this month** `3`. **Save**, then **Submit report**.
+   - **Save**, then **Mark as done**.
+3. **PRB Practice Office B** → **Enter results**: FV-01 **Done this month** `3`. **Save**, then **Mark as done**.
 
 **Type only what was done in February.** Do not type 2 sessions or 20 cases: those are the totals so far, and the app adds the months for you.
 
@@ -325,15 +324,15 @@ The office score is **not** the simple average of the two activities.
 | Jan–Dec add up to the Target: **12**, **120**, **24**; indicator **600** | The **Total** column of each plan |
 | You typed the month's figure, not the running total (February ACT-02 is **12**, not 20) | Monthly results |
 | Both plans are **Final** and both offices are **Done** for the month | Step-by-step, steps 3 and 4 |
-| The scoring method is **Excel method** | Settings → Years → *Practice 2026* |
+| A month marked as done needs a change | Monthly results → **Change results**, correct, **Save**, **Mark as done** |
 
-To fix a figure in a closed month: **Who has reported** → choose the month → **Reopen** (type a reason), correct it, then close the month again. Reopen the latest month first.
+To fix a figure in a closed month: **Step-by-step** step 5 → **Reopen [month]** (or **Years** → *Practice 2026* → **Reopen month**), type a reason, correct it, then close the month again. Reopen the latest month first.
 
 <!-- page -->
 
 ## When You Are Done Practising
 
 - You can keep the practice data: it stays in the Sample Ministry and **Practice 2026** and does not mix with a real year.
-- Or remove it: **Settings → Offices**, select **Practice Center**, press **Delete**, tick *I understand this cannot be undone* and press **Delete permanently**. The Practice Center, both offices, their plans and all their results are deleted. The same works for the Sample Ministry's other offices if you want to start from an empty list.
+- Or remove it: **Offices**, select **Practice Center**, press **Delete**, tick *I understand this cannot be undone* and press **Delete permanently**. The Practice Center, both offices, their plans and all their results are deleted. The same works for the Sample Ministry's other offices if you want to start from an empty list.
 - To start your real work, type `./run.sh setup` in Git Bash. It creates your real agency and administrator and switches the practice agencies off. Nothing is deleted.
 - Then follow the general **User Guide**: the same six steps, with your own offices and figures.

@@ -157,12 +157,13 @@ class Command(BaseCommand):
         years = {y["label"]: y for y in api.get("/api/v1/fiscal-years")}
         fy = (
             years.get("2026")
-            or api.post(
-                "/api/v1/fiscal-years",
-                {"label": "2026", "start_year": 2026, "preset": "capped_with_tolerance"},
-            ).json()
+            or api.post("/api/v1/fiscal-years", {"label": "2026", "start_year": 2026}).json()
         )
-        api.patch(f"/api/v1/scoring-profiles/{fy['profile_id']}", {"weighting": "equal", "confirm": True})
+        # New years always start with the workbook method (D49); the bureau shows the other one.
+        api.patch(
+            f"/api/v1/scoring-profiles/{fy['profile_id']}",
+            {"preset": "capped_with_tolerance", "weighting": "equal", "confirm": True},
+        )
         if fy["status"] == "draft":
             api.patch(f"/api/v1/fiscal-years/{fy['id']}", {"status": "open"})
         offices = {o["code"]: o for o in api.get("/api/v1/offices")}

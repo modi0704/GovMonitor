@@ -11,6 +11,7 @@ import logging
 from dataclasses import dataclass, field
 from decimal import Decimal
 
+from django.conf import settings
 from django.utils import timezone
 from pptx import Presentation
 from pptx.chart.data import CategoryChartData
@@ -452,6 +453,8 @@ def ranking_sets(data: DeckData) -> list:
         if len(kids) >= 2
     ]
     groups: dict = {}
+    if not settings.OFFICE_GROUPS_ENABLED:  # D49: only offices under the same parent
+        return sets
     for m in OfficeGroupMember.objects.select_related("group").filter(office_id__in=list(in_scope)):
         groups.setdefault(m.group, []).append(in_scope[m.office_id])
     for g in sorted(groups, key=lambda g: (g.sort_order, g.name)):

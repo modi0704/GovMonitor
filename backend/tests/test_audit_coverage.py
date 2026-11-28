@@ -305,6 +305,8 @@ SCENARIOS = {
     ("plan-approve", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan('submitted')['id']}/approve"),
     ("plan-return", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan('submitted')['id']}/return"),
     ("plan-revise", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan('approved')['id']}/revise"),
+    ("plan-finalize", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan()['id']}/finalize"),
+    ("plan-change", "POST"): lambda w: w.admin.post(f"/api/v1/plans/{w.plan('approved')['id']}/change"),
     ("plan-copy", "POST"): lambda w: (
         lambda plan: w.admin.post(
             f"/api/v1/plans/{plan['id']}/copy",
@@ -335,6 +337,7 @@ SCENARIOS = {
     ("reports-return", "POST"): lambda w: w.admin.post(
         "/api/v1/reports/return", {**w.submitted_month(), "note": "Fix"}
     ),
+    ("reports-reopen", "POST"): lambda w: w.admin.post("/api/v1/reports/reopen", w.submitted_month()),
     ("period", "PATCH"): lambda w: w.admin.patch(
         f"/api/v1/periods/{w.fiscal_year()['periods'][0]['id']}",
         {"cutoff_at": "2026-02-20T17:00:00+08:00"},

@@ -22,11 +22,18 @@ DEPLOYMENT_MODE = env("DEPLOYMENT_MODE", "multi")
 if DEPLOYMENT_MODE not in {"single", "multi"}:
     raise ValueError("DEPLOYMENT_MODE must be 'single' or 'multi'")
 SESSION_IDLE_MINUTES = env_int("SESSION_IDLE_MINUTES", 60)
-# Testing mode: no sign-in. Every visitor acts as an agency administrator (LOGIN_AS, or the first
-# active one). For trying the system on one PC only — ./run.sh switches it on and publishes the
-# app on this PC alone (127.0.0.1). Never enable it on a server that others can reach.
-LOGIN_DISABLED = env_bool("LOGIN_DISABLED", False)
+# No sign-in (the default since D49): every visitor acts as the agency administrator (LOGIN_AS, or
+# the first active one). For one PC only — ./run.sh publishes the app on 127.0.0.1 alone. Server
+# installs set LOGIN_DISABLED=0 (deploy/.env.example); './run.sh login on' does the same here.
+LOGIN_DISABLED = env_bool("LOGIN_DISABLED", True)
 LOGIN_AS = env("LOGIN_AS", "").strip().lower()
+# One monitoring officer on one PC (D49): features a single user does not need are switched off,
+# with their code kept so they can return. Each switch brings its feature back when set to 1.
+LICENCE_ENFORCED = env_bool("LICENCE_ENFORCED", False)  # read-only mode without a valid licence
+PLATFORM_ENABLED = env_bool("PLATFORM_ENABLED", False)  # vendor area at /platform/api/
+ALERTS_ENABLED = env_bool("ALERTS_ENABLED", False)  # notifications, daily alert scan, emails
+AUTO_LOCK_ENABLED = env_bool("AUTO_LOCK_ENABLED", False)  # close months automatically at cutoff
+OFFICE_GROUPS_ENABLED = env_bool("OFFICE_GROUPS_ENABLED", False)  # rank office groups too
 MAX_UPLOAD_MB = env_int("MAX_UPLOAD_MB", 25)
 LICENCE_FILE = env("LICENCE_FILE", "")  # office installs (DEPLOYMENT_MODE=single), P13.5
 LICENCE_PUBLIC_KEY = env("LICENCE_PUBLIC_KEY", "")  # override of the key shipped in the image (tests)
@@ -60,6 +67,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "apps.audit.middleware.AuditContextMiddleware",
+    "apps.tenancy.middleware.PlatformSwitchMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "config.security.SecurityHeadersMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",

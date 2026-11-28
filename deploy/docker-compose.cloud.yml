@@ -9,6 +9,7 @@ name: govmonitor-cloud
 x-app-env: &app-env
   DEPLOYMENT_MODE: ${DEPLOYMENT_MODE:-multi}
   SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY}
+  LOGIN_DISABLED: ${LOGIN_DISABLED:-0}  # a cloud service always asks for sign-in
   ALLOWED_HOSTS: ${ALLOWED_HOSTS:?set ALLOWED_HOSTS}
   CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:?set CSRF_TRUSTED_ORIGINS}
   DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL (app_user)}

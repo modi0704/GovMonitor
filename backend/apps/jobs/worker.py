@@ -158,7 +158,12 @@ def lock_period_job(job: Job) -> dict:
 def schedule_auto_lock() -> int:
     """When the profile says ``auto_lock``, queue a lock for the earliest open month whose cutoff
     has passed (months lock in order). No duplicate while one is queued or running (D4)."""
+    from django.conf import settings
+
     from apps.planning.models import FiscalYear, ReportingPeriod
+
+    if not settings.AUTO_LOCK_ENABLED:
+        return 0  # D49: months are closed by hand only
 
     queued = 0
     now = timezone.now()

@@ -125,7 +125,12 @@ def state() -> LicenceState:
 
 
 def payload(user_count: int | None = None) -> dict:
+    from django.conf import settings
+
     s = state()
+    if not settings.LICENCE_ENFORCED:  # D49: never read-only, nothing to warn about
+        return {"status": "not_required", "read_only": False, "agency": s.agency, "expires": None,
+                "days_left": None, "seats": None, "seats_used": user_count, "message": ""}  # fmt: skip
     return {
         "status": s.status,
         "read_only": s.read_only,
@@ -139,6 +144,10 @@ def payload(user_count: int | None = None) -> dict:
 
 
 def seats_available(active_users: int) -> bool:
+    from django.conf import settings
+
+    if not settings.LICENCE_ENFORCED:
+        return True
     s = state()
     return s.status == "not_required" or s.seats is None or active_users < s.seats
 
@@ -150,8 +159,10 @@ class LicenceMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        from django.conf import settings
+
         writes = request.method not in ("GET", "HEAD", "OPTIONS") and request.path.startswith("/api/")
-        if writes and not request.path.startswith(READ_ONLY_ALLOWED):
+        if settings.LICENCE_ENFORCED and writes and not request.path.startswith(READ_ONLY_ALLOWED):
             s = state()
             if s.read_only:
                 from django.http import JsonResponse

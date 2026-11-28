@@ -62,7 +62,6 @@ def get_fy(fy_id) -> FiscalYear:
 class FiscalYearCreateSerializer(serializers.Serializer):
     label = serializers.CharField(max_length=40)
     start_year = serializers.IntegerField(min_value=2000, max_value=2100)
-    preset = serializers.ChoiceField(choices=sorted(presets.PRESETS), default=presets.DEFAULT_PRESET)
 
 
 class FiscalYearListView(APIView):
@@ -77,7 +76,8 @@ class FiscalYearListView(APIView):
         s.is_valid(raise_exception=True)
         d = s.validated_data
         try:
-            fy = services.create_fiscal_year(d["label"], d["start_year"], d["preset"])
+            # D49: every new year scores like the Excel workbook; a "preset" sent is ignored.
+            fy = services.create_fiscal_year(d["label"], d["start_year"], presets.DEFAULT_PRESET)
         except services.PlanningError as err:
             return planning_error(err)
         return Response(fiscal_year_payload(fy, with_periods=True), status=status.HTTP_201_CREATED)

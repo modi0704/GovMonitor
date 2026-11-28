@@ -190,6 +190,35 @@ class PlanSaveView(APIView):
         return Response({"plan": plan_detail(plan, request.user), "created": keymap})
 
 
+class PlanFinalizeView(APIView):
+    """POST — 'Save as final': submit and approve in one step (agency administrator)."""
+
+    permission_classes = [perm.IsAgencyAdmin]
+
+    def post(self, request, plan_id):
+        plan = get_plan(request, plan_id, edit=True)
+        try:
+            svc.finalize(plan, request.user)
+        except PlanningError as err:
+            return planning_error(err)
+        plan.refresh_from_db()
+        return Response(plan_detail(plan, request.user))
+
+
+class PlanChangeView(APIView):
+    """POST — 'Change plan' on a final plan: returns the editable copy (an open revision or a new one)."""
+
+    permission_classes = [perm.IsAgencyAdmin]
+
+    def post(self, request, plan_id):
+        plan = get_plan(request, plan_id, edit=True)
+        try:
+            draft = svc.change(plan)
+        except PlanningError as err:
+            return planning_error(err)
+        return Response(plan_detail(draft, request.user))
+
+
 class PlanSubmitView(APIView):
     def post(self, request, plan_id):
         plan = get_plan(request, plan_id, edit=True)

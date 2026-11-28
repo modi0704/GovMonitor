@@ -7,6 +7,7 @@ Numbers come only from ``results.read`` (frozen when the month is locked, live o
 
 from decimal import Decimal
 
+from django.conf import settings
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -150,16 +151,19 @@ class DashboardView(APIView):
                 }
             )
         groups = {}
+        # D49: only offices under the same parent are ranked unless office groups are switched on.
+        group_rows = OfficeGroupMember.objects.none()
+        if settings.OFFICE_GROUPS_ENABLED:
+            group_rows = OfficeGroupMember.objects.select_related("group")
         for m in (
-            OfficeGroupMember.objects.select_related("group")
+            group_rows
             # Groups shown: those with a member at or beneath this office (all of them on the root).
             .filter(
                 office_id__in=list(visible),
                 group_id__in=OfficeGroupMember.objects.filter(office__path__startswith=office.path).values(
                     "group_id"
                 ),
-            )
-            .order_by("group__sort_order", "group__name")
+            ).order_by("group__sort_order", "group__name")
         ):
             groups.setdefault(m.group, []).append(str(m.office_id))
         for group, member_ids in groups.items():
@@ -343,7 +347,10 @@ class RankingsView(APIView):
             if len(parents[pid]) >= 2
         ]
         group_members = {}
-        for m in OfficeGroupMember.objects.select_related("group").filter(office_id__in=list(scope)):
+        group_rows = OfficeGroupMember.objects.none()
+        if settings.OFFICE_GROUPS_ENABLED:  # D49: parent sets only, unless switched on
+            group_rows = OfficeGroupMember.objects.select_related("group")
+        for m in group_rows.filter(office_id__in=list(scope)):
             group_members.setdefault(m.group, []).append(str(m.office_id))
         for g in sorted(group_members, key=lambda g: (g.sort_order, g.name)):
             sets.append({"key": f"group:{g.id}", "kind": "group", "name": g.name})

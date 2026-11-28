@@ -9,6 +9,7 @@ urlpatterns = [
     path("reports/submit", api.ReportSubmitView.as_view(), name="reports-submit"),
     path("submission-board", api.SubmissionBoardView.as_view(), name="submission-board"),
     path("reports/return", api.ReportReturnView.as_view(), name="reports-return"),
+    path("reports/reopen", api.ReportReopenView.as_view(), name="reports-reopen"),
     path("progress", progress_api.ProgressView.as_view(), name="progress"),
     path("attachments", attachments_api.AttachmentListView.as_view(), name="attachments"),
     path(

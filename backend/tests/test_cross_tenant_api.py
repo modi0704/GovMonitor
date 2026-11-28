@@ -196,6 +196,7 @@ def reference_cases(w):
         ("reports-preview", "post", "/api/v1/reports/preview", month),
         ("reports-submit", "post", "/api/v1/reports/submit", month),
         ("reports-return", "post", "/api/v1/reports/return", {**month, "note": "x"}),
+        ("reports-reopen", "post", "/api/v1/reports/reopen", month),
         ("submission-board", "get", "/api/v1/submission-board", {"period": jan}),
         ("progress (B year)", "get", "/api/v1/progress", {"fiscal_year": fy_b}),
         ("progress (B month)", "get", "/api/v1/progress", {"period": jan}),
@@ -230,8 +231,8 @@ def reference_cases(w):
 # Listed in reference_cases (or multipart cases below) — classification for the meta test.
 REFERENCED = {
     "dashboard", "dashboard-activities", "dashboard-activity", "rankings", "reports", "reports-save",
-    "reports-preview", "reports-submit", "reports-return", "submission-board", "progress", "attachments",
-    "plans",
+    "reports-preview", "reports-submit", "reports-return", "reports-reopen", "submission-board", "progress",
+    "attachments", "plans",
     "role-assignments", "offices-reorder", "offices-import", "results-preview", "export-xlsx", "export-pptx",
     "import-plan-template", "import-plan",
 }  # fmt: skip

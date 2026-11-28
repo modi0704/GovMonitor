@@ -410,6 +410,30 @@ class ReportReturnView(APIView):
         return Response(month_view(request, office, period, "owner"))
 
 
+class ReportReopenView(APIView):
+    """POST ``{office, period}`` — 'Change results' (D49): an office's month marked done becomes
+    editable again (draft). For the one officer who entered it; closed months stay closed."""
+
+    permission_classes = [perm.IsAgencyAdmin]
+
+    @transaction.atomic
+    def post(self, request):
+        office, period = _context(request, request.data.get("office"), request.data.get("period"))
+        if period.status == ReportingPeriod.Status.LOCKED:
+            return error(rules.ReportingError("period_locked", "This month is closed.", http=409))
+        sub = OfficeSubmission.objects.filter(office=office, period=period).first()
+        if sub is None or sub.status not in (
+            OfficeSubmission.Status.SUBMITTED,
+            OfficeSubmission.Status.RETURNED,
+        ):
+            return error(rules.ReportingError("not_submitted", "This month is not marked as done.", http=409))
+        sub.status = OfficeSubmission.Status.DRAFT
+        with audit.suppressed():
+            sub.save(update_fields=["status"])
+        audit.record("reopen", sub, after={"month": period.month_index}, office_id=office.id)
+        return Response(month_view(request, office, period, "owner"))
+
+
 class SubmissionBoardView(APIView):
     """GET ``?period=`` — every office with an approved plan × its submission status (P7.6)."""
 

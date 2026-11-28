@@ -349,6 +349,32 @@ def revise(plan: Plan) -> Plan:
     return new
 
 
+@transaction.atomic
+def finalize(plan: Plan, user) -> Plan:
+    """'Save as final' (D49): one action makes a plan final — the app submits and approves it.
+    The approved version before it, if any, is replaced; closed months keep their frozen results."""
+    if plan.status == Plan.Status.APPROVED:
+        return plan
+    if plan.status == Plan.Status.SUPERSEDED:
+        raise PlanningError("superseded", "This is an older version of the plan; open the current one.")
+    if plan.status == Plan.Status.DRAFT:
+        submit(plan, user)
+    return approve(plan, user)
+
+
+def change(plan: Plan) -> Plan:
+    """'Change plan' on a final plan (D49): the editable copy to work on — the revision already in
+    progress, or a new one. 'Save as final' then makes it the final plan."""
+    if plan.status != Plan.Status.APPROVED:
+        return plan
+    open_revision = Plan.objects.filter(
+        office=plan.office,
+        fiscal_year=plan.fiscal_year,
+        status__in=[Plan.Status.DRAFT, Plan.Status.SUBMITTED],
+    ).first()
+    return open_revision or revise(plan)
+
+
 def compare(old: Plan, new: Plan) -> dict:
     """Rows added, removed and changed between two versions, matched by lineage id (P5.7)."""
 

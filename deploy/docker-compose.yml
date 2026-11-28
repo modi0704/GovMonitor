@@ -22,8 +22,9 @@ x-app-env: &app-env
   SECURE_SSL: ${SECURE_SSL:-1}
   TRUST_X_FORWARDED_FOR: "1"
   LOG_FORMAT: ${LOG_FORMAT:-json}
-  # Testing mode without sign-in (./run.sh switches it on, for one PC only). Off by default.
-  LOGIN_DISABLED: ${LOGIN_DISABLED:-0}
+  # No sign-in by default (one officer on one PC, D49; ./run.sh publishes the app on this PC only).
+  # Server installs set LOGIN_DISABLED=0 in .env (see .env.example).
+  LOGIN_DISABLED: ${LOGIN_DISABLED:-1}
   LOGIN_AS: ${LOGIN_AS:-}
 
 services:

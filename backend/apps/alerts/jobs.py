@@ -22,6 +22,10 @@ def alert_scan(job: Job) -> dict:
 @scheduler
 def schedule_alert_scan(now=None) -> int:
     """Queue one alert_scan per agency per local day, after SCAN_HOUR (idempotent)."""
+    from django.conf import settings
+
+    if not settings.ALERTS_ENABLED:
+        return 0  # D49: the daily alert scan does not run
     from apps.alerts.services import _tz
     from apps.tenancy import context
 

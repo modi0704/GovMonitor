@@ -18,13 +18,14 @@ def world():
 
 def test_create_open_close_and_read(world):
     boss = Json(api_client("boss@a.gov"))
+    # D49: every new year uses the workbook method (same results as the Excel); a preset is ignored.
     r = boss.post(
         "/api/v1/fiscal-years", {"label": "2026", "start_year": 2026, "preset": "capped_with_tolerance"}
     )
     assert (
         r.status_code == 201
         and len(r.json()["periods"]) == 12
-        and r.json()["preset"] == "capped_with_tolerance"
+        and r.json()["preset"] == "workbook_compatible"
     )
     fy = r.json()
     assert (

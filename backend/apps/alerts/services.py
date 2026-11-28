@@ -17,6 +17,7 @@ import zoneinfo
 from collections import defaultdict
 from dataclasses import dataclass
 
+from django.conf import settings
 from django.utils import timezone
 
 from apps.alerts.models import Notification
@@ -39,6 +40,8 @@ class Message:
 
 def send(message: Message, user_ids) -> int:
     """Create one notification per recipient; returns how many were new."""
+    if not settings.ALERTS_ENABLED:
+        return 0  # D49: no notifications for a single user
     ids = sorted({str(u) for u in user_ids if u})
     if not ids:
         return 0

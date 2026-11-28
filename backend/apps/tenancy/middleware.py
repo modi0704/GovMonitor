@@ -37,3 +37,19 @@ class TenantMiddleware:
             finally:
                 context.clear()
         return response
+
+
+class PlatformSwitchMiddleware:
+    """The vendor's platform area (/platform/api/) answers only when PLATFORM_ENABLED is on (D49);
+    otherwise every platform route is Not Found."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from django.conf import settings
+        from django.http import JsonResponse
+
+        if request.path.startswith("/platform/api/") and not settings.PLATFORM_ENABLED:
+            return JsonResponse({"detail": "Not found."}, status=404)
+        return self.get_response(request)

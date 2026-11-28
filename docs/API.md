@@ -124,6 +124,8 @@ Generated from the code by `tools/api_docs.py`; do not edit by hand.
 | PATCH | `/api/v1/plans/{plan_id}` | `plan` | Approved budget (agency administrator) — allowed in any status (P5.8). |
 | POST | `/api/v1/plans/{plan_id}/save` | `plan-save` | Bulk save from the grid: all changed rows and indicators in one request. |
 | POST | `/api/v1/plans/{plan_id}/submit` | `plan-submit` | Submit a draft for approval (refused with the list of problems if it does not validate). |
+| POST | `/api/v1/plans/{plan_id}/finalize` | `plan-finalize` | POST — 'Save as final': submit and approve in one step (agency administrator). |
+| POST | `/api/v1/plans/{plan_id}/change` | `plan-change` | POST — 'Change plan' on a final plan: returns the editable copy (an open revision or a new one). |
 | POST | `/api/v1/plans/{plan_id}/approve` | `plan-approve` | Approve a submitted plan (agency administrator); it becomes the baseline and supersedes the previous version. |
 | POST | `/api/v1/plans/{plan_id}/return` | `plan-return` | Return a submitted plan to its office: `{"note"}`. |
 | POST | `/api/v1/plans/{plan_id}/revise` | `plan-revise` | Start a revision of the approved plan (a new draft version). |
@@ -151,6 +153,7 @@ Generated from the code by `tools/api_docs.py`; do not edit by hand.
 | POST | `/api/v1/reports/submit` | `reports-submit` | Submit an office's month: `{"office", "period"}` (refused while delay reasons or required files are missing). |
 | GET | `/api/v1/submission-board` | `submission-board` | GET ``?period=`` — every office with an approved plan × its submission status (P7.6). |
 | POST | `/api/v1/reports/return` | `reports-return` | Return a submitted month to its office: `{"office", "period", "note"}` (agency administrator). |
+| POST | `/api/v1/reports/reopen` | `reports-reopen` | POST ``{office, period}`` — 'Change results' (D49): an office's month marked done becomes editable again (draft). For the one officer who entered it; closed months stay closed. |
 | GET | `/api/v1/attachments` | `attachments` | GET ?target_type&lineage_id&period_id — files of one actual. POST multipart — upload one file. |
 | POST | `/api/v1/attachments` | `attachments` | GET ?target_type&lineage_id&period_id — files of one actual. POST multipart — upload one file. |
 | DELETE | `/api/v1/attachments/{attachment_id}` | `attachment` | Remove a supporting file (kept in storage for the audit trail). |

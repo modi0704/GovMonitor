@@ -19,6 +19,11 @@ opens on **Step-by-step**, a progress bar with six steps:
 The app calculates everything else: plan versus actual, gap, status (ADVANCED / ON-TIME / DELAYED),
 funds, S-curves and rankings. It can be set up for any agency's offices.
 
+It is built for **one user** (D49): there are no user accounts, approvals, reminders or sign-in by
+default. **Save as final** makes a plan the one used for the results, **Mark as done** finishes an
+office's month, and you close each month yourself. Sign-in and the other switched-off features stay
+in the code and can be brought back (see `MASTERPLAN.md`, decision D49).
+
 **Two guides:**
 
 * [User Guide](docs/USER_GUIDE.md) ([PDF](docs/user-guide/USER_GUIDE.pdf)) — short and step by step:
@@ -28,8 +33,8 @@ funds, S-curves and rankings. It can be set up for any agency's offices.
   two offices, every figure to type, and the exact results to expect after each step.
 
 **Run it on your PC** (Docker Desktop open, in Git Bash inside this folder): `./run.sh start`, then
-open <http://localhost:8000/>. For now it opens **without sign-in** (testing mode, this PC only);
-`./run.sh login on` brings the sign-in page back. `./run.sh stop` closes it, `./run.sh update` gets the newest
+open <http://localhost:8000/>. It opens **without sign-in**: one monitoring officer enters every
+office's figures on their own PC (this PC only). `./run.sh login on` brings the sign-in page back. `./run.sh stop` closes it, `./run.sh update` gets the newest
 version, `./run.sh demo` loads practice data. Details: [docs/RUN_AND_CLOSE.txt](docs/RUN_AND_CLOSE.txt).
 
 ## For developers
@@ -58,7 +63,7 @@ Node 22, PostgreSQL 16 or later.
 make up          # build and start db, web, worker and Caddy
 make migrate     # apply migrations
 make check       # lint + backend tests + frontend tests + build
-make smoke       # browser tests of the five user flows (needs a running server with demo data)
+make smoke       # browser tests of the monitoring routine (needs a running server with demo data)
 make audit       # known-vulnerability check of the dependencies
 make down        # stop everything
 ```

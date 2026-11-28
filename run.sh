@@ -6,7 +6,7 @@
 #   ./run.sh update   get the newest version (git pull), then start
 #   ./run.sh demo     load the practice agencies (sample data)
 #   ./run.sh setup    set up your real agency (once; asks a few questions)
-#   ./run.sh login on|off   switch the sign-in page on or off (off = testing mode, the default)
+#   ./run.sh login on|off   switch the sign-in page on or off (off = single-user mode, the default)
 #   ./run.sh status   show what is running
 #   ./run.sh logs     show the last messages (send these when asking for help)
 #   ./run.sh reset-password [email]   with sign-in on: list the administrator accounts, or give
@@ -24,7 +24,7 @@ export MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*'
 
 URL="http://localhost:${WEB_PORT:-8000}"
 
-# Testing mode (no sign-in) unless deploy/.env says LOGIN_DISABLED=0. In testing mode only the
+# Single-user mode (no sign-in, D49) unless deploy/.env says LOGIN_DISABLED=0. In it only the
 # database, the app and its worker run: the app is published on this PC alone (127.0.0.1), and the
 # HTTPS front door (Caddy) that other computers could reach stays stopped.
 if [ -f deploy/.env ] && grep -q '^LOGIN_DISABLED=' deploy/.env; then
@@ -74,7 +74,7 @@ wait_until_up() {
       echo
       echo "GovMonitor is running: open $URL/ in your browser."
       if [ "$LOGIN_DISABLED" = "1" ]; then
-        echo "Testing mode: no sign-in needed. Only this PC can open it."
+        echo "No sign-in needed. Only this PC can open it."
         echo "(To bring the sign-in page back later: ./run.sh login on)"
       fi
       return 0
@@ -100,7 +100,7 @@ start() {
   # shellcheck disable=SC2086
   compose up -d --build $SERVICES || true
   if [ "$LOGIN_DISABLED" = "1" ]; then
-    compose stop caddy >/dev/null 2>&1 || true  # no door for other computers in testing mode
+    compose stop caddy >/dev/null 2>&1 || true  # no door for other computers without sign-in
   fi
   wait_until_up
 }
@@ -146,7 +146,7 @@ case "${1:-}" in
   login)
     case "${2:-}" in
       on) set_login 0; LOGIN_DISABLED=0; SERVICES=""; echo "Sign-in switched ON." ;;
-      off) set_login 1; LOGIN_DISABLED=1; SERVICES="db web worker"; echo "Sign-in switched OFF (testing mode)." ;;
+      off) set_login 1; LOGIN_DISABLED=1; SERVICES="db web worker"; echo "Sign-in switched OFF (single-user mode)." ;;
       *) echo "Use: ./run.sh login on   or   ./run.sh login off"; exit 1 ;;
     esac
     export LOGIN_DISABLED

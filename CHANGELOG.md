@@ -5,6 +5,25 @@ step on update (described here); minor and patch versions update with `update.sh
 
 ## Unreleased
 
+### One user, as simple as Excel (D49)
+- **Removed from the menu and screens** (no data deleted; old addresses show *Page not found*):
+  Users, Account security and two-step sign-in, the platform owner screens, licence warnings,
+  Plans to approve, Plan versions, Return for correction, Reminders and Notifications (and the
+  bell), Office groups, Scoring settings, the "Show"/"Scores of" view switch, Report look, report
+  deadlines and automatic closing, Help and word list (the words are now in the User guide), Change
+  history and Who has reported.
+- **Done automatically now:** **Save as final** makes a plan final in one step (no approval);
+  **Change plan** opens a final plan for changes and its new Save as final replaces it (closed
+  months keep their results); **Mark as done** finishes an office's month and **Change results**
+  opens it again while the month is open; every new year is scored the Excel way; everything is
+  scored on each office's own plan; months close only when you close them (Years → Close month, or
+  Step-by-step), and the latest closed month can be reopened with a reason.
+- **No sign-in by default** (`LOGIN_DISABLED` now defaults to on). `./run.sh login on` brings the
+  sign-in page, password rules and forgot/reset password back unchanged; servers keep sign-in.
+- Switches (all off by default): `LICENCE_ENFORCED`, `PLATFORM_ENABLED`, `ALERTS_ENABLED`,
+  `AUTO_LOCK_ENABLED`, `OFFICE_GROUPS_ENABLED`.
+- Browser smoke tests now follow the single officer's routine without sign-in.
+
 ### Fixed
 - A backend test needed the built frontend and failed in CI.
 - When the app cannot open its database, it now says why (for example "password authentication

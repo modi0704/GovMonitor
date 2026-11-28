@@ -26,12 +26,12 @@ Then use ONE of these commands:
 Closing the browser does NOT stop the app. Use ./run.sh stop.
 
 
-NO SIGN-IN (TESTING MODE) - THE DEFAULT FOR NOW
-The app opens without a sign-in page and you work as the agency
-administrator. A yellow bar at the top reminds you. Only this PC can open
-it: other computers on the network cannot.
+NO SIGN-IN - ONE PERSON, ONE PC (THE DEFAULT)
+The app opens without a sign-in page: you are the only user and you enter
+every office's figures yourself. Only this PC can open it: other computers
+on the network cannot.
 
-Bring the sign-in page back later (when the system is ready):
+Bring the sign-in page back later (if the app is ever shared):
    ./run.sh login on
 Switch it off again:
    ./run.sh login off
@@ -63,7 +63,7 @@ SET UP YOUR REAL AGENCY (ONLY ONCE, WHEN YOU STOP PRACTISING)
 It asks for your agency's name, a short code, your name and your email, and
 shows a temporary password ONE time (you need it only when sign-in is on).
 The practice agencies are switched off; nothing official is deleted.
-In testing mode the app then opens as your real agency's administrator.
+Without sign-in the app then opens as your real agency's administrator.
 
 
 THE USER GUIDES
